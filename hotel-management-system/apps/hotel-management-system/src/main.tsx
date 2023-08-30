@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import store from './app/redux/store';
+import {store} from './app/redux/store';
 import { Provider } from 'react-redux';
 import App from './app/app';
 const root = ReactDOM.createRoot(
@@ -11,5 +11,5 @@ root.render(
     <StrictMode>
       <App />
     </StrictMode>
-  </Provider>,
+  </Provider>
 );
