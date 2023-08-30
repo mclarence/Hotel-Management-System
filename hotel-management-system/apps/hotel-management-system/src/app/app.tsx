@@ -1,19 +1,20 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import styles from './app.module.css';
+import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { LoginPage } from './pages/login-page/LoginPage';
 
-import NxWelcome from './nx-welcome';
-import { User } from '@hotel-management-system/models';
-export function App() {
-  var user: User = {
-    uuid: '1234',
-    username: 'test1',
+const darkTheme = createTheme({
+  palette: {
+    mode: 'light'
   }
+});
 
-
+export function App() {
   return (
-    <div>
-      {user.uuid}
-    </div>
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <div>
+        <LoginPage />
+      </div>
+    </ThemeProvider>
   );
 }
 
