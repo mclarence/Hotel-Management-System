@@ -20,7 +20,7 @@ jobs:
     steps:
       # Set Azure DevOps CLI default settings
       - bash: |
-          az devops configure --defaults organization=$(System.TeamFoundationCollectionUri) project=$(System.TeamProject)
+          az devops configure --defaults organization="$(System.TeamFoundationCollectionUri)" project="$(System.TeamProject)"
         displayName: 'Set default Azure DevOps organization and project'
 
       # Get last successful commit from Azure DevOps CLI
@@ -37,9 +37,14 @@ jobs:
           AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
 
       - script: npm ci
+        workingDirectory: hotel-management-system
 
       - script: npx nx format:check --base=$BASE_SHA
+        workingDirectory: hotel-management-system
 
       - script: npx nx affected --base=$BASE_SHA -t lint --parallel=3
+        workingDirectory: hotel-management-system/
       - script: npx nx affected --base=$BASE_SHA -t test --parallel=3 --configuration=ci
+        workingDirectory: hotel-management-system/
       - script: npx nx affected --base=$BASE_SHA -t build --parallel=3
+        workingDirectory: hotel-management-system/
