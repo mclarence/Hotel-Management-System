@@ -19,10 +19,10 @@ export function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
-          <Route path="login" element={<LoginPage />} />
           <Route path="rooms" element={<Rooms />} />
           <Route path="tickets" element={<Tickets />} />
         </Route>
+        <Route path="login" element={<LoginPage />} />
       </Routes>
     </BrowserRouter>
     </ThemeProvider>
