@@ -3,11 +3,15 @@ trigger:
 pr:
   - main
 
+
 variables:
   CI: 'true'
-  BASE_SHA: $(System.PullRequest.PullRequestId) # Set a default value, this will be updated later
-  NX_BRANCH: $(Build.SourceBranchName)
-  HEAD_SHA: $(Build.SourceVersion)
+  ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+    NX_BRANCH: $(System.PullRequest.PullRequestId) # You can use $(System.PullRequest.PullRequestNumber if your pipeline is triggered by a PR from GitHub ONLY)
+    TARGET_BRANCH: $[replace(variables['System.PullRequest.TargetBranch'],'refs/heads/','origin/')]
+  ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+    NX_BRANCH: $(Build.SourceBranchName)
+  HEAD_SHA: $(git rev-parse HEAD)
 
 jobs:
   - job: main
