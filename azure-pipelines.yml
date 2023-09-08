@@ -10,5 +10,5 @@ jobs:
     steps:
       - script: yarn install --frozen-lockfile
       - script: npx nx run-many --target=build --all --parallel --maxParallel=4
-      - publish: $(Build.ArtifactStagingDirectory)/dist/apps
+      - publish: $(System.DefaultWorkingDirectory)/dist/apps
         artifact: build
