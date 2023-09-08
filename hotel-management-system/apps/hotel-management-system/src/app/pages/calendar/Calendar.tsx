@@ -7,7 +7,12 @@ export const Calendar = () => {
         const [currentDate, setCurrentDate] = useState(new Date());
 
         // Function to calculate the number of days in the current month
-        
+        const daysInMonth = (date: Date) => {
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1; // Month is 0-indexed
+            return new Date(year, month, 0).getDate();
+        };
+
         // Function to determine the first day of the current month
 
         // Function to generate the calendar grid

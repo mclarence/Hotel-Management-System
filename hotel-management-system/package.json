@@ -5,15 +5,26 @@
   "scripts": {},
   "private": true,
   "dependencies": {
+<<<<<<< Updated upstream
     "@mui/material": "^5.14.7",
     "@reduxjs/toolkit": "^1.9.5",
+=======
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.14.7",
+>>>>>>> Stashed changes
     "@swc/helpers": "~0.5.0",
     "axios": "^1.0.0",
     "express": "^4.18.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+<<<<<<< Updated upstream
     "react-redux": "^8.1.2",
     "tslib": "^2.3.0"
+=======
+    "tslib": "^2.3.0",
+    "webpack": "4.0.0"
+>>>>>>> Stashed changes
   },
   "devDependencies": {
     "@nx/cypress": "16.7.2",
