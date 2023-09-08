@@ -1,0 +1,28 @@
+.room {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #000;
+    padding: 10px;
+    margin: 10px;
+    position: relative;  /* 让内部元素可以基于它定位 */
+    display: flex;
+    align-items: center;  /* 垂直居中内容 */
+    justify-content: center;  /* 水平居中内容 */
+}
+
+.room-number {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.center-content {
+    font-weight: bold;  /* 加粗字体 */
+}
+
+.room-info {
+    position: absolute;
+    bottom: 10px;
+    text-align: center;
+    width: 100%;  /* 让房间信息填满容器的宽度 */
+}
