@@ -21,6 +21,9 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import { Button } from '@mui/material';
+import { useSelector } from 'react-redux';
+import { RootState } from './redux/store';
+import { useAppDispatch } from './redux/hooks';
 const drawerWidth = 240;
 
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -95,6 +98,9 @@ const Drawer = styled(MuiDrawer, {
 export function Layout() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const appState = useSelector((state: RootState) => state.appState);
+  const dispatch = useAppDispatch();
+
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -122,7 +128,7 @@ export function Layout() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Mini variant drawer
+            {appState.appBarTitle}
           </Typography>
           <Button variant='outlined' component={Link} to="/login">
             Login
