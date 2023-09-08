@@ -1,41 +1,16 @@
-import React, { useState } from 'react';
+import { 
+    LocalizationProvider,
+    DateCalendar,
+} from '@mui/x-date-pickers';
 
-export const Calendar = () => {
-    
-    function DynamicMonths(){
-        const monthNames = ["Janurary", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-        for (let i = 0; i < monthNames.length; ++i)
-            document.write(monthNames[i]);
-    }
+import { 
+    AdapterDayjs 
+} from '@mui/x-date-pickers/AdapterDayjs'
 
-    function MakeCalendar(){
-        
-    }
-    
+export default function Calendar () {
         return (
-            <div>
-                <h1>Calendar Section</h1>
-                
-                <table>
-                    <button>
-                        Back
-                    </button>                    
-                    <th>
-                        "Month"
-                    </th>
-                    <button>
-                        Next
-                    </button>
-                        <tr>
-                            <th>Mon</th>
-                            <th>Tue</th>
-                            <th>Wed</th>
-                            <th>Thu</th>
-                            <th>Fri</th>
-                            <th>Sat</th>
-                            <th>Sun</th>    
-                        </tr>    
-                </table>
-            </div>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DateCalendar showDaysOutsideCurrentMonth fixedWeekNumber={6} />
+            </LocalizationProvider>
         )
 };
