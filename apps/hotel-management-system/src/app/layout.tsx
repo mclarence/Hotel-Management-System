@@ -124,7 +124,7 @@ export function Layout() {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Mini variant drawer
           </Typography>
-          <Button variant='outlined' LinkComponent={Link} to="/login">
+          <Button variant='outlined' component={Link} to="/login">
             Login
           </Button>
         </Toolbar>

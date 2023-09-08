@@ -13,7 +13,7 @@ import Card from '@mui/material/Card';
 import { useState } from 'react';
 
 export const LoginPage = () => {
-  const delay = ms => new Promise(res => setTimeout(res, ms));
+  const delay = (ms: number | undefined) => new Promise(res => setTimeout(res, ms));
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState('');
