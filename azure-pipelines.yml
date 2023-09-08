@@ -1,0 +1,12 @@
+trigger:
+  - main
+pr:
+  - main
+
+jobs:
+  - job: main
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+      - script: yarn install --frozen-lockfile
+      - script: npx nx run-many --target=build --all --parallel --maxParallel=4

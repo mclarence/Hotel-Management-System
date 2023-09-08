@@ -1,0 +1,81 @@
+{
+  "name": "hotel-management-system",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/hotel-management-system/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/hotel-management-system"
+      },
+      "configurations": {
+        "development": {
+          "mode": "development"
+        },
+        "production": {
+          "mode": "production"
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/vite:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "hotel-management-system:build",
+        "proxyConfig": "apps/hotel-management-system/proxy.conf.json"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "hotel-management-system:build:development",
+          "hmr": true
+        },
+        "production": {
+          "buildTarget": "hotel-management-system:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "preview": {
+      "executor": "@nx/vite:preview-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "hotel-management-system:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "hotel-management-system:build:development"
+        },
+        "production": {
+          "buildTarget": "hotel-management-system:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["coverage/apps/hotel-management-system"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/apps/hotel-management-system"
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "apps/hotel-management-system/**/*.{ts,tsx,js,jsx}"
+        ]
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "hotel-management-system:build"
+      }
+    }
+  },
+  "tags": []
+}
