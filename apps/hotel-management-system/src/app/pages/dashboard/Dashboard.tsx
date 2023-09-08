@@ -1,7 +1,7 @@
 import { Button } from "@mui/material"
 import { useAppDispatch } from "../../redux/hooks";
 import { useEffect } from "react";
-import appStateSlice from "../../redux/slices/appStateSlice";
+import appStateSlice from "../../redux/slices/AppStateSlice";
 
 export const Dashboard = () => {
 

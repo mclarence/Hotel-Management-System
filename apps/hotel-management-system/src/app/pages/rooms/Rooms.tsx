@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useAppDispatch } from "../../redux/hooks";
-import appStateSlice from "../../redux/slices/appStateSlice";
+import appStateSlice from "../../redux/slices/AppStateSlice";
 
 export const Rooms = () => {
 
