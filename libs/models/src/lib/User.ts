@@ -1,5 +1,5 @@
 export type User = {
-    staffId: Number;
+    userId: Number;
     username: String;
     password: String;
     firstName: String;
