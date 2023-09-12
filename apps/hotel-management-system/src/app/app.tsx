@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Rooms } from './pages/rooms/Rooms';
 import { Layout } from './layout';
 import { Tickets } from './pages/tickets/Tickets';
+import { Calendar } from './pages/calendar/Calendar';
 const darkTheme = createTheme({
   palette: {
     mode: 'dark'
@@ -21,6 +22,7 @@ export function App() {
           <Route index element={<Dashboard />} />
           <Route path="rooms" element={<Rooms />} />
           <Route path="tickets" element={<Tickets />} />
+          <Route path="/calendar" element={<Calendar />} />
         </Route>
         <Route path="login" element={<LoginPage />} />
       </Routes>
