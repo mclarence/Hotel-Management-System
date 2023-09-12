@@ -25,13 +25,13 @@ export const Rooms = () => {
     return (
       <Grid container spacing={1} columns={12}>
         <Grid item xs={1}>
-          <Button variant="outlined" style={{ minWidth: '100px', maxHeight: '55px', minHeight: '55px'}}>Add</Button>
+          <Button variant="contained" style={{ minWidth: '100px', maxHeight: '55px', minHeight: '55px'}}>Add</Button>
         </Grid>
         <Grid item xs={1}>
-          <Button variant="outlined" disabled style={{ minWidth: '100px', maxHeight: '55px', minHeight: '55px'}}>Edit</Button>
+          <Button variant="contained" disabled style={{ minWidth: '100px', maxHeight: '55px', minHeight: '55px'}}>Edit</Button>
         </Grid>
         <Grid item xs={1}>
-          <Button variant="outlined" disabled style={{ minWidth: '100px', maxHeight: '55px', minHeight: '55px'}}>Remove</Button>
+          <Button variant="contained" disabled style={{ minWidth: '100px', maxHeight: '55px', minHeight: '55px'}}>Remove</Button>
         </Grid>
         <Grid item xs={9} sx={{textAlign: 'right'}}>
             <TextField
