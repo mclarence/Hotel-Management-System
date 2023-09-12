@@ -9,6 +9,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.7",
     "@mui/material": "^5.14.8",
+    "@mui/x-data-grid": "^6.13.0",
     "@reduxjs/toolkit": "^1.9.5",
     "@swc/helpers": "~0.5.0",
     "axios": "^1.0.0",
