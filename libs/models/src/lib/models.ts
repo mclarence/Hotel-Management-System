@@ -3,3 +3,4 @@ export function models(): string {
 }
 
 export * from './User'
+export * from './Room'
