@@ -9,7 +9,7 @@ import { User } from '@hotel-management-system/models'
 
 const app = express();
 const testUser: User = {
-  staffId: 1,
+  userId: 1,
   username: 'test',
   password: 'test',
   firstName : 'test',
