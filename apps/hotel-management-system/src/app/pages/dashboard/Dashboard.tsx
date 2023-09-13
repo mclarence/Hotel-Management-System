@@ -14,7 +14,7 @@ export const Dashboard = () => {
     return (
         <div>
             <Button variant="outlined">Outlined</Button>
-            Test change 2
+            Test change
         </div>
     )
 }
