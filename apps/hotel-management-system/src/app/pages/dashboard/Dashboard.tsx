@@ -1,7 +1,7 @@
-import { Button } from "@mui/material"
+import React, { useEffect } from 'react';
 import { useAppDispatch } from "../../redux/hooks";
-import { useEffect } from "react";
-import appStateSlice from "../../redux/slices/AppStateSlice";
+import HotelDashboard from './HotelDashboard'; 
+
 
 export const Dashboard = () => {
 
@@ -10,11 +10,8 @@ export const Dashboard = () => {
     useEffect(() => {
         dispatch(appStateSlice.actions.setAppBarTitle('Dashboard'));
     }, []);
-    
+
     return (
-        <div>
-            <Button variant="outlined">Outlined</Button>
-            Test change
-        </div>
+            <HotelDashboard />
     )
 }
