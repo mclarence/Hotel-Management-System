@@ -3,4 +3,6 @@ export type Guest = {
     firstName: String;
     lastName: String;
     phoneNumber: String;
+    address: String;
+    emailAddress: String;
 }

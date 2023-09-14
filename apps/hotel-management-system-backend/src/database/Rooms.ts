@@ -5,14 +5,14 @@ const rooms: Room[] = [
         roomId: 1,
         status: 'Available',
         price: 100,
-        pricePer: 'Night',
+        priceUnit: 'Night',
         metadata: 'Room 1',
     },
     {
         roomId: 2,
         status: 'Available',
         price: 100,
-        pricePer: 'Night',
+        priceUnit: 'Night',
         metadata: 'Room 2',
     }
 ]
@@ -37,10 +37,6 @@ export const createRoom = (room: Room): Promise<Room> => {
         const newRoom = {
             ...room,
             roomId: rooms.length + 1,
-            status: room.status,
-            price: room.price,
-            pricePer: room.pricePer,
-            metadata: room.metadata,
         }
 
         rooms.push(newRoom);

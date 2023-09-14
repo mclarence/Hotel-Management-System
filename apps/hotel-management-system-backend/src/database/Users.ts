@@ -9,8 +9,9 @@ const users: User[] = [
         firstName : 'test',
         lastName : 'test',
         email : 'test@example.com',
-        phone : '12345678',
+        phoneNumber : '12345678',
         position : 'test',
+        roleId: 1,
     },
     {
         userId: 2,
@@ -19,8 +20,9 @@ const users: User[] = [
         firstName : 'test2',
         lastName : 'test2',
         email : 'test2@example.com',
-        phone : '12345678',
+        phoneNumber : '12345678',
         position : 'test2',
+        roleId: 1,
     }
 ]
 
@@ -55,13 +57,6 @@ export const createUser = (user: User): Promise<User> => {
         const newUser = {
             ...user,
             userId: users.length + 1,
-            username: user.username,
-            password: user.password,
-            firstName : user.firstName,
-            lastName : user.lastName,
-            email : user.email,
-            phone : user.phone,
-            position : user.position
         }
 
         users.push(newUser);

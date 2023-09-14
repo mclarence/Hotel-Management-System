@@ -2,6 +2,6 @@ export type Room = {
     roomId: Number;
     status: String;
     price: Number;
-    pricePer: String;
+    priceUnit: String;
     metadata: String;
 }

@@ -5,6 +5,7 @@ export type User = {
     firstName: String;
     lastName: String;
     email: String;
-    phone: String;
+    phoneNumber: String;
     position: String;
+    roleId: Number;
 }

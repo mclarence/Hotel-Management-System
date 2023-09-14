@@ -1,4 +1,4 @@
 export type TicketRoom = {
-    ticketRoomId: Number;
     ticketId: Number;
+    roomId: Number;
 }

@@ -5,4 +5,7 @@ export type Reservation = {
     paymentStatus: String;
     checkInTime: Date;
     checkOutTime: Date;
+    createdByUserId: Number;
+    guestId: Number;
+    roomId: Number;
 }

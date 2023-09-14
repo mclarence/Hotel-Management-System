@@ -6,7 +6,6 @@ export type PaymentMethod = {
     cardCVV: String;
     cardExpiration: Date;
     cardHolderName: String;
-    cashAmount: Number;
     bankAccountNumber: String;
     bankBSB: String;
 }
