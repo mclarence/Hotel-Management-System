@@ -1,5 +1,12 @@
 // roomData.js
-const rooms = [
+
+interface Room {
+    roomNumber: string;
+    occupantName: string;
+    roomInfo: string;
+    roomStatus: string;
+  }
+const rooms: Room[] = [
     { roomNumber: '101', occupantName: 'Tom', roomInfo: 'Double Bed', roomStatus: 'Occupied' },
     { roomNumber: '102', occupantName: '', roomInfo: 'Single Bed', roomStatus: 'Available' },
     { roomNumber: '103', occupantName: 'Jack', roomInfo: 'Double Bed', roomStatus: 'Occupied' },

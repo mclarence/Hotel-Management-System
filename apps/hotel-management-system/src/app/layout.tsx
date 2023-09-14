@@ -194,7 +194,7 @@ export function Layout() {
               </ListItemButton>
             </ListItem>
 
-            <ListItem key="Rooms" disablePadding sx={{ display: 'block' }}>
+            <ListItem key="Tickets" disablePadding sx={{ display: 'block' }}>
               <ListItemButton
               component={Link}
               to="/tickets"
