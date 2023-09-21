@@ -1,106 +1,161 @@
-import { User } from "@hotel-management-system/models";
-import { db } from "./db";
-// store users in memory for now, we will move to a database later.
-const users: User[] = [
-    {
-        userId: 1,
-        username: 'test',
-        password: 'test',
-        passwordSalt: 'test',
-        firstName : 'test',
-        lastName : 'test',
-        email : 'test@example.com',
-        phoneNumber : '12345678',
-        position : 'test',
-        roleId: 1,
-    },
-    {
-        userId: 2,
-        username: 'test2',
-        password: 'test2',
-        passwordSalt: 'test2',
-        firstName : 'test2',
-        lastName : 'test2',
-        email : 'test2@example.com',
-        phoneNumber : '12345678',
-        position : 'test2',
-        roleId: 1,
-    }
-]
+import {User} from "@hotel-management-system/models";
+import {db} from "./db";
+import pgPromise from "pg-promise";
+import QueryResultError = pgPromise.errors.QueryResultError;
+import queryResultErrorCode = pgPromise.errors.queryResultErrorCode;
 
-export const getUsers = new Promise<User[]>((resolve, reject) => {
-    resolve(users);
-});
+/**
+ * Get all users
+ * @returns A promise that resolves to a list of users
+ */
+export const getUsers = (): Promise<User[]> => {
+    return new Promise<User[]>((resolve, reject) => {
+        db.any(`
+            SELECT * FROM users
+           `).then((users: User[]) => {
+            resolve(users);
+        }).catch((err: any) => {
+            reject(err);
+        })
+    })
+};
 
-export const getUserById = (userId: number): Promise<User | undefined> => {
+/**
+ * Get a user by id
+ *
+ * @param userId The id of the user
+ * @returns A promise that resolves to the user if found, or null if not found
+ */
+export const getUserById = (userId: number): Promise<User | null> => {
     return new Promise<User>((resolve, reject) => {
-        const user = users.find(u => u.userId === userId);
-        if (user === undefined) {
-            reject(`User with id ${userId} not found`);
-        } else {
+        db.one(`
+            SELECT * FROM users WHERE user_id = $1`
+            , [userId]
+        ).then((user: User) => {
             resolve(user);
-        }
+        }).catch((err: any) => {
+            if (err instanceof QueryResultError && err.code === queryResultErrorCode.noData) {
+                resolve(null);
+            } else {
+                reject(err);
+            }
+        })
     })
 }
 
-export const getUserByUsername = (username: string): Promise<User | undefined> => {
+/**
+ * Get a user by username
+ * @param username
+ * @returns A promise that resolves to the user if found, or null if not found
+ */
+export const getUserByUsername = (username: string): Promise<User | null> => {
     return new Promise<User>((resolve, reject) => {
-        const user = users.find(u => u.username === username);
-        if (user === undefined) {
-            reject(`User with username ${username} not found`);
-        } else {
+        db.one(`
+            SELECT * FROM users WHERE username = $1
+        `, [username]
+        ).then((user: User) => {
             resolve(user);
-        }
+        }).catch((err: any) => {
+            if (err instanceof QueryResultError && err.code === queryResultErrorCode.noData) {
+                resolve(null);
+            } else {
+                reject(err);
+            }
+        })
     })
 }
 
-
+/**
+ * Create a new user
+ * @param user
+ * @returns A promise that resolves to the created user with the id set.
+ */
 export const createUser = (user: User): Promise<User> => {
-    return db.one(`
-        INSERT INTO users (username, password, passwordSalt, firstName, lastName, email, phoneNumber, position, roleId)
+    return new Promise<User>((resolve, reject) => {
+        db.one(`
+        INSERT INTO users (username, password, password_salt, first_name, last_name, email, phone_number, position, role_id)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING userId
-    `,[
-        user.username,
-        user.password,
-        user.passwordSalt,
-        user.firstName,
-        user.lastName,
-        user.email,
-        user.phoneNumber,
-        user.position,
-        user.roleId
-    ])
+        RETURNING user_id
+    `, [
+            user.username,
+            user.password,
+            user.passwordSalt,
+            user.firstName,
+            user.lastName,
+            user.email,
+            user.phoneNumber,
+            user.position,
+            user.roleId
+        ]).then((result: User) => {
+            console.log(result);
+            user.userId = result.userId;
+            resolve(user);
+        }).catch((err: any) => {
+            reject(err);
+        });
+    })
 }
 
+/**
+ * Check if a user with the given username exists
+ *
+ * @param username
+ * @returns A promise that resolves to true if the user exists, or false if not.
+ */
 export const checkUserExists = (username: string): Promise<boolean> => {
     return new Promise<boolean>((resolve, reject) => {
         db.oneOrNone(`
             SELECT * FROM users WHERE username = $1
-        `, [username]).then((user) => {
+        `, [username]).then((user: User) => {
             if (user === null) {
                 resolve(false);
             } else {
                 resolve(true);
             }
-        }).catch((err) => {
-            reject({
-                type: 'databaseError',
-                message: err,
-            });
+        }).catch((err: any) => {
+            reject(err);
         })
     })
 }
 
+export const checkUserExistsById = (userId: number): Promise<boolean> => {
+    return new Promise<boolean>((resolve, reject) => {
+        db.oneOrNone(`
+            SELECT * FROM users WHERE user_id = $1
+        `, [userId]).then((user: User) => {
+            if (user === null) {
+                resolve(false);
+            } else {
+                resolve(true);
+            }
+        }).catch((err: any) => {
+            reject(err);
+        })
+    })
+}
+
+/**
+ * Delete a user by id
+ *
+ * @param userId
+ * @returns A promise that resolves to void
+ */
 export const deleteUser = (userId: number): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
-        const index = users.findIndex(u => u.userId === userId);
-
-        if (index === -1) {
-            reject(`User with id ${userId} not found`);
-        } else {
-            users.splice(index, 1);
+        // check if the user exists
+        checkUserExistsById(userId).then((exists) => {
+            if (!exists) {
+                reject(`User with id ${userId} not found`);
+            }
+        }).then(() => {
+            // delete the user
+            return db.none(`
+            DELETE FROM users WHERE user_id = $1
+        `, [userId])
+        }).then(() => {
             resolve();
-        }
+        }).catch((err: any) => {
+            reject(err);
+        })
     })
 }

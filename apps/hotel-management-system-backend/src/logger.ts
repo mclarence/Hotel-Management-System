@@ -8,6 +8,7 @@ let expressLogger: HttpLogger<any>;
 if (process.env.NODE_ENV === "development") {
     const pretty = require("pino-pretty");
     logger = pino(pretty())
+    logger.level = "debug";
     expressLogger = pinoHttp(pretty());
 } else {
     logger = pino();

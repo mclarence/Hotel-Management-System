@@ -15,7 +15,8 @@
         "main": "apps/hotel-management-system-backend/src/main.ts",
         "tsConfig": "apps/hotel-management-system-backend/tsconfig.app.json",
         "assets": [
-          "apps/hotel-management-system-backend/src/assets"
+          "apps/hotel-management-system-backend/src/assets",
+          "apps/hotel-management-system-backend/src/database/sql/sql_files"
         ],
         "isolatedConfig": true,
         "webpackConfig": "apps/hotel-management-system-backend/webpack.config.js"
