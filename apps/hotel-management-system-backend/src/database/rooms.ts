@@ -1,19 +1,19 @@
-import { Room } from '@hotel-management-system/models'
+import {PriceUnits, Room, RoomStatuses} from '@hotel-management-system/models'
 
 const rooms: Room[] = [
     {
         roomId: 1,
-        status: 'Available',
+        status: RoomStatuses.Available,
         price: 100,
-        priceUnit: 'Night',
-        metadata: 'Room 1',
+        priceUnit: PriceUnits.night,
+        metadata: {},
     },
     {
         roomId: 2,
-        status: 'Available',
+        status: RoomStatuses.Available,
         price: 100,
-        priceUnit: 'Night',
-        metadata: 'Room 2',
+        priceUnit: PriceUnits.night,
+        metadata: {},
     }
 ]
 

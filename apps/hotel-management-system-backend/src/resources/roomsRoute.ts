@@ -1,4 +1,4 @@
-import { getRooms, getRoomById, createRoom, deleteRoom } from "../database/Rooms";
+import { getRooms, getRoomById, createRoom, deleteRoom } from "../database/rooms";
 import express from 'express';
 const router = express.Router();
 
@@ -42,4 +42,4 @@ router.delete('/:roomId', (req, res) => {
     })
 })
 
-module.exports = router;
+export default router;

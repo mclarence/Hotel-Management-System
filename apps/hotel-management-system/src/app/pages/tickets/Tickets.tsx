@@ -48,6 +48,7 @@ export const Tickets = () => {
                     </Button>
                 </Stack>
                 <DataGrid
+                    disableRowSelectionOnClick={true}
                     rows={rows}
                     columns={columns}
                     initialState={{

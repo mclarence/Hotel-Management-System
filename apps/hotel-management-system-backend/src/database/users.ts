@@ -1,11 +1,12 @@
 import { User } from "@hotel-management-system/models";
-
+import { db } from "./db";
 // store users in memory for now, we will move to a database later.
 const users: User[] = [
     {
         userId: 1,
         username: 'test',
         password: 'test',
+        passwordSalt: 'test',
         firstName : 'test',
         lastName : 'test',
         email : 'test@example.com',
@@ -17,6 +18,7 @@ const users: User[] = [
         userId: 2,
         username: 'test2',
         password: 'test2',
+        passwordSalt: 'test2',
         firstName : 'test2',
         lastName : 'test2',
         email : 'test2@example.com',
@@ -52,16 +54,41 @@ export const getUserByUsername = (username: string): Promise<User | undefined> =
     })
 }
 
+
 export const createUser = (user: User): Promise<User> => {
-    return new Promise<User>((resolve, reject) => {
-        const newUser = {
-            ...user,
-            userId: users.length + 1,
-        }
+    return db.one(`
+        INSERT INTO users (username, password, passwordSalt, firstName, lastName, email, phoneNumber, position, roleId)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING userId
+    `,[
+        user.username,
+        user.password,
+        user.passwordSalt,
+        user.firstName,
+        user.lastName,
+        user.email,
+        user.phoneNumber,
+        user.position,
+        user.roleId
+    ])
+}
 
-        users.push(newUser);
-
-        resolve(newUser);
+export const checkUserExists = (username: string): Promise<boolean> => {
+    return new Promise<boolean>((resolve, reject) => {
+        db.oneOrNone(`
+            SELECT * FROM users WHERE username = $1
+        `, [username]).then((user) => {
+            if (user === null) {
+                resolve(false);
+            } else {
+                resolve(true);
+            }
+        }).catch((err) => {
+            reject({
+                type: 'databaseError',
+                message: err,
+            });
+        })
     })
 }
 

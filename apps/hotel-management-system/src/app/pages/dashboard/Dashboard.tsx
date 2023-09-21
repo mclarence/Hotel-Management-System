@@ -66,7 +66,7 @@ export function Dashboard() {
                 <Stack gap={2} padding={1}>
                     <Card>
                         <Stack margin={2}>
-                            <Typography variant='h5'>Occupancy rate1</Typography>
+                            <Typography variant='h5'>Occupancy rate</Typography>
                             <PieChart width={300} height={300}>
                                 <Pie
                                     data={data}

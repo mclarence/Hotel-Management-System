@@ -14,7 +14,9 @@
         "outputPath": "dist/apps/hotel-management-system-backend",
         "main": "apps/hotel-management-system-backend/src/main.ts",
         "tsConfig": "apps/hotel-management-system-backend/tsconfig.app.json",
-        "assets": ["apps/hotel-management-system-backend/src/assets"],
+        "assets": [
+          "apps/hotel-management-system-backend/src/assets"
+        ],
         "isolatedConfig": true,
         "webpackConfig": "apps/hotel-management-system-backend/webpack.config.js"
       },

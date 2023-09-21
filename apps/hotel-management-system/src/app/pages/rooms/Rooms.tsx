@@ -1,270 +1,243 @@
-import { useEffect, useState } from 'react';
-import { useAppDispatch } from '../../redux/hooks';
+import {useEffect, useState} from 'react';
+import {useAppDispatch} from '../../redux/hooks';
 import appStateSlice from '../../redux/slices/AppStateSlice';
 
 import {
-  Button,
-  Grid,
-  TextField,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Drawer,
-  Box,
-  Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+    Box,
+    Button,
+    Drawer,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Typography,
 } from '@mui/material';
+import {DataGrid, GridColDef} from "@mui/x-data-grid";
+import {PriceUnits, Room, RoomStatuses} from "@hotel-management-system/models";
 
-interface ITableData {
-  roomID: number;
-  status: string;
-  pricePerNight: number;
-  beds: number;
-  bathrooms: number;
-  view: string;
-  balcony: string;
-}
 
-const initTableData: ITableData[] = [
-  {
-    roomID: 1001,
-    status: 'Available',
-    pricePerNight: 100,
-    beds: 2,
-    bathrooms: 1,
-    view: 'Sea',
-    balcony: 'Yes',
-  },
-  {
-    roomID: 1002,
-    status: 'Available',
-    pricePerNight: 100,
-    beds: 2,
-    bathrooms: 1,
-    view: 'Sea',
-    balcony: 'Yes',
-  },
-  {
-    roomID: 1003,
-    status: 'Available',
-    pricePerNight: 100,
-    beds: 2,
-    bathrooms: 1,
-    view: 'Sea',
-    balcony: 'Yes',
-  },
-  {
-    roomID: 1004,
-    status: 'Available',
-    pricePerNight: 100,
-    beds: 2,
-    bathrooms: 1,
-    view: 'Sea',
-    balcony: 'Yes',
-  },
-  {
-    roomID: 1005,
-    status: 'Available',
-    pricePerNight: 100,
-    beds: 2,
-    bathrooms: 1,
-    view: 'Sea',
-    balcony: 'Yes',
-  },
-  {
-    roomID: 1006,
-    status: 'Available',
-    pricePerNight: 100,
-    beds: 2,
-    bathrooms: 1,
-    view: 'Sea',
-    balcony: 'Yes',
-  },
+const rows: Room[] = [
+    {
+        roomId: 1001,
+        status: RoomStatuses.Available,
+        price: 100,
+        priceUnit: PriceUnits.night,
+        metadata: {
+            'beds': 2,
+            'bathrooms': 1,
+            'x': 'test',
+            'y': 'test1',
+            'z': 'test2',
+        },
+    },
+    {
+        roomId: 1002,
+        status: RoomStatuses.Available,
+        price: 100,
+        priceUnit: PriceUnits.night,
+        metadata: {
+            'beds': 2,
+            'bathrooms': 1
+        },
+    },
+    {
+        roomId: 1003,
+        status: RoomStatuses.Available,
+        price: 100,
+        priceUnit: PriceUnits.night,
+        metadata: {
+            'beds': 2,
+            'bathrooms': 1
+        },
+    },
+    {
+        roomId: 1004,
+        status: RoomStatuses.Available,
+        price: 100,
+        priceUnit: PriceUnits.night,
+        metadata: {
+            'beds': 2,
+            'bathrooms': 1
+        },
+    },
+    {
+        roomId: 1005,
+        status: RoomStatuses.Available,
+        price: 100,
+        priceUnit: PriceUnits.night,
+        metadata: {
+            'beds': 2,
+            'bathrooms': 1
+        },
+    },
+    {
+        roomId: 1006,
+        status: RoomStatuses.Available,
+        price: 100,
+        priceUnit: PriceUnits.night,
+        metadata: {
+            'beds': 2,
+            'bathrooms': 1
+        },
+    },
 ];
-
 export const Rooms = () => {
-  const [tableData, setTableData] = useState<ITableData[]>(initTableData);
-  const [selectRoom, setSelectRoom] = useState<ITableData>();
-  const [isOpenDrawer, setIsOpenDrawer] = useState<boolean>(false);
-  const dispatch = useAppDispatch();
+    const [selectRoom, setSelectRoom] = useState<Room>();
+    const [tableData, setTableData] = useState<Room[]>(rows);
+    const [isOpenDrawer, setIsOpenDrawer] = useState<boolean>(false);
+    const dispatch = useAppDispatch();
+    //
+    const HandleEditRoom = (room: Room) => {
+        console.log(room.metadata)
+        setSelectRoom(room);
+        setIsOpenDrawer(true);
+    };
 
-  const HandleEditRoom = (room: ITableData) => {
-    setSelectRoom(room);
-    setIsOpenDrawer(true);
-  };
+    const handleChangeRoom = (key: string, value: string) => {
+        const newTableData = [...tableData];
+        const RoomSelect: any = newTableData.find((item) => item.roomId === selectRoom?.roomId);
+        RoomSelect[key] = value;
+        newTableData.map((item) => {
+            if (item.roomId === selectRoom?.roomId) {
+                item = RoomSelect;
+            }
+        });
+        setTableData(newTableData);
+    };
 
-  const handleChangeRoom = (key: string, value: string) => {
-    const newTableData = [...tableData];
-    const RoomSelect: any = newTableData.find((item) => item.roomID === selectRoom?.roomID);
-    RoomSelect[key] = value;
-    newTableData.map((item) => {
-      if (item.roomID === selectRoom?.roomID) {
-        item = RoomSelect;
-      }
-    });
-    setTableData(newTableData);
-  };
-
-  useEffect(() => {
-    dispatch(appStateSlice.actions.setAppBarTitle('Room Management'));
-  }, []);
-
-  return (
-    <Grid container spacing={1} columns={12}>
-      <Grid item xs={1}>
-        <Button variant='contained' style={{ minWidth: '100px', maxHeight: '55px', minHeight: '55px' }}>
-          Add
-        </Button>
-      </Grid>
-      <Grid item xs={1}>
-        <Button variant='contained' disabled style={{ minWidth: '100px', maxHeight: '55px', minHeight: '55px' }}>
-          Edit
-        </Button>
-      </Grid>
-      <Grid item xs={1}>
-        <Button variant='contained' disabled style={{ minWidth: '100px', maxHeight: '55px', minHeight: '55px' }}>
-          Remove
-        </Button>
-      </Grid>
-      <Grid item xs={9} sx={{ textAlign: 'right' }}>
-        <TextField id='outlined-basic' label='Search' type='search' variant='outlined' />
-      </Grid>
-      <Grid item xs={12}>
-        <TableContainer component={Paper}>
-          <Table size='small' aria-label='a dense table'>
-            <TableHead>
-              <TableRow>
-                <TableCell>Room ID</TableCell>
-                <TableCell align='center'>Status</TableCell>
-                <TableCell align='center'>Price Per Night</TableCell>
-                <TableCell align='center'>Beds</TableCell>
-                <TableCell align='center'>Bathrooms</TableCell>
-                <TableCell align='center'>View</TableCell>
-                <TableCell align='center'>Balcony</TableCell>
-                <TableCell align='center'>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tableData.map((row) => (
-                <TableRow key={row.roomID}>
-                  <TableCell component='th' scope='row'>
-                    {row.roomID}
-                  </TableCell>
-                  <TableCell component='th' scope='row' align='center'>
-                    {row.status}
-                  </TableCell>
-                  <TableCell component='th' scope='row' align='center'>
-                    {row.pricePerNight}$
-                  </TableCell>
-                  <TableCell component='th' scope='row' align='center'>
-                    {row.beds}
-                  </TableCell>
-                  <TableCell component='th' scope='row' align='center'>
-                    {row.bathrooms}
-                  </TableCell>
-                  <TableCell component='th' scope='row' align='center'>
-                    {row.view}
-                  </TableCell>
-                  <TableCell component='th' scope='row' align='center'>
-                    {row.balcony}
-                  </TableCell>
-                  <TableCell component='th' scope='row' align='center'>
-                    <Button onClick={() => HandleEditRoom(row)} size='small' variant='contained'>
-                      Edit
+    const columns: GridColDef[] = [
+        {field: 'roomId', headerName: 'Room ID', width: 130},
+        {field: 'status', headerName: 'Status', width: 130},
+        {field: 'price', headerName: 'Unit Price', width: 130},
+        {field: 'priceUnit', headerName: 'Price Unit', width: 130},
+        {
+            field: 'actions', headerName: 'Actions', width: 150, renderCell: (params: any) => (
+                <strong>
+                    <Button variant="outlined" onClick={() => HandleEditRoom(params.row)}>
+                        Edit
                     </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Drawer anchor='right' open={isOpenDrawer} onClose={() => setIsOpenDrawer(false)}>
-          <Box style={{ width: '800px' }} mt={10} p={3}>
-            <Typography fontSize={22}>Information Room {selectRoom?.roomID}</Typography>
-            <Grid container spacing={2} mt={2}>
-              <Grid item xs={6}>
-                <Box>
-                  <InputLabel id='Status'>Status:</InputLabel>
-                  <Select
-                    labelId='Status'
-                    value={selectRoom?.status}
-                    style={{ width: '100%' }}
-                    onChange={(event) => handleChangeRoom('status', event.target.value)}
-                  >
-                    <MenuItem value='Available'>Available</MenuItem>
-                    <MenuItem value='Not Available'>Not Available</MenuItem>
-                  </Select>
+                </strong>
+            )
+        },
+    ]
+
+    useEffect(() => {
+        dispatch(appStateSlice.actions.setAppBarTitle('Room Management'));
+    }, []);
+
+    return (
+        <>
+            <Stack direction={'column'} gap={2}>
+                <Stack direction={'row'} gap={2}>
+                    <Button variant="contained" color="success">
+                        Add Room
+                    </Button>
+                    <Button variant="contained" color="info">
+                        Edit Room
+                    </Button>
+                    <Button variant="contained" color="error">
+                        Delete Room
+                    </Button>
+                </Stack>
+                <DataGrid
+                    disableRowSelectionOnClick={true}
+                    rows={tableData}
+                    columns={columns}
+                    initialState={{
+                        pagination: {
+                            paginationModel: {page: 0, pageSize: 5},
+                        },
+                    }}
+                    pageSizeOptions={[5, 10]}
+                    getRowId={(row) => row.roomId}
+                    checkboxSelection
+                />
+            </Stack>
+            <Drawer anchor='right' open={isOpenDrawer} onClose={() => setIsOpenDrawer(false)}>
+                <Box style={{width: '800px'}} mt={10} p={3}>
+                    <Typography fontSize={22}>Room: {selectRoom?.roomId.toString()}</Typography>
+                    <Grid container spacing={2} mt={2}>
+                        <Grid item xs={6}>
+                            <Box>
+                                <InputLabel id='Status'>Status:</InputLabel>
+                                <Select
+                                    labelId='Status'
+                                    value={selectRoom?.status}
+                                    style={{width: '100%'}}
+                                    onChange={(event) => handleChangeRoom('status', event.target.value.toString())}
+                                >
+                                    <MenuItem value='Available'>Available</MenuItem>
+                                    <MenuItem value='Not Available'>Not Available</MenuItem>
+                                </Select>
+                            </Box>
+                            <Box mt={1}>
+                                <InputLabel id='Price Per Night'>Price:</InputLabel>
+                                <TextField
+                                    value={selectRoom?.price}
+                                    type='number'
+                                    style={{width: '100%'}}
+                                    onChange={(event) => handleChangeRoom('price', event.target.value)}
+                                />
+                            </Box>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Box mt={0}>
+                                <InputLabel id='Price Per Night'>Unit:</InputLabel>
+                                <TextField
+                                    value={selectRoom?.priceUnit}
+                                    type='text'
+                                    style={{width: '100%'}}
+                                    onChange={(event) => handleChangeRoom('priceUnit', event.target.value)}
+                                />
+                            </Box>
+                        </Grid>
+                    </Grid>
+                    <Box>
+                        <Typography fontSize={22} mt={2}>Metadata</Typography>
+                        <Stack direction={"row"}>
+                            <Button>Add</Button>
+                            <Button>Delete</Button>
+                        </Stack>
+                        <TableContainer component={Paper}>
+                            <Table size={'small'}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Property</TableCell>
+                                        <TableCell>Value</TableCell>
+                                        <TableCell>Action</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {selectRoom && selectRoom.metadata && Object.keys(selectRoom.metadata).map((key) => (
+                                        <TableRow key={key}>
+                                            <TableCell>{key}</TableCell>
+                                            <TableCell>{String(selectRoom?.metadata[key])}</TableCell>
+                                            <TableCell><Button size={"small"}>Edit</Button></TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Box>
+                    <Button
+                        onClick={() => setIsOpenDrawer(false)}
+                        variant='contained'
+                        color='error'
+                        style={{float: 'right', marginTop: 30}}
+                    >
+                        Close
+                    </Button>
                 </Box>
-                <Box mt={1}>
-                  <InputLabel id='Price Per Night'>Price Per Night:</InputLabel>
-                  <TextField
-                    value={selectRoom?.pricePerNight}
-                    type='number'
-                    style={{ width: '100%' }}
-                    onChange={(event) => handleChangeRoom('pricePerNight', event.target.value)}
-                  />
-                </Box>
-                <Box mt={1}>
-                  <InputLabel id='Beds'>Beds:</InputLabel>
-                  <TextField
-                    value={selectRoom?.beds}
-                    type='number'
-                    style={{ width: '100%' }}
-                    onChange={(event) => handleChangeRoom('beds', event.target.value)}
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Box>
-                  <InputLabel id='View'>View:</InputLabel>
-                  <TextField
-                    value={selectRoom?.view}
-                    type='text'
-                    style={{ width: '100%' }}
-                    onChange={(event) => handleChangeRoom('view', event.target.value)}
-                  />
-                </Box>
-                <Box mt={1}>
-                  <InputLabel id='Balcony'>Balcony:</InputLabel>
-                  <Select
-                    labelId='Balcony'
-                    value={selectRoom?.balcony}
-                    style={{ width: '100%' }}
-                    onChange={(event) => handleChangeRoom('balcony', event.target.value)}
-                  >
-                    <MenuItem value='Yes'>Yes</MenuItem>
-                    <MenuItem value='No'>No</MenuItem>
-                  </Select>
-                </Box>
-                <Box mt={1}>
-                  <InputLabel id='Bathrooms'>Bathrooms:</InputLabel>
-                  <TextField
-                    value={selectRoom?.bathrooms}
-                    type='number'
-                    style={{ width: '100%' }}
-                    onChange={(event) => handleChangeRoom('bathrooms', event.target.value)}
-                  />
-                </Box>
-              </Grid>
-            </Grid>
-            <Button
-              onClick={() => setIsOpenDrawer(false)}
-              variant='contained'
-              color='error'
-              style={{ float: 'right', marginTop: 30 }}
-            >
-              Close
-            </Button>
-          </Box>
-        </Drawer>
-      </Grid>
-    </Grid>
-  );
+            </Drawer>
+        </>
+    );
 };
