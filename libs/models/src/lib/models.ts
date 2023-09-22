@@ -4,6 +4,7 @@ export function models(): string {
 
 export * from './user'
 export * from './room'
+export * from './role'
 export * from './enums/PriceUnits'
 export * from './enums/RoomStatuses'
 export * from './serverConfig'

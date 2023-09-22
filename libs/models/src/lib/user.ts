@@ -1,5 +1,5 @@
 export type User = {
-    userId: Number;
+    userId: number;
     username: String;
     password: String;
     passwordSalt: String;
@@ -8,5 +8,5 @@ export type User = {
     email: String;
     phoneNumber: String;
     position: String;
-    roleId: Number;
+    roleId: number;
 }

@@ -3,6 +3,8 @@ import {getUsers, getUserById, createUser, deleteUser, getUserByUsername, checkU
 import {ApiResponse} from "@hotel-management-system/models";
 import {validateRequestBody} from "../util/bodyValidator";
 import config from "../config";
+import authentication from "../middleware/authentication";
+import hasPermission from "../util/checkPermissions";
 
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -12,21 +14,39 @@ const router = express.Router();
  * HTTP GET - /api/users
  * Get all users
  */
-router.get('/', (req, res) => {
+router.get('/', authentication, (req: any, res) => {
+
     const response: ApiResponse = {
         success: false,
         statusCode: 500,
         message: "Internal server error",
         data: null
     }
-    // return the list of users
-    getUsers().then(users => {
+
+    hasPermission('users.read', req.userRoleId).then(hasPermission => {
+        if (!hasPermission) {
+            return Promise.reject({
+                type: 'unauthorized',
+                message: "Unauthorized"
+            })
+        }
+
+        return getUsers();
+    }).then(users => {
         response.success = true;
         response.statusCode = 200;
         response.message = "Users retrieved";
         response.data = users;
     }).catch(err => {
-        response.data = err;
+        switch (err.type) {
+            case 'unauthorized':
+                response.statusCode = 401;
+                response.message = err.message;
+                break;
+            default:
+                response.data = err;
+        }
+
     }).finally(() => {
         res.status(response.statusCode).send(response);
     })
@@ -198,9 +218,13 @@ router.post('/login', (req, res) => {
                 message: "Incorrect password"
             })
         }
-    }).then(() => {
+
+        return user;
+    }).then((user) => {
         const jwtToken = jwt.sign({
-            username: req.body.username
+            userId: user.userId,
+            roleId: user.roleId,
+            username: user.username
         }, config.jwt.secret)
 
         response.success = true;
