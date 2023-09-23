@@ -7,13 +7,24 @@ import RoomFilterBar from './RoomFilterBar';
 import { Card, Paper, Stack, Typography } from '@mui/material';
 import appStateSlice from '../../redux/slices/AppStateSlice';
 import { useAppDispatch } from "../../redux/hooks";
+import {getCurrentUser, verifyLogin} from "../../api/auth";
+import {useNavigate} from "react-router-dom";
+import {useSelector} from "react-redux";
+import {RootState} from "../../redux/store";
 
 export function Dashboard() {
     const dispatch = useAppDispatch();
-
+    const appState = useSelector((state: RootState) => state.appState);
+    const navigate = useNavigate();
     useEffect(() => {
         dispatch(appStateSlice.actions.setAppBarTitle('Dashboard'));
     }, []);
+
+    useEffect(() => {
+        if (!appState.loggedIn) {
+            navigate('/login')
+        }
+    }, [appState.loggedIn]);
 
     const occupancyRate = 78;
     const vacancyRate = 100 - occupancyRate;

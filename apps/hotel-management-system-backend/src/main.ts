@@ -42,7 +42,7 @@ const startServer = async () => {
                     message: "Invalid request body",
                     statusCode: 400,
                     data: err.message
-                } as ApiResponse
+                } as ApiResponse<string>
             );
         }
         next();

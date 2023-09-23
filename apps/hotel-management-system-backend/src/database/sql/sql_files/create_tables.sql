@@ -16,3 +16,8 @@ CREATE TABLE IF NOT EXISTS users (
     role_id INTEGER NOT NULL,
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
+CREATE TABLE IF NOT EXISTS token_revocation_list (
+    token_id SERIAL PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    revokedAt TIMESTAMP NOT NULL
+);

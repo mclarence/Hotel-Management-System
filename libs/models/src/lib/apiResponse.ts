@@ -1,6 +1,6 @@
-export type ApiResponse = {
+export type ApiResponse<T> = {
     success: boolean;
     statusCode: number;
     message: string;
-    data: any;
+    data: T;
 }

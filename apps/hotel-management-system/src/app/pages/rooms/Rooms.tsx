@@ -23,6 +23,10 @@ import {
 } from '@mui/material';
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {PriceUnits, Room, RoomStatuses} from "@hotel-management-system/models";
+import {verifyLogin} from "../../api/auth";
+import {useNavigate} from "react-router-dom";
+import {useSelector} from "react-redux";
+import {RootState} from "../../redux/store";
 
 
 const rows: Room[] = [
@@ -95,6 +99,15 @@ export const Rooms = () => {
     const [tableData, setTableData] = useState<Room[]>(rows);
     const [isOpenDrawer, setIsOpenDrawer] = useState<boolean>(false);
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const appState = useSelector((state: RootState) => state.appState);
+
+    useEffect(() => {
+        if (!appState.loggedIn) {
+            navigate('/login')
+        }
+    }, [appState.loggedIn]);
+
     //
     const HandleEditRoom = (room: Room) => {
         console.log(room.metadata)

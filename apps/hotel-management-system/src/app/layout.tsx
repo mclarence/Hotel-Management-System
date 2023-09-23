@@ -1,9 +1,9 @@
-import { Outlet, Link } from 'react-router-dom';
+import {Outlet, Link} from 'react-router-dom';
 import * as React from 'react';
-import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
+import {styled, useTheme, Theme, CSSObject} from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
+import MuiAppBar, {AppBarProps as MuiAppBarProps} from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -20,212 +20,251 @@ import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-import { Button } from '@mui/material';
-import { useSelector } from 'react-redux';
-import { RootState } from './redux/store';
-import { useAppDispatch } from './redux/hooks';
+import {Avatar, Button, Paper, Stack} from '@mui/material';
+import {useSelector} from 'react-redux';
+import {RootState} from './redux/store';
+import {useAppDispatch} from './redux/hooks';
+import {useEffect} from "react";
+import appStateSlice, {fetchUserDetails} from "./redux/slices/AppStateSlice";
+import LogoutIcon from '@mui/icons-material/Logout';
+import {logout} from "./api/auth";
+
 const drawerWidth = 240;
 
 const openedMixin = (theme: Theme): CSSObject => ({
-  width: drawerWidth,
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen
-  }),
-  overflowX: 'hidden'
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen
+    }),
+    overflowX: 'hidden'
 });
 
 const closedMixin = (theme: Theme): CSSObject => ({
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen
-  }),
-  overflowX: 'hidden',
-  width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up('sm')]: {
-    width: `calc(${theme.spacing(8)} + 1px)`
-  }
+    transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen
+    }),
+    overflowX: 'hidden',
+    width: `calc(${theme.spacing(7)} + 1px)`,
+    [theme.breakpoints.up('sm')]: {
+        width: `calc(${theme.spacing(8)} + 1px)`
+    }
 });
 
-const DrawerHeader = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar
+const DrawerHeader = styled('div')(({theme}) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: theme.spacing(0, 1),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar
 }));
 
 interface AppBarProps extends MuiAppBarProps {
-  open?: boolean;
+    open?: boolean;
 }
 
 const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open'
-})<AppBarProps>(({ theme, open }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  transition: theme.transitions.create(['width', 'margin'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen
-  }),
-  ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
+    shouldForwardProp: (prop) => prop !== 'open'
+})<AppBarProps>(({theme, open}) => ({
+    zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen
+    }),
+    ...(open && {
+        marginLeft: drawerWidth,
+        width: `calc(100% - ${drawerWidth}px)`,
+        transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen
+        })
     })
-  })
 }));
 
 const Drawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== 'open'
-})(({ theme, open }) => ({
-  width: drawerWidth,
-  flexShrink: 0,
-  whiteSpace: 'nowrap',
-  boxSizing: 'border-box',
-  ...(open && {
-    ...openedMixin(theme),
-    '& .MuiDrawer-paper': openedMixin(theme)
-  }),
-  ...(!open && {
-    ...closedMixin(theme),
-    '& .MuiDrawer-paper': closedMixin(theme)
-  })
+    shouldForwardProp: (prop) => prop !== 'open'
+})(({theme, open}) => ({
+    width: drawerWidth,
+    flexShrink: 0,
+    whiteSpace: 'nowrap',
+    boxSizing: 'border-box',
+    ...(open && {
+        ...openedMixin(theme),
+        '& .MuiDrawer-paper': openedMixin(theme)
+    }),
+    ...(!open && {
+        ...closedMixin(theme),
+        '& .MuiDrawer-paper': closedMixin(theme)
+    })
 }));
 
+const handleLogoutButton = () => {
+    const existingToken = localStorage.getItem('jwt');
+    if (existingToken !== null) {
+        logout()
+            .then((response) => {
+                if (response.status === 200) {
+                    localStorage.removeItem('jwt');
+                    window.location.reload();
+                }
+            })
+            .catch((error) => {
+                dispatch(appStateSlice.actions.setSnackBarAlert({
+                    show: true,
+                    message: 'Something went wrong',
+                    severity: 'error'
+                }))
+            })
+    }
+}
+
 export function Layout() {
-  const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
-  const appState = useSelector((state: RootState) => state.appState);
-  const dispatch = useAppDispatch();
+    const theme = useTheme();
+    const [open, setOpen] = React.useState(false);
+    const appState = useSelector((state: RootState) => state.appState);
+    const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        dispatch(fetchUserDetails())
+    }, []);
 
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
+    const handleDrawerOpen = () => {
+        setOpen(true);
+    };
 
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+    const handleDrawerClose = () => {
+        setOpen(false);
+    };
 
-  return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      <AppBar position="fixed" open={open}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{
-              marginRight: 5,
-              ...(open && { display: 'none' })
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {appState.appBarTitle}
-          </Typography>
-          <Button variant='outlined' component={Link} to="/login">
-            Login
-          </Button>
-        </Toolbar>
-      </AppBar>
-      <Drawer variant="permanent" open={open}>
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        <List>
-            <ListItem key="Dashboard" disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-              component={Link}
-              to="/"
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5
-                }}
-                
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <DashboardIcon />
-                </ListItemIcon>
-                <ListItemText primary="Dashboard" sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
+    return (
+        <Box sx={{display: 'flex'}}>
+            <CssBaseline/>
+            <AppBar position="fixed" open={open}>
+                <Toolbar>
+                    <IconButton
+                        color="inherit"
+                        aria-label="open drawer"
+                        onClick={handleDrawerOpen}
+                        edge="start"
+                        sx={{
+                            marginRight: 5,
+                            ...(open && {display: 'none'})
+                        }}
+                    >
+                        <MenuIcon/>
+                    </IconButton>
+                    <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
+                        {appState.appBarTitle}
+                    </Typography>
+                    <Paper sx={{padding: 1}}>
+                        <Stack direction={"row"} alignItems={"center"} gap={1}>
+                            <Avatar sx={{width: 30, height: 30}}>
+                                {appState.currentlyLoggedInUser?.firstName?.charAt(0)}
+                            </Avatar>
+                            <>
+                                {appState.currentlyLoggedInUser?.firstName} {appState.currentlyLoggedInUser?.lastName}
+                            </>
+                            <IconButton aria-label="delete" color="error" size={"small"} onClick={handleLogoutButton}>
+                                <LogoutIcon/>
+                            </IconButton>
+                        </Stack>
 
-            <ListItem key="Rooms" disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-              component={Link}
-              to="/rooms"
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <MeetingRoomIcon />
-                </ListItemIcon>
-                <ListItemText primary="Rooms" sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
+                    </Paper>
+                </Toolbar>
+            </AppBar>
+            <Drawer variant="permanent" open={open}>
+                <DrawerHeader>
+                    <IconButton onClick={handleDrawerClose}>
+                        {theme.direction === 'rtl' ? (
+                            <ChevronRightIcon/>
+                        ) : (
+                            <ChevronLeftIcon/>
+                        )}
+                    </IconButton>
+                </DrawerHeader>
+                <Divider/>
+                <List>
+                    <ListItem key="Dashboard" disablePadding sx={{display: 'block'}}>
+                        <ListItemButton
+                            component={Link}
+                            to="/"
+                            sx={{
+                                minHeight: 48,
+                                justifyContent: open ? 'initial' : 'center',
+                                px: 2.5
+                            }}
 
-            <ListItem key="Tickets" disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-              component={Link}
-              to="/tickets"
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <ConfirmationNumberIcon />
-                </ListItemIcon>
-                <ListItemText primary="Tickets" sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
+                        >
+                            <ListItemIcon
+                                sx={{
+                                    minWidth: 0,
+                                    mr: open ? 3 : 'auto',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <DashboardIcon/>
+                            </ListItemIcon>
+                            <ListItemText primary="Dashboard" sx={{opacity: open ? 1 : 0}}/>
+                        </ListItemButton>
+                    </ListItem>
+
+                    <ListItem key="Rooms" disablePadding sx={{display: 'block'}}>
+                        <ListItemButton
+                            component={Link}
+                            to="/rooms"
+                            sx={{
+                                minHeight: 48,
+                                justifyContent: open ? 'initial' : 'center',
+                                px: 2.5
+                            }}
+                        >
+                            <ListItemIcon
+                                sx={{
+                                    minWidth: 0,
+                                    mr: open ? 3 : 'auto',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <MeetingRoomIcon/>
+                            </ListItemIcon>
+                            <ListItemText primary="Rooms" sx={{opacity: open ? 1 : 0}}/>
+                        </ListItemButton>
+                    </ListItem>
+
+                    <ListItem key="Tickets" disablePadding sx={{display: 'block'}}>
+                        <ListItemButton
+                            component={Link}
+                            to="/tickets"
+                            sx={{
+                                minHeight: 48,
+                                justifyContent: open ? 'initial' : 'center',
+                                px: 2.5
+                            }}
+                        >
+                            <ListItemIcon
+                                sx={{
+                                    minWidth: 0,
+                                    mr: open ? 3 : 'auto',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <ConfirmationNumberIcon/>
+                            </ListItemIcon>
+                            <ListItemText primary="Tickets" sx={{opacity: open ? 1 : 0}}/>
+                        </ListItemButton>
+                    </ListItem>
 
 
-          
-        </List>
-        <Divider />
-      </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <DrawerHeader />
-        <Outlet />
-      </Box>
-    </Box>
-  );
+                </List>
+                <Divider/>
+            </Drawer>
+            <Box component="main" sx={{flexGrow: 1, p: 3}}>
+                <DrawerHeader/>
+                <Outlet/>
+            </Box>
+        </Box>
+    );
 }

@@ -18,3 +18,15 @@ export const getRoleById = (roleId: number): Promise<Role | null> => {
         })
     })
 }
+
+export const checkRoleExists = (roleId: number): Promise<boolean> => {
+    return new Promise<boolean>((resolve, reject) => {
+        db.one(`
+            SELECT EXISTS(SELECT 1 FROM roles WHERE role_id = $1)
+        `, [roleId]).then((result: any) => {
+            resolve(result.exists);
+        }).catch((err: any) => {
+            reject(err);
+        })
+    })
+}

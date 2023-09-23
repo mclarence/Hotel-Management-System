@@ -3,6 +3,10 @@ import { useAppDispatch } from "../../redux/hooks";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import { Button, Stack } from "@mui/material";
 import { DataGrid, GridColDef, GridValueGetterParams } from "@mui/x-data-grid";
+import {verifyLogin} from "../../api/auth";
+import {useNavigate} from "react-router-dom";
+import {useSelector} from "react-redux";
+import {RootState} from "../../redux/store";
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'Ticket #', width: 70 },
@@ -31,6 +35,14 @@ const rows = [
 export const Tickets = () => {
 
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const appState = useSelector((state: RootState) => state.appState);
+
+    useEffect(() => {
+        if (!appState.loggedIn) {
+            navigate('/login')
+        }
+    }, [appState.loggedIn]);
 
     useEffect(() => {
         dispatch(appStateSlice.actions.setAppBarTitle('Tickets'));

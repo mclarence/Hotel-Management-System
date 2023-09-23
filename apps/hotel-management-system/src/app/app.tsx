@@ -1,34 +1,54 @@
-import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
-import { LoginPage } from './pages/login-page/LoginPage';
-import { Dashboard } from './pages/dashboard/Dashboard';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Rooms } from './pages/rooms/Rooms';
-import { Layout } from './layout';
-import { Tickets } from './pages/tickets/Tickets';
-import { Calendar } from './pages/calendar/Calendar';
+import {CssBaseline, ThemeProvider, createTheme, Alert, Snackbar} from '@mui/material';
+import {LoginPage} from './pages/login-page/LoginPage';
+import {Dashboard} from './pages/dashboard/Dashboard';
+import {BrowserRouter, Routes, Route, useNavigate} from "react-router-dom";
+import {Rooms} from './pages/rooms/Rooms';
+import {Layout} from './layout';
+import {Tickets} from './pages/tickets/Tickets';
+import {Calendar} from './pages/calendar/Calendar';
+import {useSelector} from "react-redux";
+import {RootState} from "./redux/store";
+import appStateSlice from "./redux/slices/AppStateSlice";
+import {useAppDispatch} from "./redux/hooks";
+import {useEffect} from "react";
 const darkTheme = createTheme({
-  palette: {
-    mode: 'dark'
-  }
+    palette: {
+        mode: 'dark'
+    }
 });
 
 export function App() {
-  return (
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="rooms" element={<Rooms />} />
-          <Route path="tickets" element={<Tickets />} />
-          <Route path="/calendar" element={<Calendar />} />
-        </Route>
-        <Route path="login" element={<LoginPage />} />
-      </Routes>
-    </BrowserRouter>
-    </ThemeProvider>
-  );
+
+    const appState = useSelector((state: RootState) => state.appState);
+    const dispatch = useAppDispatch();
+    const handleSnackBarClose = () => {
+        dispatch(appStateSlice.actions.setSnackBarAlert({
+            ...appState.snackBarAlert,
+            show: false,
+        }))
+    }
+
+    return (
+        <ThemeProvider theme={darkTheme}>
+            <CssBaseline/>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<Layout/>}>
+                        <Route index element={<Dashboard/>}/>
+                        <Route path="rooms" element={<Rooms/>}/>
+                        <Route path="tickets" element={<Tickets/>}/>
+                        <Route path="/calendar" element={<Calendar/>}/>
+                    </Route>
+                    <Route path="login" element={<LoginPage/>}/>
+                </Routes>
+            </BrowserRouter>
+            <Snackbar open={appState.snackBarAlert.show} autoHideDuration={6000} anchorOrigin={{vertical: 'bottom', horizontal: 'right'}} onClose={handleSnackBarClose}>
+                <Alert onClose={handleSnackBarClose} severity={appState.snackBarAlert.severity} sx={{width: '100%'}} variant={"filled"}>
+                    {appState.snackBarAlert.message}
+                </Alert>
+            </Snackbar>
+        </ThemeProvider>
+    );
 }
 
 export default App;
