@@ -1,12 +1,12 @@
 export type User = {
     userId: number;
-    username: String;
-    password: String;
-    passwordSalt: String;
-    firstName: String;
-    lastName: String;
-    email: String;
-    phoneNumber: String;
-    position: String;
+    username: string;
+    password: string;
+    passwordSalt: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    position: string;
     roleId: number;
 }

@@ -1,7 +1,7 @@
 import {PermissionData} from "./permissionData";
 
 export type Role = {
-    roleId: Number;
-    name: String;
+    roleId: number;
+    name: string;
     permissionData: PermissionData;
 }

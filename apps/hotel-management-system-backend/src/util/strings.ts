@@ -12,6 +12,7 @@ const strings = {
         userConflict: (username: string) => `User with username ${username} already exists.`,
         roleIdNotFound: (roleId: number) => `Role with roleId ${roleId} not found.`,
         loggedOut: "You have been logged out.",
+        invalidField: (fieldName: string) => `The request body contains an invalid field: ${fieldName}`,
     }
 }
 

@@ -1,32 +1,137 @@
 import {expressLogger, logger} from "./logger";
-import {createTables, db} from "./database/db";
-import express from "express";
-import usersRouter from "./resources/usersRoute";
+import createDatabase from "./database/db";
+import express, {Express} from "express";
+import makeUsersRoute from "./resources/usersRoute";
 import roomsRouter from "./resources/roomsRoute";
 import path from "path";
-import {ApiResponse} from "@hotel-management-system/models";
-import config from "./config";
+import {ApiResponse, Role, ServerConfig, User} from "@hotel-management-system/models";
+import makeUsersDAO, {IUsersDAO} from "./database/users";
+import makeRolesDAO, {IRolesDAO} from "./database/roles";
+import makeTokenRevocationListDAO from "./database/tokens";
+import makeAuthenticationMiddleware from "./middleware/authentication";
+import makeAuthorizationMiddleware from "./middleware/authorization";
+import * as process from "process";
 
-const startServer = async () => {
+const createDefaultRoleAndAdmin = async (rolesDAO: IRolesDAO, usersDAO: IUsersDAO) => {
+    const DEFAULT_ROLE_ID = 1;
+    const DEFAULT_UID = 1;
+    const {
+        checkRoleExists,
+        addRole
+    } = rolesDAO
+
+    const superAdminRoleExists = await checkRoleExists(DEFAULT_ROLE_ID)
+
+    if (!superAdminRoleExists) {
+        const superAdminRole: Role = {
+            roleId: DEFAULT_ROLE_ID,
+            name: "Super Admin",
+            permissionData: {
+                "*": {
+                    read: true,
+                    write: true,
+                    delete: true
+                }
+            }
+        }
+
+        await addRole(superAdminRole)
+            .then(() => {
+                logger.info("Created default role");
+            })
+            .catch((err: any) => {
+                logger.fatal("Failed to create default role");
+                logger.fatal(err);
+                process.exit(1);
+            })
+    }
+
+    const adminUserExists = await usersDAO.checkUserExists("admin")
+
+    if (!adminUserExists) {
+        const user: User = {
+            email: "admin@example.com",
+            firstName: "super",
+            lastName: "admin",
+            phoneNumber: "",
+            position: "Admin",
+            userId: DEFAULT_UID,
+            username: "admin",
+            password: "admin",
+            passwordSalt: "",
+            roleId: DEFAULT_ROLE_ID
+
+        }
+
+        // generate a random password salt
+        user.passwordSalt = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+        // hash the password
+        const crypto = require('crypto');
+        const hash = crypto.createHash('sha256');
+        hash.update(user.passwordSalt + user.password);
+        user.password = hash.digest('hex');
+
+        await usersDAO.createUser(user)
+            .then(() => {
+                logger.info("Created default user");
+            })
+            .catch((err: any) => {
+                    logger.fatal("Failed to create default user");
+                    logger.fatal(err);
+                    process.exit(1);
+                }
+            )
+    }
+}
+
+interface IServer {
+    app: Express,
+    start: () => void
+}
+
+const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
     logger.info("Starting server");
 
-    await db.connect()
-        .then(async (e) => {
-            logger.info(`Connected to database ${e.client.connectionParameters.host}`);
-            await createTables();
-        })
-        .catch((err) => {
+    const db = createDatabase(serverOptions);
+
+    await db.testConnection()
+        .then(() => {
+            return db.createTables();
+        }).catch((err: any) => {
             logger.fatal("Failed to connect to database");
             logger.fatal(err);
             process.exit(1);
-        });
+        })
+
+    const usersDAO = makeUsersDAO(db.db)
+    const rolesDAO = makeRolesDAO(db.db)
+    const tokenRevocationListDAO = makeTokenRevocationListDAO(db.db)
+
+    await createDefaultRoleAndAdmin(rolesDAO, usersDAO)
+
+    const authenticationMiddleware = makeAuthenticationMiddleware(
+        serverOptions.jwt.secret,
+        tokenRevocationListDAO
+    )
+
+    const authorizationMiddleware = makeAuthorizationMiddleware(rolesDAO)
 
     const app = express();
 
     app.use(express.json())
     app.use(expressLogger);
 
-    app.use("/api/users", usersRouter);
+    const usersRoute = makeUsersRoute(
+        usersDAO,
+        rolesDAO,
+        tokenRevocationListDAO,
+        authenticationMiddleware,
+        authorizationMiddleware,
+        serverOptions.jwt.secret,
+    )
+
+    app.use("/api/users", usersRoute.router);
     app.use("/api/rooms", roomsRouter);
     app.use(express.static(path.join(__dirname, 'assets')));
 
@@ -53,10 +158,19 @@ const startServer = async () => {
         res.sendFile('index.html', {root: path.join(__dirname, 'assets')});
     });
 
-    const port = config.server.port || 3333;
-    const server = app.listen(port, () => {
-        logger.info(`Listening at http://localhost:${port}/api`);
-    });
-    server.on('error', console.error);
+    const start = () => {
+        const port = serverOptions.server.port
+        const server = app.listen(port, () => {
+            logger.info(`Listening at http://localhost:${port}/api`);
+        });
+        server.on('error', console.error);
+    }
+
+    return {
+        app,
+        start
+    }
 }
+
+
 export default startServer;

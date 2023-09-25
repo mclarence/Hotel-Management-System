@@ -1,6 +1,7 @@
-import {Outlet, Link} from 'react-router-dom';
+import {Link, Outlet} from 'react-router-dom';
 import * as React from 'react';
-import {styled, useTheme, Theme, CSSObject} from '@mui/material/styles';
+import {useEffect} from 'react';
+import {CSSObject, styled, Theme, useTheme} from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar, {AppBarProps as MuiAppBarProps} from '@mui/material/AppBar';
@@ -20,14 +21,15 @@ import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-import {Avatar, Button, Paper, Stack} from '@mui/material';
+import {Avatar, Paper, Stack} from '@mui/material';
 import {useSelector} from 'react-redux';
 import {RootState} from './redux/store';
 import {useAppDispatch} from './redux/hooks';
-import {useEffect} from "react";
 import appStateSlice, {fetchUserDetails} from "./redux/slices/AppStateSlice";
 import LogoutIcon from '@mui/icons-material/Logout';
 import {logout} from "./api/auth";
+import PeopleIcon from '@mui/icons-material/People';
+import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 
 const drawerWidth = 240;
 
@@ -100,26 +102,6 @@ const Drawer = styled(MuiDrawer, {
     })
 }));
 
-const handleLogoutButton = () => {
-    const existingToken = localStorage.getItem('jwt');
-    if (existingToken !== null) {
-        logout()
-            .then((response) => {
-                if (response.status === 200) {
-                    localStorage.removeItem('jwt');
-                    window.location.reload();
-                }
-            })
-            .catch((error) => {
-                dispatch(appStateSlice.actions.setSnackBarAlert({
-                    show: true,
-                    message: 'Something went wrong',
-                    severity: 'error'
-                }))
-            })
-    }
-}
-
 export function Layout() {
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
@@ -138,6 +120,26 @@ export function Layout() {
     const handleDrawerClose = () => {
         setOpen(false);
     };
+
+    const handleLogoutButton = () => {
+        const existingToken = localStorage.getItem('jwt');
+        if (existingToken !== null) {
+            logout()
+                .then((response) => {
+                    if (response.status === 200) {
+                        localStorage.removeItem('jwt');
+                        window.location.reload();
+                    }
+                })
+                .catch((error) => {
+                    dispatch(appStateSlice.actions.setSnackBarAlert({
+                        show: true,
+                        message: 'Something went wrong',
+                        severity: 'error'
+                    }))
+                })
+        }
+    }
 
     return (
         <Box sx={{display: 'flex'}}>
@@ -187,6 +189,11 @@ export function Layout() {
                 </DrawerHeader>
                 <Divider/>
                 <List>
+                    <ListItem disablePadding sx={{display: open ? 'block' : 'none'}}>
+                        <Typography sx={{padding: 2}}>
+                            Core
+                        </Typography>
+                    </ListItem>
                     <ListItem key="Dashboard" disablePadding sx={{display: 'block'}}>
                         <ListItemButton
                             component={Link}
@@ -254,6 +261,59 @@ export function Layout() {
                                 <ConfirmationNumberIcon/>
                             </ListItemIcon>
                             <ListItemText primary="Tickets" sx={{opacity: open ? 1 : 0}}/>
+                        </ListItemButton>
+                    </ListItem>
+
+                    <Divider/>
+
+                    <ListItem  disablePadding sx={{display: open ? 'block' : 'none'}}>
+                        <Typography sx={{padding: 2}}>
+                            User Management
+                        </Typography>
+                    </ListItem>
+
+                    <ListItem key="Users" disablePadding sx={{display: 'block'}}>
+                        <ListItemButton
+                            component={Link}
+                            to="/users"
+                            sx={{
+                                minHeight: 48,
+                                justifyContent: open ? 'initial' : 'center',
+                                px: 2.5
+                            }}
+                        >
+                            <ListItemIcon
+                                sx={{
+                                    minWidth: 0,
+                                    mr: open ? 3 : 'auto',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <PeopleIcon/>
+                            </ListItemIcon>
+                            <ListItemText primary="Users" sx={{opacity: open ? 1 : 0}}/>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem key="Roles" disablePadding sx={{display: 'block'}}>
+                        <ListItemButton
+                            component={Link}
+                            to="/users"
+                            sx={{
+                                minHeight: 48,
+                                justifyContent: open ? 'initial' : 'center',
+                                px: 2.5
+                            }}
+                        >
+                            <ListItemIcon
+                                sx={{
+                                    minWidth: 0,
+                                    mr: open ? 3 : 'auto',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <PermIdentityIcon/>
+                            </ListItemIcon>
+                            <ListItemText primary="Roles" sx={{opacity: open ? 1 : 0}}/>
                         </ListItemButton>
                     </ListItem>
 

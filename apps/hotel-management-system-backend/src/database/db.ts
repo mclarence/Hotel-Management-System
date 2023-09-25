@@ -1,59 +1,65 @@
 import {logger} from "../logger";
-import config from "../config";
 import queries from "./sql/queries";
 import {camelizeColumns} from "../util/camelizeColumns";
+import {IDatabase} from "pg-promise";
+import {ServerConfig} from "@hotel-management-system/models";
 
-const fs = require('fs');
+import pg_promise from "pg-promise";
 
-const pgp = require('pg-promise')({
-    receive(e) {
-        camelizeColumns(e.data);
-    }
-});
+interface Database {
+    db: IDatabase<any, any>,
+    createTables: () => Promise<void>,
+    testConnection: () => Promise<void>,
+}
 
-const db = pgp({
-    host: config.database.host,
-    port: config.database.port,
-    database: config.database.database,
-    user: config.database.user,
-    password: config.database.password,
-});
-
-const createTables = async () => {
-    logger.debug("Creating tables");
-    await db.none(queries.tables.createAll).then(() => {
-        logger.debug("Created tables");
-    }).catch((err) => {
-        logger.fatal("Failed to create tables");
-        logger.fatal(err);
-        process.exit(1);
+const createDatabase = (options: ServerConfig): Database => {
+    const pgp = pg_promise({
+        receive(e) {
+            camelizeColumns(e.data);
+        }
     });
 
-    // check if the superadmin role exists
-    await db.oneOrNone(`
-        SELECT * FROM roles WHERE name = 'superadmin';
-        `).then(async (role) => {
-        if (role === null) {
-            logger.debug("Default superadmin role does not exist");
-            // create default superadmin role
-            await db.none(`
-                INSERT INTO roles (name, permission_data) VALUES ('superadmin', '{"*": {"read": true, "write": true, "delete": true}}');
-                `).then(() => {
-                logger.debug("Created default superadmin role");
-            }).catch((err) => {
-                logger.warn("Failed to create default superadmin role");
-                logger.warn(err);
-            });
-        } else {
-            logger.debug("Default superadmin role exists");
-            return;
-        }
-    }).catch((err) => {
-        logger.debug("Failed to check if default superadmin role exists");
-        logger.debug(err);
-    })
+    const db = pgp({
+        host: options.database.host,
+        port: options.database.port,
+        database: options.database.database,
+        user: options.database.user,
+        password: options.database.password
+    });
+
+    const testConnection = (): Promise<void> => {
+        return new Promise<void>((resolve, reject) => {
+            db.connect()
+                .then((e) => {
+                    logger.debug(`Connected to database ${e.client.connectionParameters.host}`);
+                    resolve();
+                })
+                .catch((err) => {
+                    logger.fatal("Failed to connect to database");
+                    logger.fatal(err);
+                    reject(err);
+                });
+        })
+
+    }
+    const createTables = async () => {
+        logger.debug("Creating tables");
+        await db.none(queries.tables.createAll).then(() => {
+            logger.debug("Created tables");
+        }).catch((err) => {
+            logger.fatal("Failed to create tables");
+            logger.fatal(err);
+            process.exit(1);
+        });
+    }
+
+
+    return {
+        db,
+        createTables,
+        testConnection
+    }
 }
 
 
-// Exporting the database object for shared use:
-export {db, createTables}
+export default createDatabase;

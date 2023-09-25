@@ -10,7 +10,8 @@ import {useSelector} from "react-redux";
 import {RootState} from "./redux/store";
 import appStateSlice from "./redux/slices/AppStateSlice";
 import {useAppDispatch} from "./redux/hooks";
-import {useEffect} from "react";
+import {UsersPage} from "./pages/users-page/UsersPage";
+import Users from "../../../hotel-management-system-backend/src/database/users";
 const darkTheme = createTheme({
     palette: {
         mode: 'dark'
@@ -37,7 +38,8 @@ export function App() {
                         <Route index element={<Dashboard/>}/>
                         <Route path="rooms" element={<Rooms/>}/>
                         <Route path="tickets" element={<Tickets/>}/>
-                        <Route path="/calendar" element={<Calendar/>}/>
+                        <Route path="calendar" element={<Calendar/>}/>
+                        <Route path="users" element={<UsersPage/>}/>
                     </Route>
                     <Route path="login" element={<LoginPage/>}/>
                 </Routes>

@@ -1,28 +1,36 @@
 import {ApiResponse} from "@hotel-management-system/models";
-import config from "../config";
 import strings from "../util/strings";
-import {checkTokenRevoked} from "../database/tokens";
+import {ITokenRevocationListDAO} from "../database/tokens";
+import jwt from "jsonwebtoken";
 
-const jwt = require('jsonwebtoken');
-const authentication = (req: any, res: any, next: any) => {
-    // check if the request has a jwt token
-    if (!req.headers.authorization) {
-        return res.status(401).send({
-            success: false,
-            message: strings.api.unauthenticated,
-            statusCode: 401,
-            data: null
-        } as ApiResponse<null>)
-    }
+export interface IAuthenticationMiddleware {
+    (req: any, res: any, next: any): void
+}
 
-    // verify the jwt token in Authorization Bearer header
-    const token = req.headers.authorization.split(' ')[1];
+const makeAuthenticationMiddleware = (jwtSecret: string, tokenRevocationListDAO: ITokenRevocationListDAO): IAuthenticationMiddleware => {
 
-    // check if the token is in the token revocation list
-    checkTokenRevoked(token)
-        .then((isRevoked: boolean) => {
-            if (isRevoked) {
-                // if the token is revoked, return 401
+    const {
+        checkTokenRevoked
+    } = tokenRevocationListDAO
+    return async (req: any, res: any, next: any) => {
+        // check if the request has a jwt token
+        if (!req.headers.authorization) {
+            return res.status(401).send({
+                success: false,
+                message: strings.api.unauthenticated,
+                statusCode: 401,
+                data: null
+            } as ApiResponse<null>)
+        }
+
+        // verify the jwt token in Authorization Bearer header
+        const token = req.headers.authorization.split(' ')[1];
+
+        try {
+            // check if the token is in the token revocation list
+            const tokenRevoked = await checkTokenRevoked(token)
+
+            if (tokenRevoked) {
                 return res.status(401).send({
                     success: false,
                     message: strings.api.tokenInvalid,
@@ -30,10 +38,10 @@ const authentication = (req: any, res: any, next: any) => {
                     data: null
                 } as ApiResponse<null>)
             }
-        })
-        .then(() => {
-            // if we get to this point, the token is not revoked, verify the token.
-            jwt.verify(token, config.jwt.secret, (err, decoded) => {
+
+
+            // verify the token
+            jwt.verify(token, jwtSecret, (err, decoded) => {
                 if (err) {
                     return res.status(401).send({
                         success: false,
@@ -47,9 +55,15 @@ const authentication = (req: any, res: any, next: any) => {
                 req.userRoleId = decoded.roleId;
                 next();
             })
-        })
-
-
+        } catch (err) {
+            return res.status(500).send({
+                success: false,
+                message: strings.api.serverError,
+                statusCode: 500,
+                data: err
+            } as ApiResponse<null>)
+        }
+    }
 }
 
-export default authentication;
+export default makeAuthenticationMiddleware;

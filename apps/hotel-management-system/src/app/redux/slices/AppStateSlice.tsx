@@ -31,7 +31,7 @@ export const fetchUserDetails = createAsyncThunk(
             if (response.status === 401) {
                 return rejectWithValue({
                     type: 'unauthorized',
-                    message: 'You are not authorized to view this page',
+                    message: 'You need to be logged in to view this page.',
                     error: null
                 });
             } else {
