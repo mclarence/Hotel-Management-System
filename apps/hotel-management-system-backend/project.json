@@ -39,7 +39,7 @@
             "command": "mkdir -p dist/apps/hotel-management-system-backend-build/assets/"
           },
           {
-            "command": "cp -r dist/apps/hotel-management-system-backend/ dist/apps/hotel-management-system-backend-build/"
+            "command": "cp -r dist/apps/hotel-management-system-backend/* dist/apps/hotel-management-system-backend-build/"
           },
           {
             "command": "cp -r dist/apps/hotel-management-system/* dist/apps/hotel-management-system-backend-build/assets/"
