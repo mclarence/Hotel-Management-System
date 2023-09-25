@@ -36,7 +36,7 @@
             "command": "nx run-many --target=build --all --generatePackageJson"
           },
           {
-            "command": "mkdir -p dist/apps/hotel-management-system-backend-build"
+            "command": "mkdir -p dist/apps/hotel-management-system-backend-build/assets/"
           },
           {
             "command": "cp -r dist/apps/hotel-management-system-backend/ dist/apps/hotel-management-system-backend-build/"
