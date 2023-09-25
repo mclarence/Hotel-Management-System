@@ -10,7 +10,7 @@ const makePermissionChecker = (rolesDAO: IRolesDAO): IPermissionChecker => {
     } = rolesDAO;
 
     return (requiredPermission: string, roleId: number): Promise<boolean> => {
-        return new Promise<boolean>((resolve, reject) => {
+        return new Promise<boolean>((resolve) => {
             getRoleById(roleId).then(role => {
                 if (role === null) {
                     resolve(false);

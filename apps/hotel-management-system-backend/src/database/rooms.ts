@@ -17,7 +17,7 @@ const rooms: Room[] = [
     }
 ]
 
-export const getRooms = new Promise<Room[]>((resolve, reject) => {
+export const getRooms = new Promise<Room[]>((resolve) => {
     resolve(rooms);
 });
 
@@ -33,7 +33,7 @@ export const getRoomById = (roomId: number): Promise<Room | undefined> => {
 }
 
 export const createRoom = (room: Room): Promise<Room> => {
-    return new Promise<Room>((resolve, reject) => {
+    return new Promise<Room>((resolve) => {
         const newRoom = {
             ...room,
             roomId: rooms.length + 1,

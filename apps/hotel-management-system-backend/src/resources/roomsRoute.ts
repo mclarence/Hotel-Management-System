@@ -6,7 +6,7 @@ router.get('/', (req, res) => {
     // return the list of rooms
     getRooms.then(rooms => {
         res.send(rooms);
-    }).catch(err => {
+    }).catch(() => {
         res.sendStatus(500);
     })
 });
@@ -16,7 +16,7 @@ router.get('/:roomId', (req, res) => {
     const roomId = parseInt(req.params.roomId);
     getRoomById(roomId).then(room => {
         res.send(room);
-    }).catch(err => {
+    }).catch(() => {
         res.sendStatus(404);
     })
 });
@@ -26,7 +26,7 @@ router.post('/', (req, res) => {
     const room = req.body;
     createRoom(room).then(newRoom => {
         res.send(newRoom);
-    }).catch(err => {
+    }).catch(() => {
         res.sendStatus(500);
     })
 })
@@ -37,7 +37,7 @@ router.delete('/:roomId', (req, res) => {
     const roomId = parseInt(req.params.roomId);
     deleteRoom(roomId).then(() => {
         res.sendStatus(200);
-    }).catch(err => {
+    }).catch(() => {
         res.sendStatus(404);
     })
 })

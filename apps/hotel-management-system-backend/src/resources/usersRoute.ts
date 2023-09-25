@@ -10,7 +10,6 @@ import {ITokenRevocationListDAO} from "../database/tokens";
 import hashPassword from "../util/hashPassword";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import {logger} from "../logger";
 
 interface UsersRoute {
     router: express.Router
@@ -252,12 +251,12 @@ const makeUsersRoute = (
      * Delete a user by userId
      */
     router.delete('/:userId', authentication, authorization('users.delete'), (req, res) => {
-        const response = {
-            success: false,
-            statusCode: 500,
-            message: strings.api.serverError,
-            data: null
-        } as ApiResponse<any>;
+        // const response = {
+        //     success: false,
+        //     statusCode: 500,
+        //     message: strings.api.serverError,
+        //     data: null
+        // } as ApiResponse<any>;
         // delete a user by userId
         const userId = parseInt(req.params.userId);
 

@@ -1,12 +1,12 @@
 import {IDatabase} from "pg-promise";
 
 export interface ITokenRevocationListDAO {
-    revokeToken: (token: String) => Promise<void>,
-    checkTokenRevoked: (token: String) => Promise<boolean>
+    revokeToken: (token: string) => Promise<void>,
+    checkTokenRevoked: (token: string) => Promise<boolean>
 }
 
 const makeTokenRevocationListDAO = (db: IDatabase<any, any>): ITokenRevocationListDAO => {
-    const revokeToken = (token: String): Promise<void> => {
+    const revokeToken = (token: string): Promise<void> => {
         return new Promise<void>((resolve, reject) => {
             const now = new Date();
             db.none(`
@@ -19,7 +19,7 @@ const makeTokenRevocationListDAO = (db: IDatabase<any, any>): ITokenRevocationLi
         })
     }
 
-    const checkTokenRevoked = (token: String): Promise<boolean> => {
+    const checkTokenRevoked = (token: string): Promise<boolean> => {
         return new Promise<boolean>((resolve, reject) => {
             db.oneOrNone(`
             SELECT * FROM token_revocation_list WHERE token = $1

@@ -1,5 +1,3 @@
-import path from "path";
-
 const queries = {
     tables: {
         createAll: `

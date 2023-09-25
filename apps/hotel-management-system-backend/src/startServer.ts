@@ -12,6 +12,10 @@ import makeAuthenticationMiddleware from "./middleware/authentication";
 import makeAuthorizationMiddleware from "./middleware/authorization";
 import * as process from "process";
 
+
+// hash the password
+import crypto from "crypto";
+
 const createDefaultRoleAndAdmin = async (rolesDAO: IRolesDAO, usersDAO: IUsersDAO) => {
     const DEFAULT_ROLE_ID = 1;
     const DEFAULT_UID = 1;
@@ -65,9 +69,6 @@ const createDefaultRoleAndAdmin = async (rolesDAO: IRolesDAO, usersDAO: IUsersDA
 
         // generate a random password salt
         user.passwordSalt = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-        // hash the password
-        const crypto = require('crypto');
         const hash = crypto.createHash('sha256');
         hash.update(user.passwordSalt + user.password);
         user.password = hash.digest('hex');
