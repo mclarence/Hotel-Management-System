@@ -6,7 +6,9 @@
   "targets": {
     "build": {
       "executor": "@nx/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "defaultConfiguration": "production",
       "options": {
         "target": "node",
@@ -26,6 +28,32 @@
         "production": {}
       }
     },
+    "build-with-frontend": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "nx run-many --target=build --all --generatePackageJson"
+          },
+          {
+            "command": "mkdir -p dist/apps/hotel-management-system-backend-build"
+          },
+          {
+            "command": "cp -r dist/apps/hotel-management-system-backend/ dist/apps/hotel-management-system-backend-build/"
+          },
+          {
+            "command": "cp -r dist/apps/hotel-management-system/* dist/apps/hotel-management-system-backend-build/assets/"
+          },
+          {
+            "command": "tar -czvf dist/apps/build.tar.gz -C dist/apps/hotel-management-system-backend-build/ ."
+          },
+          {
+            "command": "rm -rf dist/apps/hotel-management-system-backend-build"
+          }
+        ],
+        "parallel": false
+      }
+    },
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
@@ -43,14 +71,20 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["apps/hotel-management-system-backend/**/*.ts"]
+        "lintFilePatterns": [
+          "apps/hotel-management-system-backend/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "apps/hotel-management-system-backend/jest.config.ts",
         "passWithNoTests": true,

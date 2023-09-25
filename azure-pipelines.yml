@@ -13,9 +13,9 @@ jobs:
       - script: docker run --name postgres --rm -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=ads-db -p 127.0.0.1:5432:5432 -d postgres
         displayName: 'Start postgres for tests'
       - script: npx nx test hotel-management-system-backend --watch=false
-        displayName: 'Run tests'
-      - script: npx nx run-many --target=build --all --parallel --maxParallel=4 --verbose --generatePackageJson
+        displayName: 'Run backend tests'
+      - script: npx nx build-with-frontend hotel-management-system-backend
         displayName: 'Build apps'
-      - publish: $(System.DefaultWorkingDirectory)/dist/apps
+      - publish: $(System.DefaultWorkingDirectory)/dist/apps/build.tar.gz
         artifact: build
         displayName: 'Publish build artifacts'
