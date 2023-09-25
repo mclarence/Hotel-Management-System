@@ -21,7 +21,8 @@
           "apps/hotel-management-system-backend/src/database/sql/sql_files"
         ],
         "isolatedConfig": true,
-        "webpackConfig": "apps/hotel-management-system-backend/webpack.config.js"
+        "webpackConfig": "apps/hotel-management-system-backend/webpack.config.js",
+        "generatePackageJson": true
       },
       "configurations": {
         "development": {},
