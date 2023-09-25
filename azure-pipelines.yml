@@ -14,7 +14,7 @@ jobs:
         displayName: 'Start postgres for tests'
       - script: npx nx test hotel-management-system-backend --watch=false
         displayName: 'Run tests'
-      - script: npx nx run-many --target=build --all --parallel --maxParallel=4 --generatePackageJson
+      - script: npx nx run-many --target=build --all --parallel --maxParallel=4 --verbose --generatePackageJson
         displayName: 'Build apps'
       - publish: $(System.DefaultWorkingDirectory)/dist/apps
         artifact: build
