@@ -38,7 +38,7 @@ const makeUsersDAO = (db: IDatabase<any, any>): IUsersDAO => {
      * @returns A promise that resolves to the user if found, or null if not found
      */
     const getUserById = (userId: number): Promise<User | null> => {
-        return new Promise<User>((resolve, reject) => {
+        return new Promise<User| null>((resolve, reject) => {
             db.one(`
             SELECT * FROM users WHERE user_id = $1`
                 , [userId]
@@ -60,7 +60,7 @@ const makeUsersDAO = (db: IDatabase<any, any>): IUsersDAO => {
      * @returns A promise that resolves to the user if found, or null if not found
      */
     const getUserByUsername = (username: string): Promise<User | null> => {
-        return new Promise<User>((resolve, reject) => {
+        return new Promise<User | null>((resolve, reject) => {
             db.one(`
             SELECT * FROM users WHERE username = $1
         `, [username]
