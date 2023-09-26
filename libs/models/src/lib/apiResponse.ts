@@ -1,6 +1,8 @@
+import {StatusCodes} from "http-status-codes";
+
 export type ApiResponse<T> = {
     success: boolean;
-    statusCode: number;
+    statusCode: StatusCodes;
     message: string;
     data: T;
 }

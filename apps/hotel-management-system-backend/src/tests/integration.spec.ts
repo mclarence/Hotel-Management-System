@@ -1,4 +1,4 @@
-import startServer from "./startServer";
+import startServer from "../startServer";
 import {ServerConfig} from "@hotel-management-system/models";
 import request from 'supertest'
 import {Express} from "express";
@@ -39,6 +39,7 @@ describe("authentication", () => {
                 username: "admin",
                 password: "admin"
             })
+            .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
             .expect(200)
         expect(response.body.data).toHaveProperty("jwt")
         token = response.body.data.jwt;

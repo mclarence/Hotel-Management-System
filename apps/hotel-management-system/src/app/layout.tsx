@@ -21,7 +21,7 @@ import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-import {Avatar, Paper, Stack} from '@mui/material';
+import {Avatar, ButtonBaseProps, Paper, Stack} from '@mui/material';
 import {useSelector} from 'react-redux';
 import {RootState} from './redux/store';
 import {useAppDispatch} from './redux/hooks';
@@ -101,6 +101,42 @@ const Drawer = styled(MuiDrawer, {
         '& .MuiDrawer-paper': closedMixin(theme)
     })
 }));
+
+const sidebarItems = [
+    {
+        text: 'Core',
+        isHeader: true,
+    },
+    {
+        text: 'Dashboard',
+        icon: <DashboardIcon/>,
+        to: '/',
+    },
+    {
+        text: 'Rooms',
+        icon: <MeetingRoomIcon/>,
+        to: '/rooms',
+    },
+    {
+        text: 'Tickets',
+        icon: <ConfirmationNumberIcon/>,
+        to: '/tickets',
+    },
+    {
+        text: 'User Management',
+        isHeader: true,
+    },
+    {
+        text: 'Users',
+        icon: <PeopleIcon/>,
+        to: '/users',
+    },
+    {
+        text: 'Roles',
+        icon: <PermIdentityIcon/>,
+        to: '/roles',
+    },
+];
 
 export function Layout() {
     const theme = useTheme();
@@ -189,135 +225,38 @@ export function Layout() {
                 </DrawerHeader>
                 <Divider/>
                 <List>
-                    <ListItem disablePadding sx={{display: open ? 'block' : 'none'}}>
-                        <Typography sx={{padding: 2}}>
-                            Core
-                        </Typography>
-                    </ListItem>
-                    <ListItem key="Dashboard" disablePadding sx={{display: 'block'}}>
-                        <ListItemButton
-                            component={Link}
-                            to="/"
-                            sx={{
-                                minHeight: 48,
-                                justifyContent: open ? 'initial' : 'center',
-                                px: 2.5
-                            }}
-
-                        >
-                            <ListItemIcon
-                                sx={{
-                                    minWidth: 0,
-                                    mr: open ? 3 : 'auto',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <DashboardIcon/>
-                            </ListItemIcon>
-                            <ListItemText primary="Dashboard" sx={{opacity: open ? 1 : 0}}/>
-                        </ListItemButton>
-                    </ListItem>
-
-                    <ListItem key="Rooms" disablePadding sx={{display: 'block'}}>
-                        <ListItemButton
-                            component={Link}
-                            to="/rooms"
-                            sx={{
-                                minHeight: 48,
-                                justifyContent: open ? 'initial' : 'center',
-                                px: 2.5
-                            }}
-                        >
-                            <ListItemIcon
-                                sx={{
-                                    minWidth: 0,
-                                    mr: open ? 3 : 'auto',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <MeetingRoomIcon/>
-                            </ListItemIcon>
-                            <ListItemText primary="Rooms" sx={{opacity: open ? 1 : 0}}/>
-                        </ListItemButton>
-                    </ListItem>
-
-                    <ListItem key="Tickets" disablePadding sx={{display: 'block'}}>
-                        <ListItemButton
-                            component={Link}
-                            to="/tickets"
-                            sx={{
-                                minHeight: 48,
-                                justifyContent: open ? 'initial' : 'center',
-                                px: 2.5
-                            }}
-                        >
-                            <ListItemIcon
-                                sx={{
-                                    minWidth: 0,
-                                    mr: open ? 3 : 'auto',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <ConfirmationNumberIcon/>
-                            </ListItemIcon>
-                            <ListItemText primary="Tickets" sx={{opacity: open ? 1 : 0}}/>
-                        </ListItemButton>
-                    </ListItem>
-
-                    <Divider/>
-
-                    <ListItem  disablePadding sx={{display: open ? 'block' : 'none'}}>
-                        <Typography sx={{padding: 2}}>
-                            User Management
-                        </Typography>
-                    </ListItem>
-
-                    <ListItem key="Users" disablePadding sx={{display: 'block'}}>
-                        <ListItemButton
-                            component={Link}
-                            to="/users"
-                            sx={{
-                                minHeight: 48,
-                                justifyContent: open ? 'initial' : 'center',
-                                px: 2.5
-                            }}
-                        >
-                            <ListItemIcon
-                                sx={{
-                                    minWidth: 0,
-                                    mr: open ? 3 : 'auto',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <PeopleIcon/>
-                            </ListItemIcon>
-                            <ListItemText primary="Users" sx={{opacity: open ? 1 : 0}}/>
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem key="Roles" disablePadding sx={{display: 'block'}}>
-                        <ListItemButton
-                            component={Link}
-                            to="/users"
-                            sx={{
-                                minHeight: 48,
-                                justifyContent: open ? 'initial' : 'center',
-                                px: 2.5
-                            }}
-                        >
-                            <ListItemIcon
-                                sx={{
-                                    minWidth: 0,
-                                    mr: open ? 3 : 'auto',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <PermIdentityIcon/>
-                            </ListItemIcon>
-                            <ListItemText primary="Roles" sx={{opacity: open ? 1 : 0}}/>
-                        </ListItemButton>
-                    </ListItem>
-
-
+                    {sidebarItems.map((item, index) => (
+                        <React.Fragment key={index}>
+                            {item.isHeader ? (
+                                <ListItem disablePadding sx={{display: open ? 'block' : 'none'}}>
+                                    <Typography sx={{padding: 2}}>{item.text}</Typography>
+                                </ListItem>
+                            ) : (
+                                <ListItem key={item.text} disablePadding>
+                                    <ListItemButton
+                                        component={Link as any}
+                                        to={item.to}
+                                        sx={{
+                                            minHeight: 48,
+                                            justifyContent: open ? 'initial' : 'center',
+                                            px: 2.5,
+                                        }}
+                                    >
+                                        <ListItemIcon
+                                            sx={{
+                                                minWidth: 0,
+                                                mr: open ? 3 : 'auto',
+                                                justifyContent: 'center',
+                                            }}
+                                        >
+                                            {item.icon}
+                                        </ListItemIcon>
+                                        <ListItemText primary={item.text} sx={{opacity: open ? 1 : 0}}/>
+                                    </ListItemButton>
+                                </ListItem>
+                            )}
+                        </React.Fragment>
+                    ))}
                 </List>
                 <Divider/>
             </Drawer>

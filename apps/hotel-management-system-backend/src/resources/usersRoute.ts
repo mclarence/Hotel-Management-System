@@ -1,7 +1,6 @@
 import express from 'express';
 import {IUsersDAO} from "../database/users";
-import {ApiResponse, User} from "@hotel-management-system/models";
-import {validateRequestBody} from "../util/bodyValidator";
+import {User} from "@hotel-management-system/models";
 import {IAuthenticationMiddleware} from "../middleware/authentication";
 import {IAuthorizationMiddleware} from "../middleware/authorization";
 import {IRolesDAO} from "../database/roles";
@@ -10,7 +9,9 @@ import {ITokenRevocationListDAO} from "../database/tokens";
 import hashPassword from "../util/hashPassword";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-
+import sendResponse from "../util/sendResponse";
+import {StatusCodes} from "http-status-codes";
+import Joi from "joi";
 interface UsersRoute {
     router: express.Router
 }
@@ -31,6 +32,7 @@ const makeUsersRoute = (
         getUserByUsername,
         createUser,
         checkUserExists,
+        checkUserExistsById,
         deleteUser,
         updateUser
     } = usersDAO
@@ -48,61 +50,54 @@ const makeUsersRoute = (
      * Get all users
      * Requires users.read permission
      */
-    router.get('/', authentication, authorization('users.read'), (req: any, res) => {
+    router.get('/', authentication, authorization('users.read'), async (req: any, res) => {
+        try {
+            const users = await getUsers();
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.success,
+                data: users
+            })
+        } catch (e) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: e
+            })
+        }
 
-        const response = {
-            success: false,
-            statusCode: 500,
-            message: strings.api.serverError,
-            data: null
-        } as ApiResponse<any>;
-
-        getUsers().then(users => {
-            response.success = true;
-            response.statusCode = 200;
-            response.message = "UsersPage retrieved";
-            response.data = users;
-        }).catch(err => {
-            response.data = err;
-        }).finally(() => {
-            res.status(response.statusCode).send(response);
-        })
     });
 
-    router.get('/me', authentication, (req: any, res) => {
-        const response = {
-            success: false,
-            statusCode: 500,
-            message: strings.api.serverError,
-            data: null
-        } as ApiResponse<any>;
+    router.get('/me', authentication, async (req: any, res) => {
+        try {
+            const user = await getUserById(req.userId);
 
-        getUserById(req.userId).then(user => {
+            // if the user is null, return 404
             if (user === null) {
-                return Promise.reject({
-                    type: 'userNotFound',
-                    message: `User with id ${req.userId} not found`
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.userIdNotFound(req.userId),
+                    data: null
                 })
             }
 
-            response.success = true;
-            response.statusCode = 200;
-            response.message = "User retrieved";
-            response.data = user;
-        }).catch(err => {
-            switch (err.type) {
-                case 'userNotFound':
-                    response.statusCode = 404;
-                    response.message = err.message;
-                    response.success = false;
-                    response.data = null;
-                    break;
-                default:
-                    response.data = err;
-            }
-        }).finally(() => {
-            res.status(response.statusCode).send(response);
-        })
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.success,
+                data: user
+            })
+        } catch (e) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: e
+            })
+        }
     })
 
     /**
@@ -110,139 +105,129 @@ const makeUsersRoute = (
      * Get a user by id
      * Requires users.read permission
      */
-    router.get('/:userId', authentication, authorization('users.read'), (req, res) => {
-        const response = {
-            success: false,
-            statusCode: 500,
-            message: strings.api.serverError,
-            data: null
-        } as ApiResponse<any>;
-
-        let userId: number;
-
+    router.get('/:userId', authentication, authorization('users.read'), async (req, res) => {
         try {
-            userId = parseInt(req.params.userId);
-        } catch (err) {
-            response.statusCode = 400;
-            response.message = strings.api.invalidUserId;
-            res.status(response.statusCode).send(response);
-            return;
-        }
+            const userId = parseInt(req.params.userId);
 
-        getUserById(userId).then(user => {
-            if (user === null) {
-                return Promise.reject({
-                    type: 'userNotFound',
-                    message: strings.api.userIdNotFound(userId)
+            if (isNaN(userId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.invalidUserId,
+                    data: null
                 })
             }
-            response.success = true;
-            response.statusCode = 200;
-            response.message = strings.api.success;
-            response.data = user;
-        }).catch(err => {
-            switch (err.type) {
-                case 'userNotFound':
-                    response.statusCode = 404;
-                    response.message = err.message;
-                    break;
-                default:
-                    response.data = err;
+
+            const user = await getUserById(userId);
+
+            // if the user is null, return 404
+            if (user === null) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.userIdNotFound(userId),
+                    data: null
+                })
             }
-        }).finally(() => {
-            res.status(response.statusCode).send(response);
-        })
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.success,
+                data: user
+            })
+        } catch (e) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: e
+            })
+        }
     });
 
     /**
      * HTTP POST - /api/users/add
      * Create a new user
      */
-    router.post('/add', authentication, authorization('users.write'), (req, res) => {
-        const response = {
-            success: false,
-            statusCode: 500,
-            message: strings.api.serverError,
-            data: null
-        } as ApiResponse<any>;
-        const requiredFields = ['username', 'password', 'firstName', 'lastName', 'email', 'phoneNumber', 'position', 'roleId'];
+    router.post('/add', authentication, authorization('users.write'), async (req, res) => {
+        try {
 
-        validateRequestBody(req.body, requiredFields).then(() => {
-            // check if the user with the same username exists
-            return checkUserExists(req.body.username)
-        }).then((exists) => {
+            const schema = Joi.object({
+                username: Joi.string().required(),
+                password: Joi.string().required(),
+                firstName: Joi.string().required(),
+                lastName: Joi.string().required(),
+                email: Joi.string().email().allow('', null).required(),
+                phoneNumber: Joi.string().allow('', null).required(),
+                position: Joi.string().allow('', null).required(),
+                roleId: Joi.number().required()
+            })
 
-            // if the user exists, reject the promise, otherwise continue
-            if (exists) {
-                return Promise.reject({
-                    type: 'userExists',
-                    message: strings.api.userConflict(req.body.username)
+            const {error} = schema.validate(req.body);
+
+            if (error) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: error.message,
+                    data: null
                 })
             }
 
-            // check if the role id is valid
-            return checkRoleExists(req.body.roleId)
-        }).then((exists) => {
-            if (!exists) {
-                return Promise.reject({
-                    type: 'invalidRoleId',
-                    message: strings.api.roleIdNotFound(req.body.roleId)
+            if (await checkUserExists(req.body.username)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.CONFLICT,
+                    message: strings.api.userConflict(req.body.username),
+                    data: null
                 })
             }
-        }).then(() => {
-            // create a new user
-            const user = req.body;
+
+            if (!await checkRoleExists(req.body.roleId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.roleIdNotFound(req.body.roleId),
+                    data: null
+                })
+            }
 
             const salt = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            user.passwordSalt = salt;
-            user.password = hashPassword(user.password, salt)
-
-            return createUser(user)
-        }).then(user => {
-            // check if the user id is defined
-            if (user.userId === undefined) {
-                return Promise.reject("Creating the user did not return the user id")
+            const user: User = {
+                // the userId is set to 0 because it is not known yet. It will be set by the createUser function, but since we're using
+                // typescript, we need to set it to something.
+                userId: 0,
+                username: req.body.username,
+                password: hashPassword(req.body.password, salt),
+                passwordSalt: salt,
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                email: req.body.email,
+                phoneNumber: req.body.phoneNumber,
+                position: req.body.position,
+                roleId: req.body.roleId
             }
 
-            // construct the response
-            response.success = true;
-            response.statusCode = 201;
-            response.message = strings.api.success;
-            response.data = user;
-        }).catch(err => {
 
-            // construct the error response depending on the error type
-            switch (err.type) {
-                case 'missingFields':
-                    response.statusCode = 400;
-                    response.message = err.message;
-                    response.success = false;
-                    response.data = null;
-                    break;
-                case 'userExists':
-                    response.statusCode = 409;
-                    response.message = err.message;
-                    response.success = false;
-                    response.data = null;
-                    break;
-                case 'unauthorized':
-                    response.statusCode = 401;
-                    response.message = err.message;
-                    response.success = false;
-                    response.data = null;
-                    break;
-                case 'invalidRoleId':
-                    response.statusCode = 400;
-                    response.message = err.message;
-                    response.success = false;
-                    response.data = null;
-                    break;
-                default:
-                    response.data = err;
-            }
-        }).finally(() => {
-            res.status(response.statusCode).send(response);
-        })
+            await createUser(user);
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.CREATED,
+                message: strings.api.success,
+                data: user
+            })
+
+        } catch (e) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: e
+            })
+        }
+
     })
 
 
@@ -250,21 +235,57 @@ const makeUsersRoute = (
      * HTTP DELETE - /api/users/:userId
      * Delete a user by userId
      */
-    router.delete('/:userId', authentication, authorization('users.delete'), (req, res) => {
-        // const response = {
-        //     success: false,
-        //     statusCode: 500,
-        //     message: strings.api.serverError,
-        //     data: null
-        // } as ApiResponse<any>;
-        // delete a user by userId
-        const userId = parseInt(req.params.userId);
+    router.delete('/:userId', authentication, authorization('users.delete'), async (req: express.Request, res) => {
+        try {
+            const userId = parseInt(req.params.userId);
 
-        deleteUser(userId).then(() => {
-            res.sendStatus(200);
-        }).catch(() => {
-            res.sendStatus(404);
-        })
+            //check if the user is trying to delete themselves
+            if (userId === req['userId']) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.cannotDeleteSelf,
+                    data: null
+                })
+            }
+
+            if (isNaN(userId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.invalidUserId,
+                    data: null
+                })
+            }
+
+            // check if the user exists
+            if (!await checkUserExistsById(userId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.userIdNotFound(userId),
+                    data: null
+                })
+            }
+
+            await deleteUser(userId);
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.success,
+                data: null
+            })
+
+        } catch (e) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: e
+            })
+        }
+
     })
 
     /**
@@ -272,41 +293,48 @@ const makeUsersRoute = (
      * Login a user
      */
     router.post('/login', async (req, res) => {
-        const response = {
-            success: false,
-            statusCode: 500,
-            message: strings.api.serverError,
-            data: null
-        } as ApiResponse<any>;
+        try {
 
-        const requiredFields = ['username', 'password'];
+            const schema = Joi.object({
+                username: Joi.string().required(),
+                password: Joi.string().required()
+            })
 
-        validateRequestBody(req.body, requiredFields).then(() => {
-            return getUserByUsername(req.body.username);
-        }).then(user => {
-            if (user === null) {
-                return Promise.reject({
-                    type: 'userNotFound',
-                    message: `User with username ${req.body.username} not found`
+            const {error} = schema.validate(req.body);
+
+            if (error) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: error.message,
+                    data: null
                 })
             }
-            return user;
-        }).then(user => {
+
+            const user = await getUserByUsername(req.body.username);
+
+            if (user === null) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.usernameNotFound(req.body.username),
+                    data: null
+                })
+            }
+
             // hash the password from the request body with the password salt from the database
-            const hash = crypto.createHash('sha256');
-            hash.update(user.passwordSalt + req.body.password);
-            const hashedPassword = hash.digest('hex');
+            const hashedPasswordFromRequest = hashPassword(req.body.password, user.passwordSalt);
 
             // check if the hashed password matches the password from the database
-            if (hashedPassword !== user.password) {
-                return Promise.reject({
-                    type: 'incorrectPassword',
-                    message: "Incorrect password"
+            if (hashedPasswordFromRequest !== user.password) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.UNAUTHORIZED,
+                    message: strings.api.incorrectPassword,
+                    data: null
                 })
             }
 
-            return user;
-        }).then((user) => {
             const jwtToken = jwt.sign({
                 userId: user.userId,
                 roleId: user.roleId,
@@ -316,61 +344,57 @@ const makeUsersRoute = (
                 expiresIn: '24h'
             })
 
-            response.success = true;
-            response.statusCode = 200;
-            response.message = "Login successful";
-            response.data = {
-                jwt: jwtToken
-            }
-        }).catch(err => {
-            switch (err.type) {
-                case 'missingFields':
-                    response.statusCode = 400;
-                    response.message = err.message;
-                    response.success = false;
-                    response.data = null;
-                    break;
-                case 'userNotFound':
-                    response.statusCode = 404;
-                    response.message = err.message;
-                    response.success = false;
-                    response.data = null;
-                    break;
-                case 'incorrectPassword':
-                    response.statusCode = 401;
-                    response.message = err.message;
-                    response.success = false;
-                    response.data = null;
-            }
-        }).finally(() => {
-            return res.status(response.statusCode).send(response);
-        })
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.loginSuccessful,
+                data: {
+                    jwt: jwtToken
+                }
+            })
+        } catch (e) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: e
+            })
+        }
     })
 
     /**
      * HTTP POST - /api/users/logout
      * Logout a user by revoking the token.
      */
-    router.post('/logout', authentication, (req, res) => {
-        const response: ApiResponse<null> = {
-            success: false,
-            statusCode: 500,
-            message: strings.api.serverError,
-            data: null
+    router.post('/logout', authentication, async (req, res) => {
+        try {
+            const token = req.headers.authorization?.split(' ')[1];
+
+            if (token === undefined) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.tokenInvalid,
+                    data: null
+                })
+            }
+
+            await revokeToken(token);
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.loggedOut,
+                data: null
+            })
+        } catch (e) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: e
+            })
         }
-
-        // get token from authorization bearer header
-        const token = req.headers.authorization?.split(' ')[1];
-
-        revokeToken(token).then(() => {
-            response.success = true;
-            response.statusCode = 200;
-            response.message = strings.api.loggedOut;
-        }).catch(err => {
-            response.message = err.message;
-        }).finally(() => {
-            res.status(response.statusCode).send(response);
-        })
     })
 
     /**
@@ -378,118 +402,108 @@ const makeUsersRoute = (
      * Update user properties by userId
      */
     router.patch('/:userId', authentication, authorization('users.write'), async (req, res) => {
-        const response: ApiResponse<User | null> = {
-            success: false,
-            statusCode: 500,
-            message: strings.api.serverError,
-            data: null
-        }
-
-        let userId: number;
         try {
-            userId = parseInt(req.params.userId);
-        } catch {
-            response.statusCode = 400;
-            response.message = strings.api.invalidUserId;
-            res.status(response.statusCode).send(response);
-            return;
-        }
+            const userId = parseInt(req.params.userId);
 
-        // check if the request body is empty or contains fields that do not exist on the user object
-        const allowedFields = ['username', 'password', 'firstName', 'lastName', 'email', 'phoneNumber', 'position', 'roleId'];
-        const requestBody = req.body;
-
-        // check if the body contains any fields that are not allowed
-        for (const field in requestBody) {
-            if (!allowedFields.includes(field)) {
-                response.statusCode = 400;
-                response.message = strings.api.invalidField(field);
-                res.status(response.statusCode).send(response);
-                return;
-            }
-        }
-
-        getUserById(userId).then((user) => {
-            if (user === null) {
-                return Promise.reject({
-                    type: 'userNotFound',
-                    message: strings.api.userIdNotFound(userId)
+            if (isNaN(userId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.invalidUserId,
+                    data: null
                 })
             }
 
-            return user;
-        })
-            .then(async (user) => {
-                // check if the username is already taken
-                if (requestBody.username !== undefined) {
-                    await checkUserExists(requestBody.username).then((exists) => {
-                        if (exists) {
-                            return Promise.reject({
-                                type: 'userExists',
-                                message: strings.api.userConflict(requestBody.username)
-                            })
-                        }
-                    })
-                }
-
-                // check if the role id is valid
-                if (requestBody.roleId !== undefined) {
-                    await checkRoleExists(requestBody.roleId).then((exists) => {
-                        if (!exists) {
-                            return Promise.reject({
-                                type: 'invalidRoleId',
-                                message: strings.api.roleIdNotFound(requestBody.roleId)
-                            })
-                        }
-                    })
-                }
-
-                return user;
-
+            const schema = Joi.object({
+                username: Joi.string(),
+                password: Joi.string(),
+                firstName: Joi.string(),
+                lastName: Joi.string(),
+                email: Joi.string().email(),
+                phoneNumber: Joi.string(),
+                position: Joi.string(),
+                roleId: Joi.number()
             })
-            .then((user) => {
-                const updatedUser = {
-                    ...user,
-                    ...requestBody
-                }
 
-                // hash the password if it is defined
-                if (requestBody.password !== undefined) {
-                    const salt = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-                    updatedUser.passwordSalt = salt;
-                    updatedUser.password = hashPassword(requestBody.password, salt)
-                }
+            const {error} = schema.validate(req.body);
 
-                return updateUser(updatedUser);
+            if (error) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: error.message,
+                    data: null
+                })
+            }
 
-            })
-            .then((user) => {
-                response.success = true;
-                response.statusCode = 200;
-                response.message = strings.api.success;
-                response.data = user;
-            })
-            .catch(err => {
-                switch (err.type) {
-                    case 'userNotFound':
-                        response.statusCode = 404;
-                        response.message = err.message;
-                        break;
-                    case 'userExists':
-                        response.statusCode = 409;
-                        response.message = err.message;
-                        break;
-                    case 'invalidRoleId':
-                        response.statusCode = 400;
-                        response.message = err.message;
-                        break;
-                    default:
-                        response.data = err;
+            const user = await getUserById(userId);
+
+            if (user === null) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.userIdNotFound(userId),
+                    data: null
+                })
+            }
+
+            // check if the username is already taken
+            if (req.body.username !== undefined) {
+                if (req.body.username !== user.username) {
+                    if (await checkUserExists(req.body.username)) {
+                        return sendResponse(res, {
+                            success: false,
+                            statusCode: StatusCodes.CONFLICT,
+                            message: strings.api.userConflict(req.body.username),
+                            data: null
+                        })
+                    }
                 }
+            }
+
+            // check if the role id is valid
+            if (req.body.roleId !== undefined) {
+                if (req.body.roleId !== user.roleId) {
+                    if (!await checkRoleExists(req.body.roleId)) {
+                        return sendResponse(res, {
+                            success: false,
+                            statusCode: StatusCodes.BAD_REQUEST,
+                            message: strings.api.roleIdNotFound(req.body.roleId),
+                            data: null
+                        })
+                    }
+                }
+            }
+
+            const updatedUser = {
+                ...user,
+                ...req.body
+            }
+
+            // hash the password if it is defined
+            if (req.body.password !== undefined) {
+                const salt = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                updatedUser.passwordSalt = salt;
+                updatedUser.password = hashPassword(req.body.password, salt)
+            }
+
+            await updateUser(updatedUser);
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.success,
+                data: updatedUser
             })
-            .finally(() => {
-                res.status(response.statusCode).send(response);
+
+        } catch (e) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: e
             })
+        }
 
     })
 

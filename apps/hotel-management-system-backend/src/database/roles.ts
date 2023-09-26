@@ -2,43 +2,55 @@ import {Role} from "@hotel-management-system/models";
 import pgPromise, {IDatabase} from "pg-promise";
 import queryResultErrorCode = pgPromise.errors.queryResultErrorCode;
 import QueryResultError = pgPromise.errors.QueryResultError;
+import queries from "./sql/queries";
 
 export interface IRolesDAO {
     getRoleById: (roleId: number) => Promise<Role | null>,
     checkRoleExists: (roleId: number) => Promise<boolean>,
     addRole: (role: Role) => Promise<Role>,
-    updateRole: (role: Role) => Promise<Role>
+    updateRole: (role: Role) => Promise<Role>,
+    getAllRoles: () => Promise<Role[]>
 }
 
 export const makeRolesDAO = (db: IDatabase<any, any>): IRolesDAO => {
-    const getRoleById = (roleId: number): Promise<Role | null> => {
-        return new Promise<Role | null>((resolve, reject) => {
-            db.oneOrNone(`
-            SELECT * FROM roles WHERE role_id = $1
-        `, [roleId]).then((role: Role) => {
-                resolve(role);
-            }).catch((err: any) => {
-                if (err instanceof QueryResultError && err.code === queryResultErrorCode.noData) {
-                    resolve(null);
-                } else {
-                    reject(err);
-                }
-            })
-        })
+
+    /**
+     * Get role by id
+     * @param roleId 
+     * @returns A promise that resolves to a role or null if no role is found.
+     */
+    const getRoleById = async (roleId: number): Promise<Role | null> => {
+        try {
+            const role: Role = await db.oneOrNone(queries.roles.getRoleById, [roleId]);
+            return role;
+        } catch (err) {
+            if (err instanceof QueryResultError && err.code === queryResultErrorCode.noData) {
+                return null;
+            } else {
+                throw err;
+            }
+        }
     }
 
-    const checkRoleExists = (roleId: number): Promise<boolean> => {
-        return new Promise<boolean>((resolve, reject) => {
-            db.one(`
-                SELECT EXISTS(SELECT 1 FROM roles WHERE role_id = $1)
-            `, [roleId]).then((result: any) => {
-                resolve(result.exists);
-            }).catch((err: any) => {
-                reject(err);
-            })
-        })
+    /**
+     * Check if role exists
+     * @param roleId 
+     * @returns A promise that resolves to true if role exists, false otherwise.
+     */
+    const checkRoleExists = async (roleId: number): Promise<boolean> => {
+        try {
+            const result: any = await db.one(queries.roles.checkRoleExists, [roleId]);
+            return result.exists;
+        } catch (err) {
+            throw err;
+        }
     }
 
+    /**
+     * Add role.
+     * @param role 
+     * @returns A promise that resolves to the added role containing the role id.
+     */
     const addRole = (role: Role): Promise<Role> => {
         return new Promise<Role>((resolve, reject) => {
             db.one(`
@@ -53,34 +65,38 @@ export const makeRolesDAO = (db: IDatabase<any, any>): IRolesDAO => {
         })
     }
 
-    const updateRole = (role: Role): Promise<Role> => {
-        return new Promise<Role>((resolve, reject) => {
-            checkRoleExists(role.roleId).then((exists: boolean) => {
-                if (!exists) {
-                    reject(new Error(`Role with id ${role.roleId} does not exist`));
-                }
-            })
-                .then(() => {
-                    db.one(`
-                        UPDATE roles
-                        SET name = $1, permission_data = $2
-                        WHERE role_id = $3
-                        RETURNING *
-                    `, [role.name, role.permissionData, role.roleId]).then((role: Role) => {
-                        resolve(role);
-                    }).catch((err: any) => {
-                        reject(err);
-                    })
-                })
-        })
+    /**
+     * Update role.
+     * @param role 
+     * @returns A promise that resolves to the updated role.
+     */
+    const updateRole = async (role: Role): Promise<Role> => {
+        try {
+            const updatedRole: Role = await db.one(queries.roles.updateRole, [role.name, role.permissionData, role.roleId]);
+            return updatedRole;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    /**
+     * Get all roles.
+     * @returns A promise that resolves to an array of roles.
+     */
+    const getAllRoles = async (): Promise<Role[]> => {
+        const roles: Role[] = await db.manyOrNone(queries.roles.getAllRoles);
+        return roles;
     }
 
     return {
         getRoleById,
         checkRoleExists,
         addRole,
-        updateRole
+        updateRole,
+        getAllRoles
     }
+
+
 }
 
 export default makeRolesDAO;

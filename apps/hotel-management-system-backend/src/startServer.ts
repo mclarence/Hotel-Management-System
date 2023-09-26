@@ -15,6 +15,8 @@ import * as process from "process";
 
 // hash the password
 import crypto from "crypto";
+import hashPassword from "./util/hashPassword";
+import makeRolesRoute from "./resources/rolesRoute";
 
 const createDefaultRoleAndAdmin = async (rolesDAO: IRolesDAO, usersDAO: IUsersDAO) => {
     const DEFAULT_ROLE_ID = 1;
@@ -30,13 +32,7 @@ const createDefaultRoleAndAdmin = async (rolesDAO: IRolesDAO, usersDAO: IUsersDA
         const superAdminRole: Role = {
             roleId: DEFAULT_ROLE_ID,
             name: "Super Admin",
-            permissionData: {
-                "*": {
-                    read: true,
-                    write: true,
-                    delete: true
-                }
-            }
+            permissionData: ["*"]
         }
 
         await addRole(superAdminRole)
@@ -69,9 +65,7 @@ const createDefaultRoleAndAdmin = async (rolesDAO: IRolesDAO, usersDAO: IUsersDA
 
         // generate a random password salt
         user.passwordSalt = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        const hash = crypto.createHash('sha256');
-        hash.update(user.passwordSalt + user.password);
-        user.password = hash.digest('hex');
+        user.password = hashPassword(user.password, user.passwordSalt)
 
         await usersDAO.createUser(user)
             .then(() => {
@@ -132,7 +126,14 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
         serverOptions.jwt.secret,
     )
 
+    const rolesRoute = makeRolesRoute(
+        rolesDAO,
+        authenticationMiddleware,
+        authorizationMiddleware
+    )
+
     app.use("/api/users", usersRoute.router);
+    app.use("/api/roles", rolesRoute.router);
     app.use("/api/rooms", roomsRouter);
     app.use(express.static(path.join(__dirname, 'assets')));
 

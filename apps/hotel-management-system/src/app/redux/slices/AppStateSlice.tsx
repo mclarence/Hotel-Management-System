@@ -1,7 +1,8 @@
 import {PayloadAction, createSlice, createAsyncThunk} from "@reduxjs/toolkit";
 import {getCurrentUser} from "../../api/auth";
 import {ApiResponse, User} from "@hotel-management-system/models";
-
+import UnauthorisedError from "../../../../errors/UnauthorisedError";
+import UnknownError from "../../../../errors/UnknownError";
 interface AppStateSlice {
     appBarTitle: string;
     snackBarAlert: {
@@ -11,6 +12,7 @@ interface AppStateSlice {
     },
     currentlyLoggedInUser?: User;
     loggedIn: boolean;
+    isFetchingUserList: boolean;
 }
 
 const initialState: AppStateSlice = {
@@ -20,7 +22,8 @@ const initialState: AppStateSlice = {
         message: '',
         severity: 'success'
     },
-    loggedIn: false
+    loggedIn: false,
+    isFetchingUserList: false
 };
 
 export const fetchUserDetails = createAsyncThunk(
@@ -29,21 +32,13 @@ export const fetchUserDetails = createAsyncThunk(
         try {
             const response = await getCurrentUser();
             if (response.status === 401) {
-                return rejectWithValue({
-                    type: 'unauthorized',
-                    message: 'You need to be logged in to view this page.',
-                    error: null
-                });
+                return rejectWithValue(new UnauthorisedError('You need to be logged in to access this page.'));
             } else {
                 const responseData: ApiResponse<User> = await response.json();
                 return responseData.data;
             }
         } catch (error) {
-            return rejectWithValue({
-                type: 'error',
-                message: 'Something went wrong',
-                error: error
-            });
+            return rejectWithValue(new UnknownError('An unknown error occurred. Please try again later.', error));
         }
     }
 )
@@ -72,22 +67,20 @@ const appStateSlice = createSlice({
             state.currentlyLoggedInUser = action.payload;
             state.loggedIn = true;
         })
-        builder.addCase(fetchUserDetails.rejected, (state, action: any) => {
-            switch (action.payload?.type) {
-                case 'unauthorized':
-                    state.loggedIn = false;
-                    state.snackBarAlert = {
-                        show: true,
-                        message: action.payload?.message,
-                        severity: 'warning'
-                    }
-                    break;
-                default:
-                    state.snackBarAlert = {
-                        show: true,
-                        message: action.payload?.message,
-                        severity: 'error'
-                    }
+        builder.addCase(fetchUserDetails.rejected, (state, action) => {
+            if (action.payload instanceof UnauthorisedError) {
+                state.loggedIn = false;
+                state.snackBarAlert = {
+                    show: true,
+                    message: action.payload.message,
+                    severity: 'warning'
+                }
+            } else {
+                state.snackBarAlert = {
+                    show: true,
+                    message: "An unknown error occurred. Please try again later.",
+                    severity: 'error'
+                }
             }
         })
     }

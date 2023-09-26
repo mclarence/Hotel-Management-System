@@ -16,27 +16,10 @@ const makePermissionChecker = (rolesDAO: IRolesDAO): IPermissionChecker => {
                     resolve(false);
                 }
 
-                Object.keys(role.permissionData).forEach(key => {
-
-                    // If the key is '*', the user has all permissions
-                    if (key === '*') {
-                        resolve(true);
-                    }
-
-                    /**
-                     * [permission_node] : {
-                     *     read: boolean,
-                     *     write: boolean,
-                     *     delete: boolean
-                     * }
-                     */
-
-                    // If the permission node is the required permission, check if the user has the required permission
-                    // requiredpermissions is in the format [permission_node].[read/write/delete]
-                    if (key === requiredPermission.split('.')[0]) {
-                        resolve(role.permissionData[key][requiredPermission.split('.')[1]]);
-                    }
-                })
+                const permissions = role.permissionData;
+                if (permissions.includes(requiredPermission) || permissions.includes("*")) {
+                    resolve(true);
+                }
 
                 resolve(false);
             })

@@ -1,7 +1,7 @@
-import {CssBaseline, ThemeProvider, createTheme, Alert, Snackbar} from '@mui/material';
+import {Alert, createTheme, CssBaseline, Snackbar, ThemeProvider} from '@mui/material';
 import {LoginPage} from './pages/login-page/LoginPage';
 import {Dashboard} from './pages/dashboard/Dashboard';
-import {BrowserRouter, Routes, Route, useNavigate} from "react-router-dom";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {Rooms} from './pages/rooms/Rooms';
 import {Layout} from './layout';
 import {Tickets} from './pages/tickets/Tickets';
@@ -11,8 +11,9 @@ import {RootState} from "./redux/store";
 import appStateSlice from "./redux/slices/AppStateSlice";
 import {useAppDispatch} from "./redux/hooks";
 import {UsersPage} from "./pages/users-page/UsersPage";
-import Users from "../../../hotel-management-system-backend/src/database/users";
-const darkTheme = createTheme({
+import {RolesPage} from "./pages/roles-page/RolesPage";
+
+export const theme = createTheme({
     palette: {
         mode: 'dark'
     }
@@ -30,7 +31,7 @@ export function App() {
     }
 
     return (
-        <ThemeProvider theme={darkTheme}>
+        <ThemeProvider theme={theme}>
             <CssBaseline/>
             <BrowserRouter>
                 <Routes>
@@ -40,6 +41,7 @@ export function App() {
                         <Route path="tickets" element={<Tickets/>}/>
                         <Route path="calendar" element={<Calendar/>}/>
                         <Route path="users" element={<UsersPage/>}/>
+                        <Route path="roles" element={<RolesPage/>}/>
                     </Route>
                     <Route path="login" element={<LoginPage/>}/>
                 </Routes>
