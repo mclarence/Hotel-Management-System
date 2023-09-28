@@ -1,5 +1,5 @@
-import {Paper} from "@mui/material";
-import {DataGrid, GridColDef} from "@mui/x-data-grid";
+import {CircularProgress, Paper} from "@mui/material";
+import {DataGrid, GridCellParams, GridColDef} from "@mui/x-data-grid";
 import {ApiResponse, User} from "@hotel-management-system/models";
 import React, {useEffect, useRef, useState} from "react";
 import {deleteUser, getUsers} from "../../api/users";
@@ -92,15 +92,17 @@ function CustomNoRowsOverlay() {
     );
 }
 
-export const UsersPage = () => {
 
-    const [rows, setRows] = useState<User[]>([]);
-    const [openAddUserDialog, setOpenAddUserDialog] = useState<boolean>(false);
+const RowDeleteButton = (props: {
+    params: GridCellParams,
+    fetchUsers: () => void
+}) => {
     const appState = useSelector((state: RootState) => state.appState);
     const dispatch = useAppDispatch();
-    const navigate = useNavigate();
+    const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
     const handleDeleteSingleUser = (userId: number) => {
+        setIsDeleting(true);
         deleteUser(userId).then((response) => {
             return response.json();
         })
@@ -108,10 +110,10 @@ export const UsersPage = () => {
                 if (data.success) {
                     dispatch(appStateSlice.actions.setSnackBarAlert({
                         show: true,
-                        message: data.message,
+                        message: "User deleted successfully",
                         severity: 'success'
                     }))
-                    fetchUsers();
+                    props.fetchUsers();
                 } else if (!data.success && data.statusCode === 401) {
                     dispatch(appStateSlice.actions.setSnackBarAlert({
                         show: true,
@@ -132,38 +134,27 @@ export const UsersPage = () => {
                     message: error.message,
                     severity: 'error'
                 }))
-            })
+            }).finally(() => {
+            setIsDeleting(false);
+        })
     }
 
-    const columns = useRef(
-        [
-            {field: 'userId', headerName: 'User ID'},
-            {field: 'firstName', headerName: 'First Name'},
-            {field: 'lastName', headerName: 'Last Name'},
-            {field: 'username', headerName: 'Username'},
-            {field: 'email', headerName: 'Email'},
-            {field: 'roleId', headerName: 'Role ID'},
-            {
-                field: 'actions',
-                headerName: '',
-                sortable: false,
-                filterable: false,
-                hideable: false,
-                disableReorder: true,
-                disableColumnMenu: true,
-                renderCell: (params: any) => (
-                    <>
-                        <IconButton size={"small"} color={"error"} onClick={() => handleDeleteSingleUser(params.row.userId)}>
-                            <PersonRemoveIcon fontSize={"inherit"}/>
-                        </IconButton>
-                        <IconButton size={"small"}>
-                            <MoreVertIcon fontSize={"inherit"}/>
-                        </IconButton>
-                    </>
-                )
-            },
-        ] as GridColDef[]
-    );
+    return (
+        <IconButton size={"small"} color={"error"} onClick={() => handleDeleteSingleUser(props.params.row.userId)}
+                    disabled={isDeleting}>
+            {isDeleting ? <CircularProgress size={20}/> : <PersonRemoveIcon fontSize={"inherit"}/>}
+        </IconButton>
+    )
+
+}
+export const UsersPage = () => {
+
+    const [rows, setRows] = useState<User[]>([]);
+    const [openAddUserDialog, setOpenAddUserDialog] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const appState = useSelector((state: RootState) => state.appState);
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     const actions = useRef([
         {
@@ -189,6 +180,7 @@ export const UsersPage = () => {
     }, [appState.loggedIn]);
 
     const fetchUsers = () => {
+        setIsLoading(true)
         getUsers().then((response) => {
             return response.json();
         })
@@ -216,7 +208,9 @@ export const UsersPage = () => {
                     message: error.message,
                     severity: 'error'
                 }))
-            })
+            }).finally(() => {
+            setIsLoading(false)
+        })
     }
 
     const refreshUsers = () => {
@@ -230,6 +224,36 @@ export const UsersPage = () => {
 
     }, []);
 
+
+    const columns = useRef(
+        [
+            {field: 'userId', headerName: 'User ID'},
+            {field: 'firstName', headerName: 'First Name'},
+            {field: 'lastName', headerName: 'Last Name'},
+            {field: 'username', headerName: 'Username'},
+            {field: 'email', headerName: 'Email'},
+            {field: 'roleId', headerName: 'Role ID'},
+            {
+                field: 'actions',
+                headerName: '',
+                sortable: false,
+                filterable: false,
+                hideable: false,
+                disableReorder: true,
+                disableColumnMenu: true,
+                renderCell: (params: any) => (
+                    // <>
+                    //
+                    //     <IconButton size={"small"}>
+                    //         <MoreVertIcon fontSize={"inherit"}/>
+                    //     </IconButton>
+                    // </>
+                    <RowDeleteButton params={params} fetchUsers={fetchUsers}/>
+                )
+            },
+        ] as GridColDef[]
+    );
+
     return (
         <>
             <Paper sx={{padding: 2}}>
@@ -239,6 +263,7 @@ export const UsersPage = () => {
                     disableRowSelectionOnClick={true}
                     rows={rows}
                     columns={columns.current}
+                    loading={isLoading}
                     initialState={{
                         pagination: {
                             paginationModel: {page: 0, pageSize: 10},
@@ -253,7 +278,8 @@ export const UsersPage = () => {
                     sx={{height: '100%'}}
                     slots={{
                         noRowsOverlay: CustomNoRowsOverlay,
-                    }}/>
+                    }}
+                />
             </Paper>
             <SpeedDial
                 ariaLabel="SpeedDial basic example"

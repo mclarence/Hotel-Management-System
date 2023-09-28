@@ -40,6 +40,7 @@ export const AddUserDialog = (props: AddUserDialogProps) => {
     const [position, setPosition] = useState('')
     const [selectedRoleId, setSelectedRoleId] = useState('')
     const [saveButtonDisabled, setSaveButtonDisabled] = useState(true)
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const dispatch = useAppDispatch();
 
     const handleRoleChange = (event: SelectChangeEvent) => {
@@ -67,6 +68,7 @@ export const AddUserDialog = (props: AddUserDialogProps) => {
     }
 
     const handleAddUser = () => {
+        setIsSubmitting(true);
         const newUser: User = {
             firstName: firstName,
             lastName: lastName,
@@ -112,7 +114,9 @@ export const AddUserDialog = (props: AddUserDialogProps) => {
                     message: 'An unknown error occurred',
                     severity: 'error'
                 }))
-            })
+            }).finally(() => {
+            setIsSubmitting(false);
+        })
     }
 
     useEffect(() => {
@@ -240,8 +244,8 @@ export const AddUserDialog = (props: AddUserDialogProps) => {
                         </Select>
                     </FormControl>
                     <Button variant={"contained"} color={"primary"} startIcon={<PersonAddIcon/>}
-                            disabled={saveButtonDisabled} onClick={handleAddUser}>
-                        Add User
+                            disabled={saveButtonDisabled || isSubmitting} onClick={handleAddUser}>
+                        {isSubmitting ? 'Adding user...' : 'Add User'}
                     </Button>
                 </Stack>
 
