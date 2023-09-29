@@ -12,6 +12,7 @@ import appStateSlice from "./redux/slices/AppStateSlice";
 import {useAppDispatch} from "./redux/hooks";
 import {UsersPage} from "./pages/users-page/UsersPage";
 import {RolesPage} from "./pages/roles-page/RolesPage";
+import {block} from "million/react";
 
 export const theme = createTheme({
     palette: {
@@ -55,4 +56,6 @@ export function App() {
     );
 }
 
-export default App;
+const AppBlock = block(App);
+
+export default AppBlock;
