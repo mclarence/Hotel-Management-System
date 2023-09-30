@@ -145,6 +145,7 @@ export const Rooms = () => {
 
     useEffect(() => {
         dispatch(appStateSlice.actions.setAppBarTitle('Room Management'));
+        dispatch(appStateSlice.actions.setLastPageVisited('/rooms'));
     }, []);
 
     return (

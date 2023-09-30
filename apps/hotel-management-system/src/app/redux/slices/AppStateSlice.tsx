@@ -12,6 +12,7 @@ interface AppStateSlice {
     },
     currentlyLoggedInUser?: User;
     loggedIn: boolean;
+    lastPageVisited: string;
     isFetchingUserList: boolean;
 }
 
@@ -23,6 +24,7 @@ const initialState: AppStateSlice = {
         severity: 'success'
     },
     loggedIn: false,
+    lastPageVisited: '',
     isFetchingUserList: false
 };
 
@@ -60,6 +62,9 @@ const appStateSlice = createSlice({
         setLoggedInUser: (state, action: PayloadAction<User>) => {
             state.loggedIn = true;
             state.currentlyLoggedInUser = action.payload;
+        },
+        setLastPageVisited: (state, action: PayloadAction<string>) => {
+            state.lastPageVisited = action.payload;
         }
     },
     extraReducers: (builder) => {

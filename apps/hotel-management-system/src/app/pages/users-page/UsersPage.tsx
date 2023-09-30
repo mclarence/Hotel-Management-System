@@ -179,6 +179,10 @@ export const UsersPage = () => {
         }
     }, [appState.loggedIn]);
 
+    useEffect(() => {
+        dispatch(appStateSlice.actions.setLastPageVisited('/users'));
+    })
+
     const fetchUsers = () => {
         setIsLoading(true)
         getUsers().then((response) => {

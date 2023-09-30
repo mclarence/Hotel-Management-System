@@ -18,6 +18,7 @@ export function Dashboard() {
     const navigate = useNavigate();
     useEffect(() => {
         dispatch(appStateSlice.actions.setAppBarTitle('Dashboard'));
+        dispatch(appStateSlice.actions.setLastPageVisited('/'));
     }, []);
 
     useEffect(() => {

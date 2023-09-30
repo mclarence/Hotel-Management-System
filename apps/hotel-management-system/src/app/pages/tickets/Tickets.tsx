@@ -46,6 +46,7 @@ export const Tickets = () => {
 
     useEffect(() => {
         dispatch(appStateSlice.actions.setAppBarTitle('Tickets'));
+        dispatch(appStateSlice.actions.setLastPageVisited('/tickets'));
     }, []);
 
     return (

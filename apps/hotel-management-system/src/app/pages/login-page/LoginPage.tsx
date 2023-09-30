@@ -35,7 +35,13 @@ export const LoginPage = () => {
     useEffect(() => {
         console.log("checking login status");
         if (appState.loggedIn) {
-            navigate('/');
+            if (appState.lastPageVisited !== '') {
+                console.log("redirecting to last page visited");
+                navigate(appState.lastPageVisited);;
+            } else {
+                console.log("redirecting to home page");
+                navigate('/');
+            }
         } else {
             console.log("not logged in");
             if (localStorage.getItem("jwt") !== null) {
