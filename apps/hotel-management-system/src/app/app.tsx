@@ -5,6 +5,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Rooms } from './pages/rooms/Rooms';
 import { Layout } from './layout';
 import { Tickets } from './pages/tickets/Tickets';
+import { Logs } from './pages/Log-page/log';
+import { LogDetail } from './pages/Log-page/LogDetailPage';
 const darkTheme = createTheme({
   palette: {
     mode: 'dark'
@@ -21,6 +23,8 @@ export function App() {
           <Route index element={<Dashboard />} />
           <Route path="rooms" element={<Rooms />} />
           <Route path="tickets" element={<Tickets />} />
+          <Route path="log" element={<Logs />} /> 
+            <Route path="logs" element={<LogDetail />} />
         </Route>
         <Route path="login" element={<LoginPage />} />
       </Routes>
