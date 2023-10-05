@@ -1,7 +1,7 @@
 export type Logs = {
-    logId: Number;
-    type: String;
-    description: String;
+    logId: number;
+    type: string;
+    description: string;
     date: Date;
-    data: String;
+    data: string;
 }

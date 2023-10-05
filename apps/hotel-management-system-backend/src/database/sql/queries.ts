@@ -111,7 +111,11 @@ const queries = {
          logCheckOut: `
         INSERT INTO room_logs (operation_type, operated_by, room_id)
         VALUES ('CHECK_OUT', $1, $2)
-        `
+        `,
+        deleteLogById: `
+        DELETE FROM room_logs
+         WHERE log_id = $1
+        `,
         // Add other required queries as needed
     }
     
