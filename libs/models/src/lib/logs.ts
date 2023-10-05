@@ -4,4 +4,5 @@ export type Logs = {
     description: string;
     date: Date;
     data: string;
+    roomId: number;
 }
