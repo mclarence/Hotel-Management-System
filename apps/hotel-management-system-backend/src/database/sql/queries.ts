@@ -104,6 +104,14 @@ const queries = {
         getAllLogs: `
             SELECT * FROM room_logs
         `,
+        logCheckIn: `
+        INSERT INTO room_logs (operation_type, operated_by, room_id, guest_name)
+        VALUES ('CHECK_IN', $1, $2, $3)
+        `,
+         logCheckOut: `
+        INSERT INTO room_logs (operation_type, operated_by, room_id)
+        VALUES ('CHECK_OUT', $1, $2)
+        `
         // Add other required queries as needed
     }
     
