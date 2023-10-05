@@ -15,12 +15,12 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import Divider from "@mui/material/Divider";
 import {ApiResponse, Role, User} from "@hotel-management-system/models";
 import {useEffect, useState} from "react";
-import {getRoles} from "../../api/roles";
-import {useAppDispatch} from "../../redux/hooks";
-import appStateSlice from "../../redux/slices/AppStateSlice";
+import {getRoles} from "../../../api/roles";
+import {useAppDispatch} from "../../../redux/hooks";
+import appStateSlice from "../../../redux/slices/AppStateSlice";
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from "@mui/material/IconButton";
-import {addUser} from "../../api/users";
+import {addUser} from "../../../api/users";
 
 interface AddUserDialogProps {
     open: boolean;
