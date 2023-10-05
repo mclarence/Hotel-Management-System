@@ -1,3 +1,4 @@
+
 const queries = {
     tables: {
         createAll: `
@@ -23,6 +24,15 @@ const queries = {
                 token_id SERIAL PRIMARY KEY,
                 token VARCHAR(255) NOT NULL,
                 revokedAt TIMESTAMP NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS room_logs (
+                log_id SERIAL PRIMARY KEY,
+                operation_type VARCHAR(255) NOT NULL, 
+                timestamp TIMESTAMP NOT NULL DEFAULT current_timestamp,
+                operated_by VARCHAR(255) NOT NULL,
+                room_id INTEGER NOT NULL,
+                guest_name VARCHAR(255),
+                additional_info TEXT
             );
         `,
     },
@@ -81,7 +91,23 @@ const queries = {
         checkTokenRevoked: `
             SELECT * FROM token_revocation_list WHERE token = $1
         `,
+    },
+    roomLogs: {
+        addLog: `
+            INSERT INTO room_logs (operation_type, operated_by, room_id, guest_name, additional_info)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING log_id
+        `,
+        getLogsForRoom: `
+            SELECT * FROM room_logs WHERE room_id = $1
+        `,
+        getAllLogs: `
+            SELECT * FROM room_logs
+        `,
+        // Add other required queries as needed
     }
+    
+    
 }
 
 export default queries;

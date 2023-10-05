@@ -21,3 +21,12 @@ CREATE TABLE IF NOT EXISTS token_revocation_list (
     token VARCHAR(255) NOT NULL,
     revokedAt TIMESTAMP NOT NULL
 );
+CREATE TABLE IF NOT EXISTS room_logs (
+    log_id SERIAL PRIMARY KEY,
+    operation_type VARCHAR(255) NOT NULL, -- e.g. 'CHECK_IN', 'CHECK_OUT'
+    timestamp TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    operated_by VARCHAR(255) NOT NULL, -- Username of the user who performed the operation
+    room_id INTEGER NOT NULL,
+    guest_name VARCHAR(255), -- optional, name of the guest for check in/check out
+    additional_info TEXT -- any other details we might want to store
+);
