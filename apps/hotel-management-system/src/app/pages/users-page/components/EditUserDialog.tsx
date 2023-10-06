@@ -77,22 +77,26 @@ export const EditUserDialog = (props: EditUserDialog) => {
     }
   };
 
-  const handleAddUser = () => {
+  const handleEditUser = () => {
     setIsSubmitting(true);
-    const newUser: User = {
-      userId: props.user?.userId || 0,
-      firstName: firstName,
-      lastName: lastName,
-      email: emailAddress,
-      phoneNumber: phoneNumber,
-      username: username,
-      password: password,
-      position: position,
-      roleId: parseInt(selectedRoleId),
-    };
+    const editedUser: User = {
+        userId: props.user?.userId || 0,
+        firstName: firstName,
+        lastName: lastName,
+        email: emailAddress,
+        phoneNumber: phoneNumber,
+        username: username,
+        position: position,
+        roleId: parseInt(selectedRoleId),
+      };
+
+    if (password) {
+        editedUser.password = password;
+    }
+    
 
     // send request to add user
-    updateUser(newUser)
+    updateUser(editedUser)
       .then((response) => {
         return response.json();
       })
@@ -145,7 +149,7 @@ export const EditUserDialog = (props: EditUserDialog) => {
       firstName !== props.user?.firstName ||
       lastName !== props.user?.lastName ||
       username !== props.user?.username ||
-      password !== props.user?.password ||
+      password ||
       phoneNumber !== props.user?.phoneNumber ||
       emailAddress !== props.user?.email ||
       position !== props.user?.position ||
@@ -210,7 +214,6 @@ export const EditUserDialog = (props: EditUserDialog) => {
     setEmailAddress(props.user?.email || "");
     setPhoneNumber(props.user?.phoneNumber || "");
     setUsername(props.user?.username || "");
-    setPassword(props.user?.password || "");
     setPosition(props.user?.position || "");
     setSelectedRoleId(props.user?.roleId.toString() || "");
   }, [props.user, props.open]);
@@ -288,6 +291,7 @@ export const EditUserDialog = (props: EditUserDialog) => {
             required
             label="Password"
             type="password"
+            placeholder="(unchanged)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -311,7 +315,7 @@ export const EditUserDialog = (props: EditUserDialog) => {
             color={"primary"}
             startIcon={<EditIcon />}
             disabled={saveButtonDisabled || isSubmitting}
-            onClick={handleAddUser}
+            onClick={handleEditUser}
           >
             {isSubmitting ? "Updating user..." : "Edit User"}
           </Button>

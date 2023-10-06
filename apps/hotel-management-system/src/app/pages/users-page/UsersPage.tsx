@@ -32,23 +32,6 @@ export const UsersPage = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    const actions = useRef([
-        {
-            icon: <EditIcon/>,
-            name: 'Edit Selected User(s)',
-            onClick: (e: any) => {
-                e.stopPropagation();
-            }
-        },
-        {
-            icon: <DeleteIcon/>,
-            name: 'Delete Selected User(s)',
-            onClick: (e: any) => {
-                e.stopPropagation();
-            }
-        },
-    ]);
-
     useEffect(() => {
         if (!appState.loggedIn) {
             navigate('/login')
@@ -139,6 +122,7 @@ export const UsersPage = () => {
                 <DataGrid
                     density={'compact'}
                     disableRowSelectionOnClick={true}
+                    checkboxSelection={false}
                     rows={rows}
                     columns={columns.current}
                     loading={isLoading}
@@ -148,7 +132,6 @@ export const UsersPage = () => {
                         },
                     }}
                     pageSizeOptions={[5, 10]}
-                    checkboxSelection
                     getRowId={(row) => {
                         return row.userId;
                     }}
@@ -166,17 +149,9 @@ export const UsersPage = () => {
                     setOpenAddUserDialog(true)
                 }}
                 icon={
-                    <SpeedDialIcon openIcon={<PersonAddIcon/>}/>
+                    <PersonAddIcon/>
                 }
             >
-                {actions.current.map((action) => (
-                    <SpeedDialAction
-                        key={action.name}
-                        icon={action.icon}
-                        tooltipTitle={action.name}
-                        onClick={action.onClick}
-                    />
-                ))}
             </SpeedDial>
 
         </>

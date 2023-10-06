@@ -416,7 +416,7 @@ const makeUsersRoute = (
 
             const schema = Joi.object({
                 username: Joi.string(),
-                password: Joi.string(),
+                password: Joi.string().optional(),
                 firstName: Joi.string(),
                 lastName: Joi.string(),
                 email: Joi.string().email().optional().allow(''),
