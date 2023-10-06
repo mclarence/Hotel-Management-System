@@ -16,7 +16,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {AddUserDialog} from "./components/AddUserDialog";
 import {RowDeleteButton} from "./components/RowDeleteButton";
-import {CustomNoRowsOverlay} from "./components/CustomNoRowsOverlay";
+import {CustomNoRowsOverlay} from "../../../util/CustomNoRowsOverlay";
 import {RowEditButton} from "./components/RowEditButton";
 import {EditUserDialog} from "./components/EditUserDialog";
 
@@ -37,10 +37,6 @@ export const UsersPage = () => {
             navigate('/login')
         }
     }, [appState.loggedIn]);
-
-    useEffect(() => {
-        dispatch(appStateSlice.actions.setLastPageVisited('/users'));
-    })
 
     const fetchUsers = () => {
         setIsLoading(true)
@@ -82,6 +78,7 @@ export const UsersPage = () => {
 
     useEffect(() => {
         dispatch(appStateSlice.actions.setAppBarTitle('Users'));
+        dispatch(appStateSlice.actions.setLastPageVisited('/users'));
         // fetch users
         fetchUsers();
 

@@ -149,3 +149,68 @@ describe("user management", () => {
     })
 })
 
+describe("role management", () => {
+    let token: string;
+    it("should return a jwt token when the correct credentials are provided", async () => {
+        const response = await request(app)
+            .post("/api/users/login")
+            .send({
+                username: "admin",
+                password: "admin"
+            })
+            .expect(200)
+        expect(response.body.data).toHaveProperty("jwt")
+        token = response.body.data.jwt;
+        console.log(token)
+    })
+
+    it("should return a list of roles", async () => {
+        await request(app)
+            .get("/api/roles")
+            .set("Authorization", `Bearer ${token}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.data.length).toBe(1)
+            })
+    })
+
+    it("should add a new role", async () => {
+        await request(app)
+            .post("/api/roles/add")
+            .set("Authorization", `Bearer ${token}`)
+            .send({
+                name: "test",
+                permissionData: ["users.read"]
+            })
+            .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
+            .expect(201)
+    })
+
+    it("should get a role", async () => {
+        await request(app)
+            .get("/api/roles/2")
+            .set("Authorization", `Bearer ${token}`)
+            .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.data).toHaveProperty("name", "test")
+                expect(res.body.data).toHaveProperty("permissionData", ["users.read"])
+            })
+    })
+
+    it("should delete a role", async () => {
+        await request(app)
+            .delete("/api/roles/2")
+            .set("Authorization", `Bearer ${token}`)
+            .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
+            .expect(200)
+
+        await request(app)
+            .get("/api/roles/2")
+            .set("Authorization", `Bearer ${token}`)
+            .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
+            .expect(404)
+    })
+
+})
+

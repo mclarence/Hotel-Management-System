@@ -24,6 +24,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import { updateUser } from "../../../api/users";
+import { DialogHeader } from "../../../../util/DialogHeader";
 
 interface EditUserDialog {
   user: User | null;
@@ -169,6 +170,7 @@ export const EditUserDialog = (props: EditUserDialog) => {
     selectedRoleId,
     phoneNumber,
     emailAddress,
+    position
   ]);
 
   useEffect(() => {
@@ -220,22 +222,7 @@ export const EditUserDialog = (props: EditUserDialog) => {
 
   return (
     <Dialog open={props.open} fullWidth>
-      <DialogTitle>
-        Editing {props.user?.firstName} {props.user?.lastName}
-      </DialogTitle>
-      <Divider />
-      <IconButton
-        aria-label="close"
-        onClick={handleClose}
-        sx={{
-          position: "absolute",
-          right: 8,
-          top: 8,
-          color: (theme) => theme.palette.grey[500],
-        }}
-      >
-        <CloseIcon />
-      </IconButton>
+      <DialogHeader title={`Editing User: ${props.user?.firstName} ${props.user?.lastName}`} onClose={handleClose} />
       <DialogContent>
         <Stack gap={2}>
           <Typography variant={"body1"}>

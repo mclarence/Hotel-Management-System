@@ -20,9 +20,9 @@ import { useEffect, useState } from "react";
 import { getRoles } from "../../../api/roles";
 import { useAppDispatch } from "../../../redux/hooks";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
-import CloseIcon from "@mui/icons-material/Close";
-import IconButton from "@mui/material/IconButton";
 import { addUser } from "../../../api/users";
+import { DialogHeader } from "../../../../util/DialogHeader";
+
 
 interface AddUserDialogProps {
   open: boolean;
@@ -206,20 +206,7 @@ export const AddUserDialog = (props: AddUserDialogProps) => {
 
   return (
     <Dialog open={props.open} fullWidth>
-      <DialogTitle>Add User</DialogTitle>
-      <Divider />
-      <IconButton
-        aria-label="close"
-        onClick={handleClose}
-        sx={{
-          position: "absolute",
-          right: 8,
-          top: 8,
-          color: (theme) => theme.palette.grey[500],
-        }}
-      >
-        <CloseIcon />
-      </IconButton>
+      <DialogHeader title={"Add User"} onClose={handleClose} />
       <DialogContent>
         <Stack gap={2}>
           <Typography variant={"body1"}>

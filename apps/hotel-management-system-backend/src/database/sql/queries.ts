@@ -47,6 +47,13 @@ const queries = {
         getAllRoles: `
             SELECT * FROM roles
         `,
+        getUsersWithRoles: `
+            SELECT * FROM users WHERE role_id = $1
+        `,
+        deleteRole: `
+            DELETE FROM roles
+            WHERE role_id = $1
+        `,
     },
     users: {
         getUserById: `
