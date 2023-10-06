@@ -18,12 +18,15 @@ import {AddUserDialog} from "./components/AddUserDialog";
 import {RowDeleteButton} from "./components/RowDeleteButton";
 import {CustomNoRowsOverlay} from "./components/CustomNoRowsOverlay";
 import {RowEditButton} from "./components/RowEditButton";
+import {EditUserDialog} from "./components/EditUserDialog";
 
 
 export const UsersPage = () => {
 
     const [rows, setRows] = useState<User[]>([]);
     const [openAddUserDialog, setOpenAddUserDialog] = useState<boolean>(false);
+    const [openEditUserDialog, setOpenEditUserDialog] = useState<boolean>(false);
+    const [selectedUserForEdit, setSelectedUserForEdit] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const appState = useSelector((state: RootState) => state.appState);
     const dispatch = useAppDispatch();
@@ -121,7 +124,7 @@ export const UsersPage = () => {
                 renderCell: (params: any) => (
                     <>
                         <RowDeleteButton params={params} fetchUsers={fetchUsers}/>
-                        <RowEditButton params={params} fetchUsers={fetchUsers}/>
+                        <RowEditButton params={params} fetchUsers={fetchUsers} setSelectedUserForEdit={setSelectedUserForEdit} setShowEditUserDialog={setOpenEditUserDialog}/>
                     </>
                 )
             },
@@ -132,6 +135,7 @@ export const UsersPage = () => {
         <>
             <Paper sx={{padding: 2}}>
                 <AddUserDialog open={openAddUserDialog} setOpen={setOpenAddUserDialog} refreshUsers={refreshUsers}/>
+                <EditUserDialog open={openEditUserDialog}setOpen={setOpenEditUserDialog} user={selectedUserForEdit} refreshUsers={refreshUsers}/>
                 <DataGrid
                     density={'compact'}
                     disableRowSelectionOnClick={true}

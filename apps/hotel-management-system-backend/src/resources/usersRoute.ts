@@ -419,9 +419,9 @@ const makeUsersRoute = (
                 password: Joi.string(),
                 firstName: Joi.string(),
                 lastName: Joi.string(),
-                email: Joi.string().email(),
-                phoneNumber: Joi.string(),
-                position: Joi.string(),
+                email: Joi.string().email().optional().allow(''),
+                phoneNumber: Joi.string().optional().allow(''),
+                position: Joi.string().optional().allow(''),
                 roleId: Joi.number()
             })
 
