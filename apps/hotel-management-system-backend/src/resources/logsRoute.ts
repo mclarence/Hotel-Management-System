@@ -1,45 +1,76 @@
-import express from 'express';
-import { getAllLogs, getLogsForRoom, addLog, deleteLog } from "../database/logs"; // Adjust for function
+import express from "express";
+import { ILogsDAO } from "../database/logs"; // Adjust for function
+import { IAuthenticationMiddleware } from "../middleware/authentication";
+import { IAuthorizationMiddleware } from "../middleware/authorization";
 
-const router = express.Router();
+interface IMakeLogsRoute {
+  router: express.Router;
+}
 
-router.get('/', (req, res) => {
+const makeLogsRoute = (
+    logsDAO: ILogsDAO,
+    authentication: IAuthenticationMiddleware,
+    authorization: IAuthorizationMiddleware,
+) => {
+  const router = express.Router();
+
+  const {
+    getAllLogs,
+    getLogsForRoom,
+    addLog,
+    deleteLog,
+  } = logsDAO;
+
+  router.get("/", (req, res) => {
     // return the list of all logs
-    getAllLogs.then(logs => {
+    getAllLogs
+      .then((logs) => {
         res.send(logs);
-    }).catch(() => {
+      })
+      .catch(() => {
         res.sendStatus(500);
-    });
-});
+      });
+  });
 
-router.get('/room/:roomId', (req, res) => {
+  router.get("/room/:roomId", (req, res) => {
     // return logs specific to a room by roomId
     const roomId = parseInt(req.params.roomId);
-    getLogsForRoom(roomId).then(logs => {
+    getLogsForRoom(roomId)
+      .then((logs) => {
         res.send(logs);
-    }).catch(() => {
+      })
+      .catch(() => {
         res.sendStatus(404);
-    });
-});
+      });
+  });
 
-router.post('/', (req, res) => {
+  router.post("/", (req, res) => {
     // create a new log
     const log = req.body;
-    addLog(log).then(newLog => {
+    addLog(log)
+      .then((newLog) => {
         res.send(newLog);
-    }).catch(() => {
+      })
+      .catch(() => {
         res.sendStatus(500);
-    });
-});
+      });
+  });
 
-router.delete('/:logId', (req, res) => {
+  router.delete("/:logId", (req, res) => {
     // delete a log by logId
     const logId = parseInt(req.params.logId);
-    deleteLog(logId).then(() => {
+    deleteLog(logId)
+      .then(() => {
         res.sendStatus(200);
-    }).catch(() => {
+      })
+      .catch(() => {
         res.sendStatus(404);
-    });
-});
+      });
+  });
 
-export default router;
+  return {
+    router
+  }
+};
+
+export default makeLogsRoute;
