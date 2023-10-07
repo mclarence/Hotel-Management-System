@@ -235,7 +235,7 @@ const makeGuestsRoute = (
                 success: true,
                 statusCode: StatusCodes.OK,
                 message: "Guest deleted successfully",
-                data: guest,
+                data: null,
             })
         } catch (err) {
             return sendResponse(res, {
