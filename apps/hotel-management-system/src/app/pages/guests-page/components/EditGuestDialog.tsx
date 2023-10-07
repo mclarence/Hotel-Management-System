@@ -150,7 +150,7 @@ const EditGuestDialog = (props: EditGuestDialogProps) => {
 
   return (
     <Dialog open={props.open} fullWidth>
-      <DialogHeader title={"Add Guest"} onClose={handleClose} />
+      <DialogHeader title={`Editing Guest: ${props.guest?.firstName} ${props.guest?.lastName}`} onClose={handleClose} />
       <DialogContent>
         <Stack gap={2}>
           <Typography variant={"body1"}>

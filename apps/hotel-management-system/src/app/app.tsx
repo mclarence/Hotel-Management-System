@@ -14,6 +14,8 @@ import {UsersPage} from "./pages/users-page/UsersPage";
 import {RolesPage} from "./pages/roles-page/RolesPage";
 import {block} from "million/react";
 import GuestsPage from './pages/guests-page/GuestsPage';
+import CheckInPage from './pages/checkin-page/CheckInPage';
+import CheckOutPage from './pages/checkout-page/CheckInPage';
 
 export const theme = createTheme({
     palette: {
@@ -45,6 +47,8 @@ export function App() {
                         <Route path="users" element={<UsersPage/>}/>
                         <Route path="roles" element={<RolesPage/>}/>
                         <Route path="guests" element={<GuestsPage/>}/>
+                        <Route path="check-in" element={<CheckInPage/>}/>
+                        <Route path="check-out" element={<CheckOutPage/>}/>
                     </Route>
                     <Route path="login" element={<LoginPage/>}/>
                 </Routes>

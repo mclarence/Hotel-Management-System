@@ -75,7 +75,7 @@ export const RolesPage = () => {
     { field: "name", headerName: "Role Name", width: 200 },
     {
       field: "actions",
-      headerName: "",
+      headerName: "Actions",
       sortable: false,
       filterable: false,
       hideable: false,

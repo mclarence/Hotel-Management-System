@@ -137,7 +137,7 @@ export const UsersPage = () => {
             {field: 'roleId', headerName: 'Role ID'},
             {
                 field: 'actions',
-                headerName: '',
+                headerName: 'Actions',
                 sortable: false,
                 filterable: false,
                 hideable: false,

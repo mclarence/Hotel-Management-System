@@ -30,6 +30,9 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import {logout} from "./api/auth";
 import PeopleIcon from '@mui/icons-material/People';
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
+import HailIcon from '@mui/icons-material/Hail';
+import LoginIcon from '@mui/icons-material/Login';
+import Logout from '@mui/icons-material/Logout';
 
 const drawerWidth = 240;
 
@@ -128,8 +131,18 @@ const sidebarItems = [
     },
     {
         text: 'Guests',
-        icon: <PeopleIcon/>,
+        icon: <HailIcon/>,
         to: '/guests',
+    },
+    {
+        text: 'Check In',
+        icon: <LoginIcon/>,
+        to: '/check-in',
+    },
+    {
+        text: 'Check Out',
+        icon: <Logout/>,
+        to: '/check-out',
     },
     {
         text: 'User Management',
