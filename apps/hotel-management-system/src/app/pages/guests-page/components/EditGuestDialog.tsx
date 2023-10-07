@@ -13,19 +13,20 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { DialogHeader } from "../../../../util/DialogHeader";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import { addGuest } from "../../../api/guests";
+import EditIcon from "@mui/icons-material/Edit";
+import { updateGuest } from "../../../api/guests";
 import {Guest, ApiResponse} from "@hotel-management-system/models"
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import { useAppDispatch } from "../../../redux/hooks";
 
-interface AddGuestDialogProps {
+interface EditGuestDialogProps {
+  guest: Guest | null;
   open: boolean;
   setOpen: (open: boolean) => void;
   refreshGuests: () => void;
 }
 
-const AddGuestDialog = (props: AddGuestDialogProps) => {
+const EditGuestDialog = (props: EditGuestDialogProps) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [emailAddress, setEmailAddress] = useState("");
@@ -34,6 +35,7 @@ const AddGuestDialog = (props: AddGuestDialogProps) => {
   const dispatch = useAppDispatch();
   const [saveButtonDisabled, setSaveButtonDisabled] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasChangedSomething, setHasChangedSomething] = useState(false);
 
   const resetState = () => {
     //reset all fields
@@ -45,22 +47,38 @@ const AddGuestDialog = (props: AddGuestDialogProps) => {
   }
 
   useEffect(() => {
+    setFirstName(props.guest?.firstName || "");
+    setLastName(props.guest?.lastName || "");
+    setEmailAddress(props.guest?.email || "");
+    setPhoneNumber(props.guest?.phoneNumber || "");
+    setAddress(props.guest?.address || "");
+  }, [props.guest, props.open])
+
+  useEffect(() => {
     if (
-        firstName === "" ||
-        lastName === ""
-        ) {
-        setSaveButtonDisabled(true);
-        } else {
-        setSaveButtonDisabled(false);
-        }
-  }, [firstName, lastName]);
+      firstName !== props.guest?.firstName ||
+      lastName !== props.guest?.lastName ||
+      phoneNumber !== props.guest?.phoneNumber ||
+      emailAddress !== props.guest?.email ||
+      address !== props.guest?.address
+    ) {
+      setSaveButtonDisabled(false);
+      setHasChangedSomething(true);
+    } else {
+      setSaveButtonDisabled(true);
+      setHasChangedSomething(false);
+    }
+  }, [
+    firstName,
+    lastName,
+    phoneNumber,
+    emailAddress,
+    address
+  ]);
 
-  const handleClose = () => {
-    props.setOpen(false);
-  };
-
-  const handleAddGuest = () => {
+  const handleEditGuest = () => {
     const newGuest: Guest = {
+        guestId: props.guest?.guestId || 0,
         firstName: firstName,
         lastName: lastName,
         email: emailAddress,
@@ -69,7 +87,7 @@ const AddGuestDialog = (props: AddGuestDialogProps) => {
         };
 
 
-    addGuest(newGuest)
+    updateGuest(newGuest)
       .then((response) => {
         return response.json();
       })
@@ -81,7 +99,7 @@ const AddGuestDialog = (props: AddGuestDialogProps) => {
           dispatch(
             appStateSlice.actions.setSnackBarAlert({
               show: true,
-              message: "Guest added successfully",
+              message: "Guest updated successfully",
               severity: "success",
             })
           );
@@ -115,6 +133,19 @@ const AddGuestDialog = (props: AddGuestDialogProps) => {
       .finally(() => {
         setIsSubmitting(false);
       });
+  };
+
+  const handleClose = () => {
+    // ask user if they want to discard changes
+    if (hasChangedSomething) {
+      if (window.confirm("Are you sure you want to discard changes?")) {
+        resetState();
+        props.setOpen(false);
+      }
+    } else {
+      resetState();
+      props.setOpen(false);
+    }
   };
 
   return (
@@ -164,11 +195,11 @@ const AddGuestDialog = (props: AddGuestDialogProps) => {
           <Button
             variant={"contained"}
             color={"primary"}
-            startIcon={<PersonAddIcon />}
+            startIcon={<EditIcon />}
             disabled={saveButtonDisabled || isSubmitting}
-            onClick={handleAddGuest}
+            onClick={handleEditGuest}
           >
-            {isSubmitting ? "Adding guest..." : "Add Guest"}
+            {isSubmitting ? "Updating guest..." : "Edit Guest"}
           </Button>
         </Stack>
       </DialogContent>
@@ -176,4 +207,4 @@ const AddGuestDialog = (props: AddGuestDialogProps) => {
   );
 };
 
-export default AddGuestDialog;
+export default EditGuestDialog;

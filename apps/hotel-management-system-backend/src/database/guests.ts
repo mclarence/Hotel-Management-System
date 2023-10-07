@@ -37,7 +37,7 @@ const makeGuestDAO = (db: IDatabase<any, any>): IGuestDAO => {
             const newGuest: Guest = await db.one(queries.guests.addGuest, [
                 guest.firstName,
                 guest.lastName,
-                guest.emailAddress,
+                guest.email,
                 guest.phoneNumber,
                 guest.address
             ]);
@@ -52,7 +52,7 @@ const makeGuestDAO = (db: IDatabase<any, any>): IGuestDAO => {
             const updatedGuest: Guest = await db.one(queries.guests.updateGuest, [
                 guest.firstName,
                 guest.lastName,
-                guest.emailAddress,
+                guest.email,
                 guest.phoneNumber,
                 guest.address,
                 guest.guestId

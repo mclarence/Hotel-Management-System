@@ -12,11 +12,15 @@ import { deleteGuest, getGuests } from "../../api/guests";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import { RowDeleteButton } from "../../../util/RowDeleteButton";
 import AddGuestDialog from "./components/AddGuestDialog";
+import { RowEditButton } from "../../../util/RowEditButton";
+import EditGuestDialog from "./components/EditGuestDialog";
 
 const GuestsPage = () => {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [openAddGuestDialog, setOpenAddGuestDialog] = useState(false);
+  const [openEditGuestDialog, setOpenEditGuestDialog] = useState<boolean>(false);
+  const [selectedGuestForEdit, setSelectedGuestForEdit] = useState<Guest | null>(null);
   const appState = useSelector((state: RootState) => state.appState);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -113,6 +117,11 @@ const GuestsPage = () => {
     fetchGuests();
   }, []);
 
+  const handleEditButtonClicked = (guest: Guest) => () => {
+    setSelectedGuestForEdit(guest);
+    setOpenEditGuestDialog(true)
+  }
+
   const columns = useRef([
     { field: "guestId", headerName: "Guest ID" },
     { field: "firstName", headerName: "First Name", width: 200 },
@@ -128,11 +137,14 @@ const GuestsPage = () => {
       disableReorder: true,
       disableColumnMenu: true,
       renderCell: (params: any) => (
-        <RowDeleteButton
-          params={params}
-          idField="guestId"
-          deleteFunction={handleDeleteGuest}
-        />
+        <>
+          <RowDeleteButton
+            params={params}
+            idField="guestId"
+            deleteFunction={handleDeleteGuest}
+          />
+          <RowEditButton onClick={handleEditButtonClicked(params.row)}/>
+        </>
       ),
     },
   ] as GridColDef[]);
@@ -140,7 +152,17 @@ const GuestsPage = () => {
   return (
     <>
       <Paper sx={{ padding: 2 }}>
-        <AddGuestDialog open={openAddGuestDialog} setOpen={setOpenAddGuestDialog} refreshGuests={fetchGuests} />
+        <AddGuestDialog
+          open={openAddGuestDialog}
+          setOpen={setOpenAddGuestDialog}
+          refreshGuests={fetchGuests}
+        />
+        <EditGuestDialog
+            open={openEditGuestDialog}
+            setOpen={setOpenEditGuestDialog}
+            refreshGuests={fetchGuests}
+            guest={selectedGuestForEdit}
+        />
         <DataGrid
           density={"compact"}
           disableRowSelectionOnClick={true}

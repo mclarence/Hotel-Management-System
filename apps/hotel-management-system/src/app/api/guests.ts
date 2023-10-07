@@ -30,3 +30,18 @@ export const addGuest = (guest: Guest): Promise<Response> => {
         body: JSON.stringify(guest)
     })
 }
+
+export const updateGuest = (guest: Guest): Promise<Response> => {
+
+    const updatedGuest = {...guest}
+    delete updatedGuest.guestId
+
+    return fetch (`/api/guests/${guest.guestId}`, {
+        method: "PATCH",
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+        },
+        body: JSON.stringify(updatedGuest)
+    })
+}

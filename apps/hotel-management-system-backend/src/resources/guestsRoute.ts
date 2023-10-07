@@ -93,7 +93,7 @@ const makeGuestsRoute = (
                 lastName: Joi.string().required(),
                 phoneNumber: Joi.string().optional().allow(""),
                 address: Joi.string().optional().allow(""),
-                emailAddress: Joi.string().optional().allow(""),
+                email: Joi.string().optional().allow(""),
             })
 
             const {error} = schema.validate(req.body);
@@ -112,7 +112,7 @@ const makeGuestsRoute = (
                 lastName: req.body.lastName,
                 phoneNumber: req.body.phoneNumber,
                 address: req.body.address,
-                emailAddress: req.body.emailAddress,
+                email: req.body.email,
             }
 
             const guest = await addGuest(newGuest);
@@ -163,7 +163,7 @@ const makeGuestsRoute = (
                 lastName: Joi.string().required(),
                 phoneNumber: Joi.string().optional().allow(""),
                 address: Joi.string().optional().allow(""),
-                emailAddress: Joi.string().optional().allow(""),
+                email: Joi.string().optional().allow(""),
             })
 
             const {error} = schema.validate(req.body);
@@ -183,7 +183,7 @@ const makeGuestsRoute = (
                 lastName: req.body.lastName,
                 phoneNumber: req.body.phoneNumber,
                 address: req.body.address,
-                emailAddress: req.body.emailAddress,
+                email: req.body.email,
             }
 
             const guest = await updateGuest(updatedGuest);

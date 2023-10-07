@@ -4,5 +4,5 @@ export type Guest = {
     lastName: string;
     phoneNumber: string;
     address: string;
-    emailAddress: string;
+    email: string;
 }
