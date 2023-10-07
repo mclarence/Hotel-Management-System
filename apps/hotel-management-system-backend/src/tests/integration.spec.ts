@@ -236,7 +236,7 @@ describe("guest management", () => {
             .send({
                 firstName: "test",
                 lastName: "test",
-                emailAddress: "test@example.com",
+                email: "test@example.com",
                 phoneNumber: "123456789",
                 address: "test address"
             })
@@ -266,7 +266,7 @@ describe("guest management", () => {
             .send({
                 firstName: "test1",
                 lastName: "test2",
-                emailAddress: "test1@example.com",
+                email: "test1@example.com",
                 phoneNumber: "1234",
                 address: "test address 1"
             })
