@@ -123,6 +123,15 @@ const sidebarItems = [
         to: '/tickets',
     },
     {
+        text: 'Guest Management',
+        isHeader: true,
+    },
+    {
+        text: 'Guests',
+        icon: <PeopleIcon/>,
+        to: '/guests',
+    },
+    {
         text: 'User Management',
         isHeader: true,
     },

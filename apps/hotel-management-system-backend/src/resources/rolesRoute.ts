@@ -66,6 +66,7 @@ const makeRolesRoute = (
             }
 
             // TODO: validate if permissions are valid
+            // TODO: check if a role with the same name already exists
 
             const newRole: Role = {
                 name: req.body.name,

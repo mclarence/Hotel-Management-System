@@ -1,8 +1,8 @@
 export type Guest = {
-    guestId: Number;
-    firstName: String;
-    lastName: String;
-    phoneNumber: String;
-    address: String;
-    emailAddress: String;
+    guestId?: number;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    address: string;
+    emailAddress: string;
 }

@@ -24,6 +24,14 @@ const queries = {
                 token VARCHAR(255) NOT NULL,
                 revokedAt TIMESTAMP NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS guests (
+                guest_id SERIAL PRIMARY KEY,
+                first_name VARCHAR(255) NOT NULL,
+                last_name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                phone_number VARCHAR(255) NOT NULL,
+                address VARCHAR(255) NOT NULL
+            );
         `,
     },
     roles: {
@@ -88,7 +96,33 @@ const queries = {
         checkTokenRevoked: `
             SELECT * FROM token_revocation_list WHERE token = $1
         `,
-    }
+    },
+    guests: {
+        getGuests: `
+            SELECT * FROM guests
+        `,
+        getGuestById: `
+            SELECT * FROM guests WHERE guest_id = $1
+        `,
+        addGuest: `
+            INSERT INTO guests (first_name, last_name, email, phone_number, address)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING *
+        `,
+        updateGuest: `
+            UPDATE guests
+            SET first_name = $1, last_name = $2, email = $3, phone_number = $4, address = $5
+            WHERE guest_id = $6
+            RETURNING *
+        `,
+        deleteGuest: `
+            DELETE FROM guests
+            WHERE guest_id = $1
+        `,
+        checkGuestExistsById: `
+            SELECT EXISTS(SELECT 1 FROM guests WHERE guest_id = $1)
+        `,
+    },
 }
 
 export default queries;
