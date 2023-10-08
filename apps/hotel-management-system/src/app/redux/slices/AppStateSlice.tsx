@@ -3,6 +3,9 @@ import {getCurrentUser} from "../../api/auth";
 import {ApiResponse, User} from "@hotel-management-system/models";
 import UnauthorisedError from "../../../../errors/UnauthorisedError";
 import UnknownError from "../../../../errors/UnknownError";
+import { Logs } from "@hotel-management-system/models";
+import { getLogs } from "../../api/logs"; // 调整路径以匹配您的项目结构
+
 interface AppStateSlice {
     appBarTitle: string;
     snackBarAlert: {
@@ -14,6 +17,8 @@ interface AppStateSlice {
     loggedIn: boolean;
     lastPageVisited: string;
     isFetchingUserList: boolean;
+    logs: Logs[];
+    isFetchingLogs: boolean;
 }
 
 const initialState: AppStateSlice = {
@@ -25,7 +30,9 @@ const initialState: AppStateSlice = {
     },
     loggedIn: false,
     lastPageVisited: '',
-    isFetchingUserList: false
+    isFetchingUserList: false,
+    logs: [],
+    isFetchingLogs: false
 };
 
 export const fetchUserDetails = createAsyncThunk(
@@ -88,7 +95,34 @@ const appStateSlice = createSlice({
                 }
             }
         })
+        builder.addCase(fetchLogs.fulfilled, (state, action) => {
+            state.logs = action.payload;
+        });
+        builder.addCase(fetchLogs.rejected, (state, action) => {
+            state.snackBarAlert = {
+                show: true,
+                message: action.error.message || 'An unknown error occurred. Please try again later.',
+                severity: 'error'
+            };
+        });      
     }
 });
+
+export const fetchLogs = createAsyncThunk(
+    'appState/fetchLogs',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await getLogs();
+            if (response.status !== 200) {
+                return rejectWithValue(new Error('Failed to fetch logs.'));
+            } else {
+                const responseData: ApiResponse<Logs[]> = await response.json();
+                return responseData.data;
+            }
+        } catch (error) {
+            return rejectWithValue(new Error('An unknown error occurred. Please try again later.'));
+        }
+    }
+);
 
 export default appStateSlice;

@@ -3,7 +3,6 @@ import { IDatabase } from "pg-promise";
 
 export interface ILogsDAO {
   getAllLogs: Promise<Logs[]>;
-  getLogsForRoom: (roomId: number) => Promise<Logs[]>;
   addLog: (log: Omit<Logs, "logId">) => Promise<Logs>;
   deleteLog: (logId: number) => Promise<void>;
 }
@@ -15,12 +14,6 @@ const makeLogsDAO = (db: IDatabase<any, any>): ILogsDAO => {
     resolve(logs);
   });
 
-  const getLogsForRoom = (roomId: number): Promise<Logs[]> => {
-    return new Promise<Logs[]>((resolve) => {
-      const roomLogs = logs.filter((log) => log.data === roomId.toString());
-      resolve(roomLogs);
-    });
-  };
 
   const addLog = (log: Omit<Logs, "logId">): Promise<Logs> => {
     return new Promise<Logs>((resolve) => {
@@ -49,7 +42,6 @@ const makeLogsDAO = (db: IDatabase<any, any>): ILogsDAO => {
 
   return {
     getAllLogs,
-    getLogsForRoom,
     addLog,
     deleteLog,
   };

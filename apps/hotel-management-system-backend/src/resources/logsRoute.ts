@@ -16,10 +16,9 @@ const makeLogsRoute = (
 
   const {
     getAllLogs,
-    getLogsForRoom,
     addLog,
     deleteLog,
-  } = logsDAO;
+} = logsDAO;
 
   router.get("/", (req, res) => {
     // return the list of all logs
@@ -29,18 +28,6 @@ const makeLogsRoute = (
       })
       .catch(() => {
         res.sendStatus(500);
-      });
-  });
-
-  router.get("/room/:roomId", (req, res) => {
-    // return logs specific to a room by roomId
-    const roomId = parseInt(req.params.roomId);
-    getLogsForRoom(roomId)
-      .then((logs) => {
-        res.send(logs);
-      })
-      .catch(() => {
-        res.sendStatus(404);
       });
   });
 
