@@ -1,7 +1,7 @@
 import {DialogHeader} from "../../../../util/DialogHeader";
 import {Button, Dialog, DialogContent, Stack, Typography} from "@mui/material";
 import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import LoginIcon from "@mui/icons-material/Login";
 import dayjs from "dayjs";
@@ -12,6 +12,8 @@ import {updateReservation} from "../../../api/reservations";
 import {ReservationStatuses} from "../../../../../../../libs/models/src/lib/enums/ReservationStatuses";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../../redux/hooks";
+import {Logout} from "@mui/icons-material";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -38,14 +40,18 @@ export const CheckInDialog = (props: {
         }
     }, [selectedDateTime]);
 
-    const handleUpdateReservation = () => {
-        updateReservation(
-            {
-                ...props.reservation,
-                checkInDate: selectedDateTime as Date,
-                reservationStatus: ReservationStatuses.CHECKED_IN
-            }
-        )
+    const handleUpdateReservation = (checkIn: boolean) => {
+        const tempReservationObj = {...props.reservation};
+
+        if (checkIn) {
+            tempReservationObj.checkInDate = selectedDateTime as Date;
+            tempReservationObj.reservationStatus = ReservationStatuses.CHECKED_IN;
+        } else {
+            tempReservationObj.checkOutDate = selectedDateTime as Date;
+            tempReservationObj.reservationStatus = ReservationStatuses.CHECKED_OUT;
+        }
+
+        updateReservation(tempReservationObj)
             .then((response) => {
                 return response.json();
             })
@@ -56,7 +62,7 @@ export const CheckInDialog = (props: {
                     dispatch(
                         appStateSlice.actions.setSnackBarAlert({
                             show: true,
-                            message: "Check in successful",
+                            message: checkIn ? "Checked in successfully" : "Checked out successfully",
                             severity: "success",
                         })
                     );
@@ -99,24 +105,37 @@ export const CheckInDialog = (props: {
                 <DialogContent>
                     <Stack gap={2}>
                         <Typography variant={"body1"}>
-                            Enter check in date and time.
+                            Enter check in/out date and time.
                         </Typography>
                         <DateTimePicker
-                            label="Check In Date and Time"
+                            label="Check In/Out Date and Time"
                             format={"DD/MM/YYYY hh:mm A"}
                             value={dayjs(selectedDateTime)}
                             // this should not be hardcoded
                             timezone={"Australia/Sydney"}
                         />
-                        <Button
-                            variant={"contained"}
-                            color={"success"}
-                            startIcon={<LoginIcon/>}
-                            disabled={saveButtonDisabled || isSubmitting}
-                            onClick={handleUpdateReservation}
-                        >
-                            {isSubmitting ? "Checking in..." : "Check In"}
-                        </Button>
+                        <Stack direction={"row"} gap={2} >
+                            <Button
+                                fullWidth
+                                variant={"contained"}
+                                color={"success"}
+                                startIcon={<LoginIcon/>}
+                                disabled={saveButtonDisabled || isSubmitting || props.reservation?.checkInDate !== null}
+                                onClick={() => handleUpdateReservation(true)}
+                            >
+                                {isSubmitting ? "Checking in..." : "Check In"}
+                            </Button>
+                            <Button
+                                fullWidth
+                                variant={"contained"}
+                                color={"error"}
+                                startIcon={<LogoutIcon/>}
+                                onClick={() => handleUpdateReservation(false)}
+                                disabled={props.reservation?.checkInDate === null || saveButtonDisabled || isSubmitting}
+                            >
+                                {isSubmitting ? "Checking out..." : "Check Out"}
+                            </Button>
+                        </Stack>
                     </Stack>
                 </DialogContent>
             </Dialog>

@@ -64,7 +64,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
                     <Button color="success" variant="contained" disabled={params.row.checkInDate !== null} onClick={() => openCheckInDialog(params.row)}>
                         Check In
                     </Button>
-                    <Button color="error" variant="contained" disabled={params.row.checkInDate === null}>
+                    <Button color="error" variant="contained" disabled={params.row.checkInDate === null || params.row.checkOutDate !== null} onClick={() => openCheckInDialog(params.row)}>
                         Check Out
                     </Button>
                 </Stack>
