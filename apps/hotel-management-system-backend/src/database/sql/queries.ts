@@ -176,6 +176,9 @@ const queries = {
         searchReservations: `
             SELECT * FROM reservations WHERE start_date ILIKE '%$1#%' OR end_date ILIKE '%$1#%'
         `,
+        getReservationsByGuestId: `
+            SELECT * FROM reservations WHERE guest_id = $1        
+        `
     },
     rooms: {
         getRooms: `

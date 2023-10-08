@@ -10,25 +10,108 @@ import {
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { DataGrid } from "@mui/x-data-grid";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import { useAppDispatch } from "../../redux/hooks";
 import { searchGuests } from "../../api/guests";
-import {Guest, ApiResponse} from "@hotel-management-system/models"
+import {
+  Guest,
+  ApiResponse,
+  Reservation,
+} from "@hotel-management-system/models";
 import { GuestAutoCompleteBox } from "../../../util/GuestAutoCompleteBox";
+import { searchReservations } from "../../api/reservations";
 
 interface CheckInPageProps {}
 const CheckInOutPage = (props: CheckInPageProps) => {
   const dispatch = useAppDispatch();
   const [autoCompleteOptions, setAutoCompleteOptions] = useState<Guest[]>([]);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
+  const [reservationRows, setReservationRows] = useState<Reservation[]>([]);
+  const [reservationTableLoading, setReservationTableLoading] = useState(false);
+
+  const columns = useRef([
+    { field: "reservationId", headerName: "Reservation ID", flex: 1 },
+    { field: "roomId", headerName: "Room ID", flex: 1 },
+    { field: "startDate", headerName: "Start Date", flex: 1 },
+    { field: "endDate", headerName: "End Date", flex: 1},
+    {
+      field: "reservationStatus",
+      headerName: "Reservation Status",
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      sortable: false,
+      filterable: false,
+      hideable: false,
+      disableReorder: true,
+      disableColumnMenu: true,
+      flex: 2,
+      renderCell: (params: any) => (
+        <Stack direction={"row"} gap={2}>
+          <Button color="success" variant="contained" disabled={params.row.checkInDate !== null}>
+            Check In
+          </Button>
+          <Button color="error" variant="contained" disabled={params.row.checkInDate === null}>
+            Check Out
+          </Button>
+        </Stack>
+      ),
+    },
+  ]);
+
+  useEffect(() => {
+    if (selectedGuest !== null) {
+      setReservationTableLoading(true);
+      // fetch the reservations for the selected guest
+      searchReservations({
+        guestId: selectedGuest?.guestId,
+      })
+        .then((response) => {
+          return response.json();
+        })
+        .then((data: ApiResponse<Reservation[]>) => {
+          if (data.success) {
+            setReservationRows(data.data);
+          } else if (!data.success && data.statusCode === 401) {
+            dispatch(
+              appStateSlice.actions.setSnackBarAlert({
+                show: true,
+                message: data.message,
+                severity: "warning",
+              })
+            );
+          } else {
+            dispatch(
+              appStateSlice.actions.setSnackBarAlert({
+                show: true,
+                message: data.message,
+                severity: "error",
+              })
+            );
+          }
+        })
+        .catch(() => {
+          dispatch(
+            appStateSlice.actions.setSnackBarAlert({
+              show: true,
+              message: "An unknown error occurred",
+              severity: "error",
+            })
+          );
+        })
+        .finally(() => {
+          setReservationTableLoading(false);
+        });
+    }
+  }, [selectedGuest]);
 
   useEffect(() => {
     dispatch(appStateSlice.actions.setAppBarTitle("Check In/Out"));
     dispatch(appStateSlice.actions.setLastPageVisited("/check-in-out"));
   }, []);
 
-  
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -46,7 +129,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
           </Stack>
         </Paper>
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={4}>
         <Paper sx={{ padding: 2 }}>
           <Stack direction={"column"} gap={2}>
             <Typography variant={"h5"}>Guest Details</Typography>
@@ -56,18 +139,16 @@ const CheckInOutPage = (props: CheckInPageProps) => {
                 <Typography variant={"body1"}>First Name:</Typography>
               </Grid>
               <Grid item xs={6}>
-                <Typography variant={"body1"}>{
-                selectedGuest === null ? "..." : selectedGuest.firstName
-                }</Typography>
+                <Typography variant={"body1"}>
+                  {selectedGuest === null ? "..." : selectedGuest.firstName}
+                </Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant={"body1"}>Last Name:</Typography>
               </Grid>
               <Grid item xs={6}>
                 <Typography variant={"body1"}>
-                {
-                selectedGuest === null ? "..." : selectedGuest.lastName
-                }
+                  {selectedGuest === null ? "..." : selectedGuest.lastName}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -75,9 +156,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
               </Grid>
               <Grid item xs={6}>
                 <Typography variant={"body1"}>
-                {
-                selectedGuest === null ? "..." : selectedGuest.email
-                }
+                  {selectedGuest === null ? "..." : selectedGuest.email}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -85,9 +164,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
               </Grid>
               <Grid item xs={6}>
                 <Typography variant={"body1"}>
-                {
-                selectedGuest === null ? "..." : selectedGuest.phoneNumber
-                }
+                  {selectedGuest === null ? "..." : selectedGuest.phoneNumber}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -95,49 +172,27 @@ const CheckInOutPage = (props: CheckInPageProps) => {
               </Grid>
               <Grid item xs={6}>
                 <Typography variant={"body1"}>
-                {
-                selectedGuest === null ? "..." : selectedGuest.address
-                }
+                  {selectedGuest === null ? "..." : selectedGuest.address}
                 </Typography>
               </Grid>
             </Grid>
           </Stack>
         </Paper>
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={8}>
         <Paper sx={{ padding: 2 }}>
           <Stack direction={"column"} gap={2}>
             <Typography variant={"h5"}>Reservations</Typography>
             <Divider />
             {/* create a datagrid listing the guests current reservations */}
             <DataGrid
+              autoHeight
               checkboxSelection={false}
-              rows={[
-                { id: 1, col1: "1", col2: "01-01-01", col3: "101" },
-                { id: 2, col1: "XGrid", col2: "is Awesome" },
-                { id: 3, col1: "Material-UI", col2: "is Amazing" },
-              ]}
-              columns={[
-                { field: "col1", headerName: "Reservation ID", width: 150 },
-                { field: "col2", headerName: "Reservation Date", width: 150 },
-                { field: "col3", headerName: "Room Number", width: 150 },
-                {
-                  field: "actions",
-                  headerName: "Actions",
-                  sortable: false,
-                  filterable: false,
-                  hideable: false,
-                  disableReorder: true,
-                  disableColumnMenu: true,
-                  flex: 1,
-                  renderCell: (params: any) => (
-                    <Stack direction={"row"} gap={2}>
-                        <Button color="success" variant="contained">Check In</Button>
-                        <Button color="error" variant="contained">Check Out</Button>
-                      </Stack>
-                  ),
-                },
-              ]}
+              rows={reservationRows}
+              columns={columns.current}
+              getRowId={(row: any) => {
+                return row.reservationId;
+              }}
             />
           </Stack>
         </Paper>

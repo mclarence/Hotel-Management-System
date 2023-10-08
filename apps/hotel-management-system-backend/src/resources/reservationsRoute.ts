@@ -28,7 +28,8 @@ export const makeReservationsRoute = (
         createReservation,
         checkReservationExistsById,
         updateReservation,
-        deleteReservation
+        deleteReservation,
+        getReservationsByGuestId
     } = reservationsDAO
 
     const {
@@ -51,6 +52,88 @@ export const makeReservationsRoute = (
                 message: "Reservations fetched successfully",
                 data: reservations,
             })
+        } catch (err) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: "Failed to fetch reservations",
+                data: err.message,
+            })
+        }
+    })
+    router.get("/search", authentication, authorization("reservations.read"), async (req: express.Request, res: express.Response) => {
+        try {
+            const db = reservationsDAO.getDb();
+
+            const {
+                startDate,
+                endDate,
+                guestId
+            } = req.query;
+            
+            let query = 'SELECT * FROM reservations WHERE 1=1 '
+            const params = {}
+
+            if (startDate) {
+                const startDateParam = new Date(startDate as string);
+                query += 'AND start_date >= $/startDate/ '
+                params['startDate'] = startDateParam;
+            }
+
+            if (endDate) {
+                const endDateParam = new Date(endDate as string);
+                query += 'AND end_date <= $/endDate/ '
+                params['endDate'] = endDateParam;
+            }
+
+            if (guestId) {
+                // check if the guest exists
+                const parsedGuestId = parseInt(guestId as string);
+
+                if (isNaN(parsedGuestId)) {
+                    return sendResponse(res, {
+                        success: false,
+                        statusCode: StatusCodes.BAD_REQUEST,
+                        message: "Invalid guest id",
+                        data: null,
+                    })
+                }
+
+                const guestExists = await checkGuestExistsById(parsedGuestId);
+
+                if (!guestExists) {
+                    return sendResponse(res, {
+                        success: false,
+                        statusCode: StatusCodes.NOT_FOUND,
+                        message: "Guest not found",
+                        data: null,
+                    })
+                }
+
+                query += 'AND guest_id = $/guestId/ '
+                params['guestId'] = guestId;
+            }
+
+            // check if any query is provided
+            if (Object.keys(params).length === 0) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: "Invalid query",
+                    data: null,
+                })
+            }
+
+            const reservations = await db.any(query, params);
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: "Reservations fetched successfully",
+                data: reservations,
+            })
+
+
         } catch (err) {
             return sendResponse(res, {
                 success: false,

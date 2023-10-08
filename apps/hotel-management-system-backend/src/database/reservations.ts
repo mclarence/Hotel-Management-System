@@ -13,6 +13,8 @@ export interface IReservationDAO {
     checkReservationExistsById(reservationId: number): Promise<boolean>;
     updateReservation(reservation: Reservation): Promise<Reservation>;
     deleteReservation(reservationId: number): Promise<void>;
+    getReservationsByGuestId(guestId: number): Promise<Reservation[]>;
+    getDb(): IDatabase<any,any>;
 }
 
 export const makeReservationDAO = (db: IDatabase<any,any>): IReservationDAO => {
@@ -76,13 +78,31 @@ export const makeReservationDAO = (db: IDatabase<any,any>): IReservationDAO => {
         }
     }
 
+    const getReservationsByGuestId = async (guestId: number): Promise<Reservation[]> => {
+        try {
+            return await db.any(queries.reservations.getReservationsByGuestId, [guestId]);
+        } catch (err) {
+            if (err instanceof QueryResultError && err.code === queryResultErrorCode.noData) {
+                return [];
+            } else {
+                throw err;
+            }
+        }
+    }
+
+    const getDb = (): IDatabase<any,any> => {
+        return db;
+    }
+
     return {
         getReservations,
         getReservationById,
         createReservation,
         deleteReservation,
         updateReservation,
-        checkReservationExistsById
+        checkReservationExistsById,
+        getReservationsByGuestId,
+        getDb
     }
 }
 
