@@ -290,6 +290,20 @@ describe("guest management", () => {
             })
     })
 
+    it("should search for a guest by name", async () => {
+        await request(app)
+            .get("/api/guests/search?q=test1")
+            .set("Authorization", `Bearer ${token}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.data.length).toBeGreaterThan(0)
+            })
+            .expect((res) => {
+                expect(res.body.data[0]).toHaveProperty("firstName", "test1")
+                expect(res.body.data[0]).toHaveProperty("lastName", "test2")
+            })
+    })
+
     it("should delete a guest", async () => {
         await request(app)
             .delete("/api/guests/1")

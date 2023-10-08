@@ -18,6 +18,7 @@ const strings = {
         invalidField: (fieldName: string) => `The request body contains an invalid field: ${fieldName}`,
         incorrectPassword: "Incorrect password.",
         loginSuccessful: "Login successful.",
+        queryNotProvided: "A query was not provided.",
     }
 }
 

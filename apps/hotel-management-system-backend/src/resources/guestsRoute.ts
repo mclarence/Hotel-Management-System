@@ -6,6 +6,7 @@ import sendResponse from "../util/sendResponse";
 import {StatusCodes} from "http-status-codes";
 import {Guest} from "@hotel-management-system/models"
 import Joi from "joi";
+import strings from "../util/strings";
 
 
 export interface IGuestRoute {
@@ -23,7 +24,8 @@ const makeGuestsRoute = (
         updateGuest,
         deleteGuest,
         checkGuestExistsById,
-        getGuestById
+        getGuestById,
+        searchGuests
     } = guestsDAO
 
     const router = express.Router();
@@ -43,6 +45,37 @@ const makeGuestsRoute = (
                 statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
                 message: "Failed to fetch guests",
                 data: err.message,
+            })
+        }
+    })
+
+    router.get("/search", authentication, authorization('guests.read'), async (req, res) => {
+        try {
+            const query = req.query.q;
+
+            if (query === undefined || query === null || query === "") {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.queryNotProvided,
+                    data: null
+                })
+            }
+
+            const users = await searchGuests(query.toString());
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.success,
+                data: users
+            })
+        } catch (e) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: e
             })
         }
     })
@@ -246,6 +279,8 @@ const makeGuestsRoute = (
             })
         }
     })
+
+    
 
     return {
         router

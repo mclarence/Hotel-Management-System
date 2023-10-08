@@ -135,14 +135,9 @@ const sidebarItems = [
         to: '/guests',
     },
     {
-        text: 'Check In',
+        text: 'Check In/Out',
         icon: <LoginIcon/>,
-        to: '/check-in',
-    },
-    {
-        text: 'Check Out',
-        icon: <Logout/>,
-        to: '/check-out',
+        to: '/check-in-out',
     },
     {
         text: 'User Management',

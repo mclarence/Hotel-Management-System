@@ -13,6 +13,7 @@ export interface IGuestDAO {
     deleteGuest(guestId: number): Promise<void>;
     getGuestById(id: number): Promise<Guest>;
     checkGuestExistsById(id: number): Promise<boolean>;
+    searchGuests(query: string): Promise<Guest[]>;
 }
 
 const makeGuestDAO = (db: IDatabase<any, any>): IGuestDAO => {
@@ -109,13 +110,32 @@ const makeGuestDAO = (db: IDatabase<any, any>): IGuestDAO => {
         }
     }
 
+    const searchGuests = async (query: string): Promise<Guest[]> => {
+        try {
+            const guests: Guest[] = await db.any(queries.guests.searchGuests, [
+                query
+            ]);
+            return guests;
+        } catch (err) {
+            if (
+                err instanceof QueryResultError &&
+                err.code === queryResultErrorCode.noData
+            ) {
+                return [];
+            } else {
+                throw err;
+            }
+        }
+    }
+
     return {
         getGuests,
         addGuest,
         updateGuest,
         deleteGuest,
         checkGuestExistsById,
-        getGuestById
+        getGuestById,
+        searchGuests
     }
 }
 

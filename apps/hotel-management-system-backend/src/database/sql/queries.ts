@@ -88,6 +88,9 @@ const queries = {
         getAllUsers: `
             SELECT * FROM users
         `,
+        searchUsers: `
+            SELECT * FROM users WHERE first_name ILIKE '%$1#%' OR last_name ILIKE '%$1#%'
+        `
     },
     tokenRevocationList: {
         revokeToken: `
@@ -121,6 +124,9 @@ const queries = {
         `,
         checkGuestExistsById: `
             SELECT EXISTS(SELECT 1 FROM guests WHERE guest_id = $1)
+        `,
+        searchGuests: `
+            SELECT * FROM guests WHERE first_name || ' ' || last_name ILIKE '%$1#%';
         `,
     },
 }
