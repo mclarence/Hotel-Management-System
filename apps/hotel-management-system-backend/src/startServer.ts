@@ -17,6 +17,8 @@ import * as process from "process";
 import crypto from "crypto";
 import hashPassword from "./util/hashPassword";
 import makeRolesRoute from "./resources/rolesRoute";
+import { makeNotesDAO } from "./database/notes";
+import { makeCalendarRoute } from "./resources/calendarRoute";
 
 const createDefaultRoleAndAdmin = async (rolesDAO: IRolesDAO, usersDAO: IUsersDAO) => {
     const DEFAULT_ROLE_ID = 1;
@@ -101,6 +103,7 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
 
     const usersDAO = makeUsersDAO(db.db)
     const rolesDAO = makeRolesDAO(db.db)
+    const calendarDAO = makeNotesDAO(db.db)
     const tokenRevocationListDAO = makeTokenRevocationListDAO(db.db)
 
     await createDefaultRoleAndAdmin(rolesDAO, usersDAO)
@@ -132,9 +135,16 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
         authorizationMiddleware
     )
 
+    const calendarRoute = makeCalendarRoute(
+        calendarDAO,
+        authenticationMiddleware,
+        authorizationMiddleware
+    );
+
     app.use("/api/users", usersRoute.router);
     app.use("/api/roles", rolesRoute.router);
     app.use("/api/rooms", roomsRouter);
+    app.use("/api/calendar", calendarRoute.router);
     app.use(express.static(path.join(__dirname, 'assets')));
 
     // catch all errors

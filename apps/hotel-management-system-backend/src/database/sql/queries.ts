@@ -24,6 +24,11 @@ const queries = {
                 token VARCHAR(255) NOT NULL,
                 revokedAt TIMESTAMP NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS calendar_notes(
+                note_id SERIAL PRIMARY KEY,
+                date TIMESTAMP NOT NULL,
+                note VARCHAR(255)
+            );
         `,
     },
     roles: {
@@ -88,6 +93,11 @@ const queries = {
         checkTokenRevoked: `
             SELECT * FROM token_revocation_list WHERE token = $1
         `,
+    },
+    notes: {
+        getNoteById: `
+            SELECT * FROM calendar_notes WHERE date = $1
+        `
     }
 }
 

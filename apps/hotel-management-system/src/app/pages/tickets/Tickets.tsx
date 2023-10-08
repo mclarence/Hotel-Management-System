@@ -7,6 +7,13 @@ import {verifyLogin} from "../../api/auth";
 import {useNavigate} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {RootState} from "../../redux/store";
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import React from "react";
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'Ticket #', width: 70 },
@@ -32,8 +39,15 @@ const rows = [
 
 ];
 
-export const Tickets = () => {
+const handleNewTicketButton = () => {
 
+}
+
+const handleCloseTicketButton = () => {
+    const text = alert('Are you sure?');
+}
+
+export const Tickets = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const appState = useSelector((state: RootState) => state.appState);
@@ -53,10 +67,10 @@ export const Tickets = () => {
         <>
             <Stack direction={'column'} gap={2}>
                 <Stack direction={'row'} gap={2}>
-                    <Button variant="contained" color="success">
+                    <Button variant="contained" color="success" onClick = {handleNewTicketButton}>
                         New Ticket
                     </Button>
-                    <Button variant="contained" color="error">
+                    <Button variant="contained" color="error" onClick = {handleCloseTicketButton}>
                         Close Ticket
                     </Button>
                 </Stack>
@@ -74,7 +88,6 @@ export const Tickets = () => {
                 />
 
             </Stack>
-
         </>
     )
 }
