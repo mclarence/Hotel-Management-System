@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchLogs } from "../../redux/slices/AppStateSlice"; 
 import { RootState, AppDispatch } from "../../redux/store"; 
 
-const LogsComponent = () => {
+const Logtest = () => {
     const logs = useSelector((state: RootState) => state.appState.logs);
     const isFetchingLogs = useSelector((state: RootState) => state.appState.isFetchingLogs);
     const dispatch = useDispatch<AppDispatch>();
@@ -43,4 +43,4 @@ const LogsComponent = () => {
     );
 }
 
-export default LogsComponent;
+export default Logtest;

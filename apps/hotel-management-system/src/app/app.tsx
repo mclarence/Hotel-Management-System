@@ -14,7 +14,8 @@ import {UsersPage} from "./pages/users-page/UsersPage";
 import {RolesPage} from "./pages/roles-page/RolesPage";
 import {block} from "million/react";
 import { LogsComponent } from './pages/logsystem/logpage';
-import Logstest from "./pages/logsystem/LogsComponent";
+import Logstest from "./pages/logsystem/Logstest";
+
 
 
 export const theme = createTheme({
@@ -46,7 +47,7 @@ export function App() {
                         <Route path="calendar" element={<Calendar/>}/>
                         <Route path="users" element={<UsersPage/>}/>
                         <Route path="roles" element={<RolesPage/>}/>
-                        {/* <Route path="logs" element={<Logstest />}/> */}
+                        <Route path="logs" element={<Logstest />}/>
                         <Route path="logspage" element={<LogsComponent/>}/>
                     </Route>
                     <Route path="login" element={<LoginPage/>}/>
