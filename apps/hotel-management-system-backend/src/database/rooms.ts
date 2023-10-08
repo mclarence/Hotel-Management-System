@@ -13,6 +13,7 @@ export interface IRoomsDAO {
     updateRoom(room: Room): Promise<Room>;
     deleteRoom(roomId: number): Promise<void>;
     checkRoomExistsByRoomCode(roomCode: string): Promise<boolean>;
+    searchRoomsByRoomCode(roomCode: string): Promise<Room[]>;
 }
 
 export const makeRoomsDAO = (db: IDatabase<any,any>): IRoomsDAO => {
@@ -85,6 +86,15 @@ export const makeRoomsDAO = (db: IDatabase<any,any>): IRoomsDAO => {
         }
     }
 
+    const searchRoomsByRoomCode = async (roomCode: string): Promise<Room[]> => {
+        try {
+            const rooms = await db.any(queries.rooms.searchRooms, [roomCode]);
+            return rooms;
+        } catch (err) {
+            throw err;
+        }
+    }
+
     return {
         getRooms,
         getRoomById,
@@ -92,6 +102,7 @@ export const makeRoomsDAO = (db: IDatabase<any,any>): IRoomsDAO => {
         checkRoomExistsById,
         updateRoom,
         deleteRoom,
-        checkRoomExistsByRoomCode
+        checkRoomExistsByRoomCode,
+        searchRoomsByRoomCode
     }
 }

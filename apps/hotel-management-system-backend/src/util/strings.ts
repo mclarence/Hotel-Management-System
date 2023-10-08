@@ -22,6 +22,7 @@ const strings = {
         invalidRoomId: "The provided roomId is invalid.",
         roomIdNotFound: (roomId: number) => `Room with roomId ${roomId} not found.`,
         roomConflict: (roomCode: string) => `Room with room code ${roomCode} already exists.`,
+        invalidRoomCode: "The provided roomCode is invalid.",
     }
 }
 

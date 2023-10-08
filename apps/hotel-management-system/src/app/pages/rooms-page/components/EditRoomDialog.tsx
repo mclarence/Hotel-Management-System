@@ -69,6 +69,7 @@ const EditRoomDialog = (props: EditRoomDialogProps) => {
   }, [roomCode, pricePerNight, description, status]);
 
   const handleEditRoom = () => {
+    setIsSubmitting(true);
     const newRoom: Room = {
       roomId: props.room?.roomId || 0,
       roomCode: roomCode,

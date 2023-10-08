@@ -77,6 +77,7 @@ const EditGuestDialog = (props: EditGuestDialogProps) => {
   ]);
 
   const handleEditGuest = () => {
+    setIsSubmitting(true);
     const newGuest: Guest = {
         guestId: props.guest?.guestId || 0,
         firstName: firstName,

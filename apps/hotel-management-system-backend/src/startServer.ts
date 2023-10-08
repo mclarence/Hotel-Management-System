@@ -156,6 +156,7 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
   const reservationsRoute = makeReservationsRoute(
     reservationsDAO,
     guestsDAO,
+    roomsDAO,
     authenticationMiddleware,
     authorizationMiddleware
   );

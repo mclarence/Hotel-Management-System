@@ -44,3 +44,13 @@ export const updateRoom = (room: Room): Promise<Response> => {
         body: JSON.stringify(updatedRoom)
     })
 }
+
+export const searchRoom = (roomCode: string): Promise<Response> => {
+    return fetch(`/api/rooms/search?q=${roomCode}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+        },
+    })
+}

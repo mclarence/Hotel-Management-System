@@ -15,6 +15,7 @@ import appStateSlice from "../../redux/slices/AppStateSlice";
 import { useAppDispatch } from "../../redux/hooks";
 import { searchGuests } from "../../api/guests";
 import {Guest, ApiResponse} from "@hotel-management-system/models"
+import { GuestAutoCompleteBox } from "../../../util/GuestAutoCompleteBox";
 
 interface CheckInPageProps {}
 const CheckInOutPage = (props: CheckInPageProps) => {
@@ -27,51 +28,6 @@ const CheckInOutPage = (props: CheckInPageProps) => {
     dispatch(appStateSlice.actions.setLastPageVisited("/check-in-out"));
   }, []);
 
-  
-  const handleAutoCompleteTypingChange = (event: any) => {
-    searchGuests(event.target.value)
-    .then((response) => {
-      return response.json();
-    })
-    .then((data: ApiResponse<Guest[]>) => {
-      if (data.success) {
-        setAutoCompleteOptions(data.data);
-      } else if (!data.success && data.statusCode === 401) {
-        dispatch(
-          appStateSlice.actions.setSnackBarAlert({
-            show: true,
-            message: data.message,
-            severity: "warning",
-          })
-        );
-      } else {
-        if (data.statusCode === 400) {
-          setAutoCompleteOptions([]);
-          return;
-        }
-        dispatch(
-          appStateSlice.actions.setSnackBarAlert({
-            show: true,
-            message: data.message,
-            severity: "error",
-          })
-        );
-      }
-    })
-    .catch(() => {
-      dispatch(
-        appStateSlice.actions.setSnackBarAlert({
-          show: true,
-          message: "An unknown error occurred",
-          severity: "error",
-        })
-      );
-    });
-  }
-
-  const handleAutoCompleteSelectionChange = (event: any, value: any) => {
-    setSelectedGuest(value);
-  }
   
   return (
     <Grid container spacing={2}>
@@ -86,17 +42,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
             <Typography variant={"body1"} sx={{ width: "150px" }}>
               Enter Guest Name:
             </Typography>
-            <Autocomplete
-              fullWidth
-              getOptionLabel={(option) => option.firstName + " " + option.lastName}
-              isOptionEqualToValue={(option, value) => option.guestId === value.guestId}
-              onChange={handleAutoCompleteSelectionChange}
-              id="combo-box-demo"
-              options={autoCompleteOptions}
-              renderInput={(params) => (
-                <TextField  {...params} label="Guest Name" onChange={handleAutoCompleteTypingChange} />
-              )}
-            />
+            <GuestAutoCompleteBox value={setSelectedGuest} />
           </Stack>
         </Paper>
       </Grid>

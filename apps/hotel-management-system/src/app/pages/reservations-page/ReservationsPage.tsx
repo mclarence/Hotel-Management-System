@@ -9,11 +9,13 @@ import { useSelector } from "react-redux";
 import { useAppDispatch } from "../../redux/hooks";
 import { RootState } from "../../redux/store";
 import { getReservations } from "../../api/reservations";
+import { CreateReservationDialog } from "./components/CreateReservationDialog";
 
 const ReservationsPage = () => {
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [rows, setRows] = useState<Reservation[]>([]);
+    const [openCreateReservationDialog, setOpenCreateReservationDialog] = useState<boolean>(false);
     const appState = useSelector((state: RootState) => state.appState);
     const dispatch = useAppDispatch();
 
@@ -77,6 +79,7 @@ const ReservationsPage = () => {
     return (
         <>
             <Paper sx={{padding: 2}}>
+              <CreateReservationDialog open={openCreateReservationDialog} setOpen={setOpenCreateReservationDialog} fetchReservations={fetchReservations} />
                 <DataGrid
                     density={'compact'}
                     disableRowSelectionOnClick={true}
@@ -103,9 +106,9 @@ const ReservationsPage = () => {
             <SpeedDial
                 ariaLabel="SpeedDial basic example"
                 sx={{position: 'fixed', bottom: 16, right: 16}}
-                // onClick={() => {
-                //     setOpenAddUserDialog(true)
-                // }}
+                onClick={() => {
+                  setOpenCreateReservationDialog(true)
+                }}
                 icon={
                     <AddIcon/>
                 }

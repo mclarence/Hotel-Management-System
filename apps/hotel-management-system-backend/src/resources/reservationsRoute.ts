@@ -7,6 +7,7 @@ import { StatusCodes } from "http-status-codes";
 import Joi from "joi";
 import {Reservation} from "@hotel-management-system/models"
 import { IGuestDAO } from "../database/guests";
+import { IRoomsDAO } from "../database/rooms";
 
 interface IReservationsRoute {
     router: express.Router
@@ -15,6 +16,7 @@ interface IReservationsRoute {
 export const makeReservationsRoute = (
     reservationsDAO: IReservationDAO,
     guestsDAO: IGuestDAO,
+    roomsDAO: IRoomsDAO,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware,
 ): IReservationsRoute => {
@@ -32,6 +34,10 @@ export const makeReservationsRoute = (
     const {
         checkGuestExistsById
     } = guestsDAO
+
+    const {
+        checkRoomExistsById
+    } = roomsDAO
 
     /**
      * Get all reservations
@@ -121,6 +127,30 @@ export const makeReservationsRoute = (
                     success: false,
                     statusCode: StatusCodes.BAD_REQUEST,
                     message: error.message,
+                    data: null,
+                })
+            }
+
+            // check if the guest exists
+            const guestExists = await checkGuestExistsById(req.body.guestId);
+
+            if (!guestExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: "Guest not found",
+                    data: null,
+                })
+            }
+
+            // check if the room exists
+            const roomExists = await checkRoomExistsById(req.body.roomId);
+
+            if (!roomExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: "Room not found",
                     data: null,
                 })
             }

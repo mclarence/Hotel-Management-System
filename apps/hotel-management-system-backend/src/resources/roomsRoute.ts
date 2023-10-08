@@ -27,7 +27,8 @@ export const makeRoomsRoute = (
         checkRoomExistsById,
         updateRoom,
         deleteRoom,
-        checkRoomExistsByRoomCode
+        checkRoomExistsByRoomCode,
+        searchRoomsByRoomCode
     } = roomsDAO
 
     /**
@@ -52,6 +53,43 @@ export const makeRoomsRoute = (
             })
         }
     });
+
+    /**
+     * GET /api/rooms/search?q=roomCode
+     * Search rooms by roomCode
+     */
+    router.get('/search', authentication, authorization('rooms.read'), async (req: any, res) => {
+        try {
+            const roomCode = req.query.q;
+
+            // check if query is provided
+            if (!roomCode) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.queryNotProvided,
+                    data: null
+                })
+            }
+
+            const rooms = await searchRoomsByRoomCode(roomCode);
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.success,
+                data: rooms
+            })
+
+        } catch (e) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: e
+            })
+        }
+    })
 
     /**
      * GET /api/rooms/:roomId

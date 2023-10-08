@@ -1,23 +1,18 @@
+import { ApiResponse, Guest } from "@hotel-management-system/models";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import {
+  Button,
   Dialog,
   DialogContent,
   Stack,
-  Typography,
   TextField,
-  Divider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Button,
+  Typography
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { DialogHeader } from "../../../../util/DialogHeader";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { addGuest } from "../../../api/guests";
-import {Guest, ApiResponse} from "@hotel-management-system/models"
-import appStateSlice from "../../../redux/slices/AppStateSlice";
 import { useAppDispatch } from "../../../redux/hooks";
+import appStateSlice from "../../../redux/slices/AppStateSlice";
 
 interface AddGuestDialogProps {
   open: boolean;
@@ -60,6 +55,7 @@ const AddGuestDialog = (props: AddGuestDialogProps) => {
   };
 
   const handleAddGuest = () => {
+    setIsSubmitting(true);
     const newGuest: Guest = {
         firstName: firstName,
         lastName: lastName,
