@@ -32,7 +32,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import HailIcon from '@mui/icons-material/Hail';
 import LoginIcon from '@mui/icons-material/Login';
-import Logout from '@mui/icons-material/Logout';
+import EventSeatIcon from '@mui/icons-material/EventSeat';
 
 const drawerWidth = 240;
 
@@ -138,6 +138,11 @@ const sidebarItems = [
         text: 'Check In/Out',
         icon: <LoginIcon/>,
         to: '/check-in-out',
+    },
+    {
+        text: 'Reservations',
+        icon: <EventSeatIcon/>,
+        to: '/reservations',
     },
     {
         text: 'User Management',

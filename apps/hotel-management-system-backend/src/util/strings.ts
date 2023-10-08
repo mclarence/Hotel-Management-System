@@ -19,6 +19,9 @@ const strings = {
         incorrectPassword: "Incorrect password.",
         loginSuccessful: "Login successful.",
         queryNotProvided: "A query was not provided.",
+        invalidRoomId: "The provided roomId is invalid.",
+        roomIdNotFound: (roomId: number) => `Room with roomId ${roomId} not found.`,
+        roomConflict: (roomCode: string) => `Room with room code ${roomCode} already exists.`,
     }
 }
 

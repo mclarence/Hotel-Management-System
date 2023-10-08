@@ -2,7 +2,7 @@ import {Alert, createTheme, CssBaseline, Snackbar, ThemeProvider} from '@mui/mat
 import {LoginPage} from './pages/login-page/LoginPage';
 import {Dashboard} from './pages/dashboard/Dashboard';
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import {Rooms} from './pages/rooms/Rooms';
+import {RoomsPage} from './pages/rooms-page/RoomsPage';
 import {Layout} from './layout';
 import {Tickets} from './pages/tickets/Tickets';
 import {Calendar} from './pages/calendar/Calendar';
@@ -15,6 +15,7 @@ import {RolesPage} from "./pages/roles-page/RolesPage";
 import {block} from "million/react";
 import GuestsPage from './pages/guests-page/GuestsPage';
 import CheckInOutPage from './pages/checkin-out-page/CheckInOutPage';
+import ReservationsPage from './pages/reservations-page/ReservationsPage';
 
 export const theme = createTheme({
     palette: {
@@ -40,13 +41,14 @@ export function App() {
                 <Routes>
                     <Route path="/" element={<Layout/>}>
                         <Route index element={<Dashboard/>}/>
-                        <Route path="rooms" element={<Rooms/>}/>
+                        <Route path="rooms" element={<RoomsPage/>}/>
                         <Route path="tickets" element={<Tickets/>}/>
                         <Route path="calendar" element={<Calendar/>}/>
                         <Route path="users" element={<UsersPage/>}/>
                         <Route path="roles" element={<RolesPage/>}/>
                         <Route path="guests" element={<GuestsPage/>}/>
                         <Route path="check-in-out" element={<CheckInOutPage/>}/>
+                        <Route path="reservations" element={<ReservationsPage/>}/>
                     </Route>
                     <Route path="login" element={<LoginPage/>}/>
                 </Routes>

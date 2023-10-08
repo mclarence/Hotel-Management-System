@@ -32,6 +32,25 @@ const queries = {
                 phone_number VARCHAR(255) NOT NULL,
                 address VARCHAR(255) NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS rooms (
+                room_id SERIAL PRIMARY KEY,
+                room_code VARCHAR(255) UNIQUE NOT NULL,
+                price_per_night FLOAT NOT NULL,
+                description TEXT NOT NULL,
+                status VARCHAR(255) NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS reservations (
+                reservation_id SERIAL PRIMARY KEY,
+                room_id INTEGER NOT NULL,
+                guest_id INTEGER NOT NULL,
+                start_date TIMESTAMP NOT NULL,
+                end_date TIMESTAMP NOT NULL,
+                check_in_date TIMESTAMP,
+                check_out_date TIMESTAMP,
+                reservation_status VARCHAR(255) NOT NULL,
+                FOREIGN KEY (room_id) REFERENCES rooms(room_id),
+                FOREIGN KEY (guest_id) REFERENCES guests(guest_id)
+            );
         `,
     },
     roles: {
@@ -129,6 +148,67 @@ const queries = {
             SELECT * FROM guests WHERE first_name || ' ' || last_name ILIKE '%$1#%';
         `,
     },
+    reservations: {
+        getReservations: `
+            SELECT * FROM reservations
+        `,
+        getReservationById: `
+            SELECT * FROM reservations WHERE reservation_id = $1
+        `,
+        addReservation: `
+            INSERT INTO reservations (room_id, guest_id, start_date, end_date, reservation_status)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING *
+        `,
+        updateReservation: `
+            UPDATE reservations
+            SET room_id = $1, guest_id = $2, start_date = $3, end_date = $4
+            WHERE reservation_id = $5
+            RETURNING *
+        `,
+        deleteReservation: `
+            DELETE FROM reservations
+            WHERE reservation_id = $1
+        `,
+        checkReservationExistsById: `
+            SELECT EXISTS(SELECT 1 FROM reservations WHERE reservation_id = $1)
+        `,
+        searchReservations: `
+            SELECT * FROM reservations WHERE start_date ILIKE '%$1#%' OR end_date ILIKE '%$1#%'
+        `,
+    },
+    rooms: {
+        getRooms: `
+            SELECT * FROM rooms
+        `,
+        getRoomById: `
+            SELECT * FROM rooms WHERE room_id = $1
+        `,
+        addRoom: `
+            INSERT INTO rooms (room_code, price_per_night, description, status)
+            VALUES ($1, $2, $3, $4)
+            RETURNING *
+        `,
+        updateRoom: `
+            UPDATE rooms
+            SET room_code = $1, price_per_night = $2, description = $3, status = $4
+            WHERE room_id = $5
+            RETURNING *
+        `,
+        deleteRoom: `
+            DELETE FROM rooms
+            WHERE room_id = $1
+        `,
+        checkRoomExistsById: `
+            SELECT EXISTS(SELECT 1 FROM rooms WHERE room_id = $1)
+        `,
+        searchRooms: `
+            SELECT * FROM rooms WHERE room_code ILIKE '%$1#%' OR description ILIKE '%$1#%'
+        `,
+        checkRoomExistsByRoomCode: `
+            SELECT EXISTS(SELECT 1 FROM rooms WHERE room_code = $1)
+        `,
+    }
 }
 
 export default queries;

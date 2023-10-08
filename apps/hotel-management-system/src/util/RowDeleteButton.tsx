@@ -2,7 +2,7 @@ import {GridCellParams} from "@mui/x-data-grid";
 import React, {useState} from "react";
 import IconButton from "@mui/material/IconButton";
 import {CircularProgress} from "@mui/material";
-import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export const RowDeleteButton = (props: {
     params: GridCellParams,
@@ -20,7 +20,7 @@ export const RowDeleteButton = (props: {
     return (
         <IconButton size={"small"} color={"error"} onClick={handleDelete}
                     disabled={isDeleting}>
-            {isDeleting ? <CircularProgress size={20}/> : <PersonRemoveIcon fontSize={"inherit"}/>}
+            {isDeleting ? <CircularProgress size={20}/> : <DeleteIcon fontSize={"inherit"}/>}
         </IconButton>
     )
 
