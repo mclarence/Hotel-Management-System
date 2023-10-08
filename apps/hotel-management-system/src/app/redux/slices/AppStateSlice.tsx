@@ -4,7 +4,7 @@ import {ApiResponse, User} from "@hotel-management-system/models";
 import UnauthorisedError from "../../../../errors/UnauthorisedError";
 import UnknownError from "../../../../errors/UnknownError";
 import { Logs } from "@hotel-management-system/models";
-import { getLogs } from "../../api/logs"; // 调整路径以匹配您的项目结构
+import { getLogs } from "../../api/logs"; 
 
 interface AppStateSlice {
     appBarTitle: string;

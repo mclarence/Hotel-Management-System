@@ -9,3 +9,4 @@ export const getLogs = (): Promise<Response> => {
         }
     });
 }
+
