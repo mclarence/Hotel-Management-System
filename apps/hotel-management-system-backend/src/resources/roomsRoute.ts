@@ -6,7 +6,7 @@ import { StatusCodes } from 'http-status-codes';
 import sendResponse from '../util/sendResponse';
 import strings from '../util/strings';
 import Joi from 'joi';
-import { Room } from '@hotel-management-system/models';
+import {Room, RoomStatuses} from '@hotel-management-system/models';
 
 interface IRoomsRoute {
     router: express.Router
@@ -147,7 +147,7 @@ export const makeRoomsRoute = (
                 roomCode: Joi.string().required(),
                 pricePerNight: Joi.number().required(),
                 description: Joi.string().required(),
-                status: Joi.string().required()
+                status: Joi.string().required().valid(...Object.values(RoomStatuses))
             })
 
             const { error } = schema.validate(req.body);
@@ -220,7 +220,7 @@ export const makeRoomsRoute = (
                 roomCode: Joi.string().required(),
                 pricePerNight: Joi.number().required(),
                 description: Joi.string().required(),
-                status: Joi.string().required()
+                status: Joi.string().required().valid(...Object.values(RoomStatuses))
             })
 
             const { error } = schema.validate(req.body);

@@ -1,13 +1,14 @@
 import express from "express";
-import { IReservationDAO } from "../database/reservations";
-import { IAuthenticationMiddleware } from "../middleware/authentication";
-import { IAuthorizationMiddleware } from "../middleware/authorization";
+import {IReservationDAO} from "../database/reservations";
+import {IAuthenticationMiddleware} from "../middleware/authentication";
+import {IAuthorizationMiddleware} from "../middleware/authorization";
 import sendResponse from "../util/sendResponse";
-import { StatusCodes } from "http-status-codes";
+import {StatusCodes} from "http-status-codes";
 import Joi from "joi";
 import {Reservation} from "@hotel-management-system/models"
-import { IGuestDAO } from "../database/guests";
-import { IRoomsDAO } from "../database/rooms";
+import {IGuestDAO} from "../database/guests";
+import {IRoomsDAO} from "../database/rooms";
+import {ReservationStatuses} from "../../../../libs/models/src/lib/enums/ReservationStatuses";
 
 interface IReservationsRoute {
     router: express.Router
@@ -29,7 +30,8 @@ export const makeReservationsRoute = (
         checkReservationExistsById,
         updateReservation,
         deleteReservation,
-        getReservationsByGuestId
+        getReservationsByGuestId,
+        checkIfReservationIsAvailable
     } = reservationsDAO
 
     const {
@@ -200,7 +202,7 @@ export const makeReservationsRoute = (
                 endDate: Joi.date().required(),
                 checkInDate: Joi.date().optional(),
                 checkOutDate: Joi.date().optional(),
-                reservationStatus: Joi.string().optional()
+                reservationStatus: Joi.string().optional().valid(...Object.values(ReservationStatuses))
             })
 
             const { error } = schema.validate(req.body);
@@ -234,6 +236,18 @@ export const makeReservationsRoute = (
                     success: false,
                     statusCode: StatusCodes.NOT_FOUND,
                     message: "Room not found",
+                    data: null,
+                })
+            }
+            console.log(req.body.startDate, req.body.endDate)
+            //check if reservation is available
+            const isAvailable = await checkIfReservationIsAvailable(req.body.roomId, new Date(req.body.startDate), new Date(req.body.endDate));
+
+            if (!isAvailable) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: "Room is not available for the given dates",
                     data: null,
                 })
             }
@@ -298,14 +312,13 @@ export const makeReservationsRoute = (
             }
 
             const schema = Joi.object({
-                reservationId: Joi.number().required(),
                 roomId: Joi.number().required(),
                 guestId: Joi.number().required(),
                 startDate: Joi.date().required(),
                 endDate: Joi.date().required(),
-                checkInDate: Joi.date().optional(),
-                checkOutDate: Joi.date().optional(),
-                reservationStatus: Joi.string().optional()
+                checkInDate: Joi.date().optional().allow(null),
+                checkOutDate: Joi.date().optional().allow(null),
+                reservationStatus: Joi.string().optional().valid(...Object.values(ReservationStatuses))
             })
 
             const { error } = schema.validate(req.body);
@@ -335,16 +348,21 @@ export const makeReservationsRoute = (
             // TODO: check if the room exists
 
             //parse the dates
-            const startDate = new Date(req.body.startDate);
-            const endDate = new Date(req.body.endDate);
+            if (req.body.startDate) {
+                req.body.startDate = new Date(req.body.startDate);
+            }
+
+            if (req.body.endDate) {
+                req.body.endDate = new Date(req.body.endDate);
+            }
             
 
             const reservation:Reservation = {
-                reservationId: req.body.reservationId,
+                reservationId: reservationId,
                 roomId: req.body.roomId,
                 guestId: req.body.guestId,
-                startDate: startDate,
-                endDate: endDate,
+                startDate: req.body.startDate,
+                endDate: req.body.endDate,
                 checkInDate: req.body.checkInDate,
                 checkOutDate: req.body.checkOutDate,
                 reservationStatus: req.body.reservationStatus

@@ -14,6 +14,7 @@ export interface IReservationDAO {
     updateReservation(reservation: Reservation): Promise<Reservation>;
     deleteReservation(reservationId: number): Promise<void>;
     getReservationsByGuestId(guestId: number): Promise<Reservation[]>;
+    checkIfReservationIsAvailable(roomId: number, startDate: Date, endDate: Date): Promise<boolean>;
     getDb(): IDatabase<any,any>;
 }
 
@@ -63,7 +64,15 @@ export const makeReservationDAO = (db: IDatabase<any,any>): IReservationDAO => {
 
     const updateReservation = async (reservation: Reservation): Promise<Reservation> => {
         try {
-            const updatedReservation = await db.one(queries.reservations.updateReservation, [reservation.roomId, reservation.guestId, reservation.startDate, reservation.endDate, reservation.reservationId]);
+            const updatedReservation = await db.one(queries.reservations.updateReservation, [
+                reservation.roomId,
+                reservation.guestId,
+                reservation.startDate,
+                reservation.endDate,
+                reservation.reservationStatus,
+                reservation.checkInDate,
+                reservation.checkOutDate,
+                reservation.reservationId]);
             return updatedReservation;
         } catch (err) {
             throw err;
@@ -90,6 +99,16 @@ export const makeReservationDAO = (db: IDatabase<any,any>): IReservationDAO => {
         }
     }
 
+    const checkIfReservationIsAvailable = async (roomId: number, startDate: Date, endDate: Date): Promise<boolean> => {
+        console.log(roomId, startDate, endDate)
+        try {
+            const exists = await db.one(queries.reservations.checkIfReservationIsAvailable, [roomId, startDate, endDate]);
+            return !exists.exists;
+        } catch (err) {
+            throw err;
+        }
+    }
+
     const getDb = (): IDatabase<any,any> => {
         return db;
     }
@@ -102,6 +121,7 @@ export const makeReservationDAO = (db: IDatabase<any,any>): IReservationDAO => {
         updateReservation,
         checkReservationExistsById,
         getReservationsByGuestId,
+        checkIfReservationIsAvailable,
         getDb
     }
 }

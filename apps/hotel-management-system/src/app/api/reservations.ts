@@ -21,6 +21,19 @@ export const createReservation = async (reservation: Reservation): Promise<Respo
     })
 }
 
+export const updateReservation = async (reservation: Reservation): Promise<Response> => {
+    const temp = {...reservation}
+    delete temp.reservationId
+    return fetch(`/api/reservations/${reservation.reservationId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+        },
+        body: JSON.stringify(temp)
+    })
+}
+
 export const searchReservations = async (searchQueries: {
     startDate?: Date,
     endDate?: Date,

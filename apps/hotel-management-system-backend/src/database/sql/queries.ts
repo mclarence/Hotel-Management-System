@@ -162,8 +162,8 @@ const queries = {
         `,
         updateReservation: `
             UPDATE reservations
-            SET room_id = $1, guest_id = $2, start_date = $3, end_date = $4
-            WHERE reservation_id = $5
+            SET room_id = $1, guest_id = $2, start_date = $3, end_date = $4, reservation_status = $5, check_in_date = $6, check_out_date = $7
+            WHERE reservation_id = $8
             RETURNING *
         `,
         deleteReservation: `
@@ -178,6 +178,9 @@ const queries = {
         `,
         getReservationsByGuestId: `
             SELECT * FROM reservations WHERE guest_id = $1        
+        `,
+        checkIfReservationIsAvailable: `
+            SELECT EXISTS(SELECT 1 FROM reservations WHERE room_id = $1 AND start_date <= $2 AND end_date >= $3)
         `
     },
     rooms: {

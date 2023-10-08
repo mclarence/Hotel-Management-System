@@ -1,10 +1,12 @@
+import {ReservationStatuses} from "./enums/ReservationStatuses";
+
 export type Reservation = {
     reservationId?: number,
     roomId: number,
     guestId: number,
     checkInDate?: Date,
     checkOutDate?: Date,
-    reservationStatus: string,
+    reservationStatus: ReservationStatuses,
     startDate: Date,
     endDate: Date
 }

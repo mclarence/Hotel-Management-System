@@ -1,22 +1,16 @@
-import {
-  Dialog,
-  DialogContent,
-  Stack,
-  Typography,
-  TextField,
-  Button,
-} from "@mui/material";
-import { DialogHeader } from "../../../../util/DialogHeader";
-import { useEffect, useState } from "react";
+import {Button, Dialog, DialogContent, Stack, Typography,} from "@mui/material";
+import {DialogHeader} from "../../../../util/DialogHeader";
+import {useEffect, useState} from "react";
 import AddIcon from "@mui/icons-material/Add";
-import { RoomAutoCompleteBox } from "../../../../util/RoomAutoCompleteBox";
-import { ApiResponse, Guest, Reservation, Room } from "@hotel-management-system/models";
-import { GuestAutoCompleteBox } from "../../../../util/GuestAutoCompleteBox";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { createReservation } from "../../../api/reservations";
+import {RoomAutoCompleteBox} from "../../../../util/RoomAutoCompleteBox";
+import {ApiResponse, Guest, Reservation, Room} from "@hotel-management-system/models";
+import {GuestAutoCompleteBox} from "../../../../util/GuestAutoCompleteBox";
+import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
+import {createReservation} from "../../../api/reservations";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
-import { useAppDispatch } from "../../../redux/hooks";
+import {useAppDispatch} from "../../../redux/hooks";
+import {ReservationStatuses} from "../../../../../../../libs/models/src/lib/enums/ReservationStatuses";
 
 export const CreateReservationDialog = (props: {
   open: boolean;
@@ -65,7 +59,7 @@ export const CreateReservationDialog = (props: {
         roomId: room.roomId ?? 0,
         startDate: startDate,
         endDate: endDate,
-        reservationStatus: "Reserved",
+        reservationStatus: ReservationStatuses.PENDING,
     };
 
     setIsSubmitting(true);
@@ -164,12 +158,14 @@ export const CreateReservationDialog = (props: {
             <DatePicker
               label="Start Date"
               value={startDate}
+              format={"DD/MM/YYYY"}
               onChange={(newValue) => {
                 setStartDate(newValue);
               }}
             />
             <DatePicker
               label="End Date"
+              format={"DD/MM/YYYY"}
               value={endDate}
               onChange={(newValue) => {
                 setEndDate(newValue);
