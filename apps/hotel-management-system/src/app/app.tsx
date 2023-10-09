@@ -17,7 +17,14 @@ import GuestsPage from './pages/guests-page/GuestsPage';
 import CheckInOutPage from './pages/checkin-out-page/CheckInOutPage';
 import ReservationsPage from './pages/reservations-page/ReservationsPage';
 import {TransactionsPage} from "./pages/transactions/TransactionsPage";
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
+import {LocalizationProvider} from "@mui/x-date-pickers";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
 export const theme = createTheme({
     palette: {
         mode: 'dark'
@@ -37,29 +44,33 @@ export function App() {
 
     return (
         <ThemeProvider theme={theme}>
-            <CssBaseline/>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={<Layout/>}>
-                        <Route index element={<Dashboard/>}/>
-                        <Route path="rooms" element={<RoomsPage/>}/>
-                        <Route path="tickets" element={<Tickets/>}/>
-                        <Route path="calendar" element={<Calendar/>}/>
-                        <Route path="users" element={<UsersPage/>}/>
-                        <Route path="roles" element={<RolesPage/>}/>
-                        <Route path="guests" element={<GuestsPage/>}/>
-                        <Route path="check-in-out" element={<CheckInOutPage/>}/>
-                        <Route path="reservations" element={<ReservationsPage/>}/>
-                        <Route path="transactions" element={<TransactionsPage/>}/>
-                    </Route>
-                    <Route path="login" element={<LoginPage/>}/>
-                </Routes>
-            </BrowserRouter>
-            <Snackbar open={appState.snackBarAlert.show} autoHideDuration={6000} anchorOrigin={{vertical: 'bottom', horizontal: 'right'}} onClose={handleSnackBarClose}>
-                <Alert onClose={handleSnackBarClose} severity={appState.snackBarAlert.severity} sx={{width: '100%'}} variant={"filled"}>
-                    {appState.snackBarAlert.message}
-                </Alert>
-            </Snackbar>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <CssBaseline/>
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/" element={<Layout/>}>
+                            <Route index element={<Dashboard/>}/>
+                            <Route path="rooms" element={<RoomsPage/>}/>
+                            <Route path="tickets" element={<Tickets/>}/>
+                            <Route path="calendar" element={<Calendar/>}/>
+                            <Route path="users" element={<UsersPage/>}/>
+                            <Route path="roles" element={<RolesPage/>}/>
+                            <Route path="guests" element={<GuestsPage/>}/>
+                            <Route path="check-in-out" element={<CheckInOutPage/>}/>
+                            <Route path="reservations" element={<ReservationsPage/>}/>
+                            <Route path="transactions" element={<TransactionsPage/>}/>
+                        </Route>
+                        <Route path="login" element={<LoginPage/>}/>
+                    </Routes>
+                </BrowserRouter>
+                <Snackbar open={appState.snackBarAlert.show} autoHideDuration={6000}
+                          anchorOrigin={{vertical: 'bottom', horizontal: 'right'}} onClose={handleSnackBarClose}>
+                    <Alert onClose={handleSnackBarClose} severity={appState.snackBarAlert.severity} sx={{width: '100%'}}
+                           variant={"filled"}>
+                        {appState.snackBarAlert.message}
+                    </Alert>
+                </Snackbar>
+            </LocalizationProvider>
         </ThemeProvider>
     );
 }

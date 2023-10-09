@@ -15,8 +15,7 @@ import {useAppDispatch} from "../../../redux/hooks";
 import {Logout} from "@mui/icons-material";
 import LogoutIcon from "@mui/icons-material/Logout";
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
+
 export const CheckInDialog = (props: {
     open: boolean;
     setOpen: (open: boolean) => void;
@@ -99,7 +98,6 @@ export const CheckInDialog = (props: {
     }
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Dialog open={props.open} fullWidth>
                 <DialogHeader title={"Check In"} onClose={handleClose}/>
                 <DialogContent>
@@ -139,7 +137,6 @@ export const CheckInDialog = (props: {
                     </Stack>
                 </DialogContent>
             </Dialog>
-        </LocalizationProvider>
 
     )
 }

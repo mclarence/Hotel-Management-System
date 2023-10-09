@@ -144,7 +144,6 @@ export const CreateReservationDialog = (props: {
   }, [startDate, endDate]);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Dialog open={props.open} fullWidth>
         <DialogHeader title={"Create Reservation"} onClose={handleClose} />
         <DialogContent>
@@ -188,6 +187,5 @@ export const CreateReservationDialog = (props: {
           </Stack>
         </DialogContent>
       </Dialog>
-    </LocalizationProvider>
   );
 };

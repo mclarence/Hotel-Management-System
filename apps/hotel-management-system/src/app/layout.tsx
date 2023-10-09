@@ -34,6 +34,7 @@ import HailIcon from '@mui/icons-material/Hail';
 import LoginIcon from '@mui/icons-material/Login';
 import EventSeatIcon from '@mui/icons-material/EventSeat';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 const drawerWidth = 240;
 
@@ -125,6 +126,15 @@ const sidebarItems = [
         text: 'Tickets',
         icon: <ConfirmationNumberIcon/>,
         to: '/tickets',
+    },
+    {
+        text: 'Scheduling',
+        isHeader: true,
+    },
+    {
+        text: 'Calendar',
+        icon: <CalendarMonthIcon/>,
+        to: '/calendar',
     },
     {
         text: 'Guest Management',

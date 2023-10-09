@@ -1,5 +1,5 @@
-export type calendarNotes = {
-    note_id: number;
+export type CalendarNotes = {
+    noteId?: number;
     date: Date;   
     note: string;
 }

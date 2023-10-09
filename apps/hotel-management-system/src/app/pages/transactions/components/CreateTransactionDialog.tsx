@@ -135,7 +135,6 @@ export const CreateTransactionDialog = (props: {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker
                                 format={"DD/MM/YYYY hh:mm A"}
                                 value={transactionDate}
@@ -144,7 +143,6 @@ export const CreateTransactionDialog = (props: {
                                     setTransactionDate(newValue);
                                 }}
                             />
-                        </LocalizationProvider>
                         <Button variant={"contained"} disabled={saveButtonDisabled} onClick={handleSubmit}>
                             Add Transaction
                         </Button>

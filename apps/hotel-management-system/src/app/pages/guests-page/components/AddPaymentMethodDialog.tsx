@@ -193,7 +193,7 @@ export const AddPaymentMethodDialog = (props: {
                             onChange={(e) => setCreditCardCVV(e.target.value)}
                             label={"Credit Card CVV"}
                         />
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+
                             <DatePicker
                                 label="Credit Card Expiration Date"
                                 format={"MM/YYYY"}
@@ -205,7 +205,6 @@ export const AddPaymentMethodDialog = (props: {
                                 }}
                                 views={['month', 'year']}
                             />
-                        </LocalizationProvider>
                         <TextField
                             fullWidth
                             value={creditCardHolderName}

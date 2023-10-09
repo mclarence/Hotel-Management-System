@@ -148,7 +148,25 @@ const queries = {
     },
     notes: {
         getNoteById: `
-            SELECT * FROM calendar_notes WHERE date = $1
+            SELECT * FROM calendar_notes WHERE DATE(date) = DATE($1);
+        `,
+        addNote: `
+            INSERT INTO calendar_notes (date, note)
+            VALUES ($1, $2)
+            RETURNING *
+        `,
+        deleteNote: `
+            DELETE FROM calendar_notes
+            WHERE note_id = $1
+        `,
+        checkNoteExistsById:`
+            SELECT EXISTS(SELECT 1 FROM calendar_notes WHERE note_id = $1)
+        `,
+        updateNote: `
+            UPDATE calendar_notes
+            SET note = $1
+            WHERE note_id = $2
+            RETURNING *
         `
     },
     guests: {

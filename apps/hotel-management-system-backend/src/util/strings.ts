@@ -28,6 +28,8 @@ const strings = {
         transactionIdNotFound: (transactionId: number) => `Transaction with transactionId ${transactionId} not found.`,
         guestIdNotFound: (guestId: number) => `Guest with guestId ${guestId} not found.`,
         paymentMethodIdNotFound: (paymentMethodId: number) => `Payment method with paymentMethodId ${paymentMethodId} not found.`,
+        invalidNoteId: "The provided noteId is invalid.",
+        noteNotFound: (noteId: number) => `Note with noteId ${noteId} not found.`,
     }
 }
 

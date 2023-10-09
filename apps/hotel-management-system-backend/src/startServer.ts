@@ -30,7 +30,7 @@ import {makePaymentMethodsDAO} from "./database/paymentMethods";
 import {makePaymentMethodRoute} from "./resources/paymentMethodRoute";
 import {makeTransactionsDAO} from "./database/transaction";
 import {makeTransactionsRoute} from "./resources/transactionsRoute";
-import { makeNotesDAO } from "./database/notes";
+import { makeNotesDAO } from "./database/calendar";
 import { makeCalendarRoute } from "./resources/calendarRoute";
 
 const createDefaultRoleAndAdmin = async (
