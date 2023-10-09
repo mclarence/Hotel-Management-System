@@ -4,7 +4,7 @@ import {Dashboard} from './pages/dashboard/Dashboard';
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {RoomsPage} from './pages/rooms-page/RoomsPage';
 import {Layout} from './layout';
-import {Tickets} from './pages/tickets/Tickets';
+import {TicketsPage} from './pages/tickets-page/TicketsPage';
 import {Calendar} from './pages/calendar/Calendar';
 import {useSelector} from "react-redux";
 import {RootState} from "./redux/store";
@@ -51,7 +51,7 @@ export function App() {
                         <Route path="/" element={<Layout/>}>
                             <Route index element={<Dashboard/>}/>
                             <Route path="rooms" element={<RoomsPage/>}/>
-                            <Route path="tickets" element={<Tickets/>}/>
+                            <Route path="tickets" element={<TicketsPage/>}/>
                             <Route path="calendar" element={<Calendar/>}/>
                             <Route path="users" element={<UsersPage/>}/>
                             <Route path="roles" element={<RolesPage/>}/>

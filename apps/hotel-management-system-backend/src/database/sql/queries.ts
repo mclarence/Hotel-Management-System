@@ -76,8 +76,59 @@ const queries = {
                 date TIMESTAMP NOT NULL,
                 FOREIGN KEY (payment_method_id) REFERENCES payment_methods(payment_method_id),
                 FOREIGN KEY (guest_id) REFERENCES guests(guest_id)
-            )
-          
+            );
+            CREATE TABLE IF NOT EXISTS tickets (
+                ticket_id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                description VARCHAR(255) NOT NULL,
+                status VARCHAR(255) NOT NULL,
+                date_opened TIMESTAMP NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(user_id)
+            );
+            CREATE TABLE IF NOT EXISTS ticket_messages (
+                ticket_message_id SERIAL PRIMARY KEY,
+                ticket_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                message VARCHAR(255) NOT NULL,
+                date_created TIMESTAMP NOT NULL,
+                FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id),
+                FOREIGN KEY (user_id) REFERENCES users(user_id)
+            );
+        `,
+    },
+    tickets: {
+        getTicketById: `
+            SELECT * FROM tickets WHERE ticket_id = $1
+        `,
+        addTicket: `
+            INSERT INTO tickets (user_id, title, description, status, date_opened)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING *
+        `,
+        updateTicket: `
+            UPDATE tickets
+            SET user_id = $1, title = $2, description = $3, status = $4, date_opened = $5
+            WHERE ticket_id = $6
+            RETURNING *
+        `,
+        deleteTicket: `
+            DELETE FROM tickets
+            WHERE ticket_id = $1
+        `,
+        getAllTickets: `
+            SELECT * FROM tickets
+        `,
+        addCommentToTicket: `
+            INSERT INTO ticket_messages (ticket_id, user_id, message, date_created)
+            VALUES ($1, $2, $3, $4)
+            RETURNING *
+        `,
+        fetchTicketComments: `
+            SELECT * FROM ticket_messages WHERE ticket_id = $1
+        `,
+        checkTicketExistsById: `
+            SELECT EXISTS(SELECT 1 FROM tickets WHERE ticket_id = $1)
         `,
     },
     roles: {
