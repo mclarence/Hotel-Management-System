@@ -57,7 +57,7 @@ export const GuestPaymentMethodAutoCompleteBox = (props: {
         }
     }, [props.guest]);
 
-    const handleAutoCompleteSelectionChange = (event: any, value: PaymentMethod) => {
+    const handleAutoCompleteSelectionChange = (event: any, value: PaymentMethod | null) => {
         props.value(value);
     }
 

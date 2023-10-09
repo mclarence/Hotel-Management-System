@@ -5,8 +5,6 @@ import dayjs, {Dayjs} from 'dayjs';
 import React, {useEffect, useState} from 'react';
 import {createNote, deleteNote, getNoteById, updateNote} from '../../api/calendar';
 import {ApiResponse, CalendarNotes} from '@hotel-management-system/models';
-import {useSelector} from 'react-redux';
-import {RootState} from '../../redux/store';
 import {useAppDispatch} from '../../redux/hooks';
 import appStateSlice from '../../redux/slices/AppStateSlice';
 import {Grid, Paper, SpeedDial, Stack} from "@mui/material";
@@ -16,9 +14,8 @@ import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 
 export function Calendar() {
-    const appState = useSelector((state: RootState) => state.appState);
     const dispatch = useAppDispatch();
-    const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs(new Date()));
+    const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs(new Date()));
     const [currentNote, setCurrentNote] = useState<CalendarNotes[]>([]);
 
     function fetchNote(date: Date) {
@@ -118,7 +115,7 @@ export function Calendar() {
             .then((response) => response.json())
             .then((data: ApiResponse<null>) => {
                 if (data.success) {
-                    fetchNote(selectedDate.toDate())
+                    fetchNote(selectedDate!.toDate())
                     dispatch(
                         appStateSlice.actions.setSnackBarAlert({
                             show: true,
@@ -171,7 +168,7 @@ export function Calendar() {
                 .then((response) => response.json())
                 .then((data: ApiResponse<CalendarNotes>) => {
                     if (data.success) {
-                        fetchNote(selectedDate.toDate())
+                        fetchNote(selectedDate!.toDate())
                         dispatch(
                             appStateSlice.actions.setSnackBarAlert({
                                 show: true,

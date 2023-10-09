@@ -32,7 +32,7 @@ export const TicketDetailsDialog = (props: {
                 .then((response) => {
                     return response.json();
                 })
-                .then((data: ApiResponse<TicketMessages>) => {
+                .then((data: ApiResponse<TicketMessages[]>) => {
                     if (data.success) {
                         setTicketComments(data.data);
                     } else if (!data.success && data.statusCode === 401) {
@@ -69,10 +69,10 @@ export const TicketDetailsDialog = (props: {
         if (props.ticket !== null) {
             const comment = prompt("Enter a comment");
 
-            if (comment !== null) {
+            if (comment !== null && user !== null) {
                 const ticketMessage: TicketMessages = {
                     ticketId: props.ticket.ticketId!,
-                    userId: user?.userId!,
+                    userId: user.userId!,
                     message: comment,
                     dateCreated: new Date()
                 }
@@ -171,10 +171,10 @@ export const TicketDetailsDialog = (props: {
     }, [props.open, props.ticket]);
 
     const handleSaveButton = () => {
-        if (props.ticket !== null) {
+        if (props.ticket !== null && user !== null) {
             const updatedTicket: Ticket = {
                 ticketId: props.ticket.ticketId,
-                userId: user?.userId!,
+                userId: user.userId!,
                 title: title,
                 description: description,
                 status: status,
@@ -223,74 +223,75 @@ export const TicketDetailsDialog = (props: {
                         })
                     );
                 })
-                .finally(() => {
-                    setIsSubmitting(false);
-                });
         }
     }
 
     return (
-            <Dialog open={props.open} fullWidth fullScreen>
-                <SpeedDial
-                    ariaLabel="SpeedDial basic example"
-                    sx={{position: 'fixed', bottom: 16, right: 16}}
-                    onClick={() => {
-                        handleAddTicketComment();
-                    }}
-                    icon={
-                        <AddIcon/>
-                    }
-                >
-                </SpeedDial>
-                <DialogHeader title={`Viewing Ticket - ${props.ticket?.ticketId}`}
-                              onClose={() => props.setOpen(false)}/>
-                <DialogContent>
-                    <Grid container spacing={2}>
-                        <Grid item xs={4}>
-                            <Paper sx={{padding: 2}}>
-                                <Stack direction={"column"} gap={2}>
-                                    <Typography variant={"h6"}>Ticket Details</Typography>
-                                    <Divider/>
-                                    <UserAutoCompleteBox value={setUser} currentValue={user}/>
-                                    <TextField
-                                        fullWidth
-                                        label={"Title"}
-                                        variant={"outlined"}
-                                        value={title}
-                                        onChange={(e) => setTitle(e.target.value)}
-                                    />
-                                    <TextField
-                                        fullWidth
-                                        label={"Description"}
-                                        variant={"outlined"}
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                    />
-                                    <TicketStatusAutoCompleteBox currentValue={status!} setValue={setStatus}/>
-                                    <Button variant={"contained"} onClick={handleSaveButton}>Save</Button>
-                                </Stack>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={8}>
-                            <Paper sx={{padding: 2}}>
-                                <Stack direction={"column"} gap={2}>
-                                    <Typography variant={"h6"}>Ticket Comments</Typography>
-                                    <Divider/>
-                                    {ticketComments.map((comment) => {
-                                        return (
-                                            <Paper sx={{padding: 2}}>
-                                                <Stack direction={"column"} gap={1}>
-                                                    <Typography variant={"body1"}>{comment.message}</Typography>
-                                                    <Typography variant={"caption"}>{comment.dateCreated}</Typography>
-                                                </Stack>
-                                            </Paper>
-                                        )
-                                    })}
-                                </Stack>
-                            </Paper>
-                        </Grid>
+        <Dialog open={props.open} fullWidth fullScreen>
+            <SpeedDial
+                ariaLabel="SpeedDial basic example"
+                sx={{position: 'fixed', bottom: 16, right: 16}}
+                onClick={() => {
+                    handleAddTicketComment();
+                }}
+                icon={
+                    <AddIcon/>
+                }
+            >
+            </SpeedDial>
+            <DialogHeader title={`Viewing Ticket - ${props.ticket?.ticketId}`}
+                          onClose={() => props.setOpen(false)}/>
+            <DialogContent>
+                <Grid container spacing={2}>
+                    <Grid item xs={4}>
+                        <Paper sx={{padding: 2}}>
+                            <Stack direction={"column"} gap={2}>
+                                <Typography variant={"h6"}>Ticket Details</Typography>
+                                <Divider/>
+                                <UserAutoCompleteBox value={setUser} currentValue={user}/>
+                                <TextField
+                                    fullWidth
+                                    label={"Title"}
+                                    variant={"outlined"}
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                />
+                                <TextField
+                                    fullWidth
+                                    label={"Description"}
+                                    variant={"outlined"}
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                />
+                                <TicketStatusAutoCompleteBox currentValue={status!} setValue={setStatus}/>
+                                <Button variant={"contained"} onClick={handleSaveButton}>Save</Button>
+                            </Stack>
+                        </Paper>
                     </Grid>
-                </DialogContent>
-            </Dialog>
+                    <Grid item xs={8}>
+                        <Paper sx={{padding: 2}}>
+                            <Stack direction={"column"} gap={2}>
+                                <Typography variant={"h6"}>Ticket Comments</Typography>
+                                <Divider/>
+                                {ticketComments.map((comment) => {
+
+                                    const formattedTime = new Date(comment.dateCreated).toISOString()
+
+                                    return (
+                                        <Paper sx={{padding: 2}}>
+                                            <Stack direction={"column"} gap={1}>
+                                                <Typography variant={"body1"}>{comment.message}</Typography>
+                                                <Typography
+                                                    variant={"caption"}>{formattedTime}</Typography>
+                                            </Stack>
+                                        </Paper>
+                                    )
+                                })}
+                            </Stack>
+                        </Paper>
+                    </Grid>
+                </Grid>
+            </DialogContent>
+        </Dialog>
     )
 }

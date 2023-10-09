@@ -1,14 +1,4 @@
-import {
-    Alert,
-    Box,
-    Button,
-    CircularProgress,
-    Grid,
-    Stack,
-    TextField,
-    Typography,
-    makeStyles
-} from '@mui/material';
+import {Alert, Button, CircularProgress, Grid, Stack, TextField, Typography} from '@mui/material';
 import Card from '@mui/material/Card';
 import {useEffect, useState} from 'react';
 import {login} from "../../api/auth";
@@ -37,7 +27,7 @@ export const LoginPage = () => {
         if (appState.loggedIn) {
             if (appState.lastPageVisited !== '') {
                 console.log("redirecting to last page visited");
-                navigate(appState.lastPageVisited);;
+                navigate(appState.lastPageVisited);
             } else {
                 console.log("redirecting to home page");
                 navigate('/');

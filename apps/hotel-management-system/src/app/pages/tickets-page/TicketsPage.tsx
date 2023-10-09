@@ -2,15 +2,15 @@ import {DataGrid} from "@mui/x-data-grid";
 import {CustomNoRowsOverlay} from "../../../util/CustomNoRowsOverlay";
 import {Paper, SpeedDial} from "@mui/material";
 import React, {useEffect, useRef, useState} from "react";
-import {ApiResponse, Ticket, Transaction} from "@hotel-management-system/models";
+import {ApiResponse, Ticket} from "@hotel-management-system/models";
 import AddIcon from "@mui/icons-material/Add";
 import {getAllTickets} from "../../api/tickets";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import {CreateTicketDialog} from "./components/CreateTicketDialog";
-import {RowDeleteButton} from "../../../util/RowDeleteButton";
 import IconButton from "@mui/material/IconButton";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import {TicketDetailsDialog} from "./components/TicketDetailsDialog";
+import {useAppDispatch} from "../../redux/hooks";
 
 export const TicketsPage = () => {
     const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -18,6 +18,7 @@ export const TicketsPage = () => {
     const [openCreateTicketDialog, setOpenCreateTicketDialog] = useState(false);
     const [openViewTicketDialog, setOpenViewTicketDialog] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+    const dispatch = useAppDispatch();
     const handleViewTicket = (ticket: Ticket) => {
         setSelectedTicket(ticket);
         setOpenViewTicketDialog(true);

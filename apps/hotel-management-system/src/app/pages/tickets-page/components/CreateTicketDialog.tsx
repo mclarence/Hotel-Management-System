@@ -26,19 +26,18 @@ export const CreateTicketDialog = (props: CreateTicketDialogProps) => {
         setUser(null);
         setTitle("");
         setDescription("");
-        setStatus("");
+        setStatus(TicketStatuses.OPEN);
     }
     useEffect(() => {
         setSaveButtonDisabled(
             user === null ||
             title === "" ||
-            description === "" ||
-            status === ""
+            description === ""
         )
     }, [user, title, description, status])
 
     const handleSubmit = () => {
-        if (user !== null && title !== "" && description !== "" && status !== "") {
+        if (user !== null && title !== "" && description !== "" && status) {
             addTicket({
                 title: title,
                 description: description,
