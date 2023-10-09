@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Drawer, Grid, Typography, TextField, Stack } from '@mui/material';
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Logs } from "@hotel-management-system/models";
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import appStateSlice from '../../redux/slices/AppStateSlice';
-import { fetchLogs } from "../../redux/slices/AppStateSlice";
-import {getLogs} from "../../api/logs";
+import { Box, Button, Dialog, DialogTitle, DialogContent, Grid, Typography, TextField, Stack } from '@mui/material';
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import { addLog, deleteLog, getLogs } from "../../api/logs";
 
-export const LogsComponent = () => {
+export type Logs = {
+    logId: number;
+    operationType: string;
+    timestamp: Date;
+    operatedBy: string;
+    guestName?: string;
+    additionalInfo?: string;
+};
+
+const LogsComponent = () => {
     const [selectedLog, setSelectedLog] = useState<Logs | null>(null);
-    const [isOpenDrawer, setIsOpenDrawer] = useState<boolean>(false);
-    const [logs , setLogs] = useState<Logs[]>([]);
+    const [logs, setLogs] = useState<Logs[]>([]);
     const [isFetchingLogs, setIsFetchingLogs] = useState<boolean>(false);
-    const dispatch = useAppDispatch();
+    const [isOpenDrawer, setIsOpenDrawer] = useState(false);
+    const [isOpenAddLogDialog, setIsOpenAddLogDialog] = useState(false);
+    const [newLog, setNewLog] = useState<Partial<Logs>>({});
 
     useEffect(() => {
         getLogs()
@@ -20,71 +26,107 @@ export const LogsComponent = () => {
             .then((data) => {
                 setLogs(data.data);
                 setIsFetchingLogs(false);
-            })
+            });
     }, []);
 
-    const HandleEditLog = (log: Logs) => {
-        setSelectedLog(log);
-        setIsOpenDrawer(true);
+    const handleAddLog = (log: Logs) => {
+        addLog(log)
+            .then((response) => response.json())
+            .then((data) => {
+                setLogs(prevLogs => [...prevLogs, data.data]);
+            });
+    };
+
+    const handleDeleteLog = (logId: number) => {
+        deleteLog(logId).then(() => {
+            setLogs(prevLogs => prevLogs.filter(log => log.logId !== logId));
+        });
+    };
+
+    const handleAddLogDialogOpen = () => {
+        setIsOpenAddLogDialog(true);
+    };
+
+    const handleAddLogDialogClose = () => {
+        setIsOpenAddLogDialog(false);
+    };
+
+    const handleSubmitLog = () => {
+        if (newLog) {
+            handleAddLog(newLog as Logs);
+            setNewLog({});
+            handleAddLogDialogClose();
+        }
     };
 
     const columns: GridColDef[] = [
-        { field: 'log_id', headerName: 'Log ID', width: 130 },
-        { field: 'operation_type', headerName: 'Operation Type', width: 180 },
+        { field: 'logId', headerName: 'Log ID', width: 130 },
+        { field: 'operationType', headerName: 'Operation Type', width: 180 },
         { field: 'timestamp', headerName: 'Timestamp', width: 250 },
-        { field: 'operated_by', headerName: 'Operated By', width: 180 },
+        { field: 'operatedBy', headerName: 'Operated By', width: 180 },
         {
-            field: 'actions', headerName: 'Actions', width: 150, renderCell: (params: any) => (
-                <Button variant="outlined" onClick={() => HandleEditLog(params.row)}>
-                    Edit
-                </Button>
+            field: 'actions',
+            headerName: 'Actions',
+            width: 250,
+            renderCell: (params: GridRenderCellParams) => (
+                <>
+                    <Button variant="outlined" onClick={() => {
+                        setSelectedLog(params.row as Logs);
+                        setIsOpenDrawer(true);
+                    }}>
+                        Edit
+                    </Button>
+                    <Button variant="outlined" color="error" onClick={() => handleDeleteLog((params.row as Logs).logId)}>
+                        Delete
+                    </Button>
+                </>
             )
         },
-    ]
+    ];
 
     return (
         <>
             <Stack direction={'column'} gap={2}>
+                <Button variant="contained" color="primary" onClick={handleAddLogDialogOpen}>
+                    Add Log
+                </Button>
                 <DataGrid
                     disableRowSelectionOnClick={true}
                     rows={logs}
                     columns={columns}
-                    initialState={{
-                        pagination: {
-                            paginationModel: { page: 0, pageSize: 5 },
-                        },
-                    }}
-                    loading={isFetchingLogs}
                     pageSizeOptions={[5, 10]}
-                    getRowId={(row) => row.logId}
+                    getRowId={(row) => (row as Logs).logId}
                     checkboxSelection
                 />
             </Stack>
-            {selectedLog && (
-                <Drawer anchor='right' open={isOpenDrawer} onClose={() => setIsOpenDrawer(false)}>
-                    <Box style={{ width: '800px' }} mt={10} p={3}>
-                        <Typography fontSize={22}>Log ID: {selectedLog.logId}</Typography>
-                        <Grid container spacing={2} mt={2}>
-                            <Grid item xs={12}>
-                                <TextField
-                                    label="Description"
-                                    fullWidth
-                                    value={selectedLog.additionalInfo}
-                                    onChange={(e) => setSelectedLog(prev => ({ ...prev!, additionalInfo: e.target.value }))}
-                                />
-                            </Grid>
+
+            <Dialog open={isOpenAddLogDialog} onClose={handleAddLogDialogClose}>
+                <DialogTitle>Add a New Log</DialogTitle>
+                <DialogContent>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <TextField
+                                label="Operation Type"
+                                fullWidth
+                                value={newLog.operationType || ""}
+                                onChange={(e) => setNewLog(prev => ({ ...prev, operationType: e.target.value }))}
+                            />
                         </Grid>
-                        <Button
-                            onClick={() => setIsOpenDrawer(false)}
-                            variant='contained'
-                            color='error'
-                            style={{ float: 'right', marginTop: 30 }}
-                        >
-                            Close
-                        </Button>
-                    </Box>
-                </Drawer>
-            )}
+                        <Grid item xs={12}>
+                            <TextField
+                                label="Operated By"
+                                fullWidth
+                                value={newLog.operatedBy || ""}
+                                onChange={(e) => setNewLog(prev => ({ ...prev, operatedBy: e.target.value }))}
+                            />
+                        </Grid>
+                        {/*... (Add more fields as needed) */}
+                    </Grid>
+                    <Button onClick={handleSubmitLog} variant="contained" color="primary" style={{ float: 'right', marginTop: 30 }}>
+                        Submit
+                    </Button>
+                </DialogContent>
+            </Dialog>
         </>
     );
 };

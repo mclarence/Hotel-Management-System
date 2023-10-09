@@ -13,7 +13,8 @@ import {useAppDispatch} from "./redux/hooks";
 import {UsersPage} from "./pages/users-page/UsersPage";
 import {RolesPage} from "./pages/roles-page/RolesPage";
 import {block} from "million/react";
-import { LogsComponent } from './pages/logsystem/logpage';
+import LogsComponent from "./pages/logsystem/logpage";
+
 
 
 
