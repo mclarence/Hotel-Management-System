@@ -2,6 +2,7 @@ import express from "express";
 import { ILogsDAO } from "../database/logs"; // Adjust for function
 import { IAuthenticationMiddleware } from "../middleware/authentication";
 import { IAuthorizationMiddleware } from "../middleware/authorization";
+import sendResponse from "../util/sendResponse";
 
 interface IMakeLogsRoute {
   router: express.Router;
@@ -24,7 +25,12 @@ const makeLogsRoute = (
     // return the list of all logs
     getAllLogs
       .then((logs) => {
-        res.send(logs);
+        sendResponse(res, {
+            statusCode: 200,
+            data: logs,
+            success: true,
+            message: "Successfully retrieved logs",
+        })
       })
       .catch(() => {
         res.sendStatus(500);

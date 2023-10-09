@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { fetchLogs } from "../../redux/slices/AppStateSlice"; 
-import { RootState, AppDispatch } from "../../redux/store"; 
+import React, {useEffect} from "react";
+import {useSelector, useDispatch} from "react-redux";
+import {fetchLogs} from "../../redux/slices/AppStateSlice";
+import {RootState, AppDispatch} from "../../redux/store";
 
 const Logtest = () => {
     const logs = useSelector((state: RootState) => state.appState.logs);
@@ -12,9 +12,6 @@ const Logtest = () => {
         dispatch(fetchLogs());
     }, [dispatch]);
 
-    if (isFetchingLogs) {
-        return <div>Loading logs...</div>;
-    }
 
     if (logs.length === 0) {
         return (
@@ -29,15 +26,21 @@ const Logtest = () => {
         <div>
             <h2>Logs</h2>
             <ul>
-                {logs.map(log => (
-                    <li key={log.logId}>
-                        Type: {log.operationType} - 
-                        Timestamp: {log.timestamp.toLocaleString()} - 
-                        Operated by: {log.operatedBy} - 
-                        Guest: {log.guestName || 'N/A'} - 
-                        Details: {log.additionalInfo || 'N/A'}
-                    </li>
-                ))}
+                {
+                    isFetchingLogs ? <div>
+                        Loading logs...
+                    </div> : logs.length === 0 ? <div> No logs available. </div> : <div>
+                        {logs.map(log => (
+                            <li key={log.logId}>
+                                Type: {log.operationType} -
+                                Timestamp: {log.timestamp.toLocaleString()} -
+                                Operated by: {log.operatedBy} -
+                                Guest: {log.guestName || 'N/A'} -
+                                Details: {log.additionalInfo || 'N/A'}
+                            </li>
+                        ))}
+                    </div>
+                }
             </ul>
         </div>
     );

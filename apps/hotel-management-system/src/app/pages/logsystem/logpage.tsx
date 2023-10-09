@@ -5,19 +5,23 @@ import { Logs } from "@hotel-management-system/models";
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import appStateSlice from '../../redux/slices/AppStateSlice';
 import { fetchLogs } from "../../redux/slices/AppStateSlice";
+import {getLogs} from "../../api/logs";
 
 export const LogsComponent = () => {
     const [selectedLog, setSelectedLog] = useState<Logs | null>(null);
     const [isOpenDrawer, setIsOpenDrawer] = useState<boolean>(false);
-
-    const logs = useAppSelector((state) => state.appState.logs);
-    const isFetchingLogs = useAppSelector((state) => state.appState.isFetchingLogs);
+    const [logs , setLogs] = useState<Logs[]>([]);
+    const [isFetchingLogs, setIsFetchingLogs] = useState<boolean>(false);
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        dispatch(appStateSlice.actions.setAppBarTitle('Logs Management'));
-        dispatch(fetchLogs());
-    }, [dispatch]);
+        getLogs()
+            .then((response) => response.json())
+            .then((data) => {
+                setLogs(data.data);
+                setIsFetchingLogs(false);
+            })
+    }, []);
 
     const HandleEditLog = (log: Logs) => {
         setSelectedLog(log);
@@ -38,10 +42,6 @@ export const LogsComponent = () => {
         },
     ]
 
-    if (isFetchingLogs) {
-        return <div>Loading logs...</div>;
-    }
-
     return (
         <>
             <Stack direction={'column'} gap={2}>
@@ -54,6 +54,7 @@ export const LogsComponent = () => {
                             paginationModel: { page: 0, pageSize: 5 },
                         },
                     }}
+                    loading={isFetchingLogs}
                     pageSizeOptions={[5, 10]}
                     getRowId={(row) => row.logId}
                     checkboxSelection
