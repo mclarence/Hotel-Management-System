@@ -71,6 +71,7 @@ export const AddRoleDialog = (props: IAddRoleDialogProps) => {
   };
 
   const handleSubmit = () => {
+    setIsSubmitting(true);
     const newRole: Role = {
       name: roleName,
       permissionData: permissions,

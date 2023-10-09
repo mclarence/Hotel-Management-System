@@ -1,7 +1,7 @@
 export enum RoomStatuses {
-    Available = 'Available',
-    Unavailable = 'Unavailable',
-    Reserved = 'Reserved',
-    Occupied = 'Occupied',
-    OutOfService = 'Out of service',
+    AVAILABLE = 'Available',
+    UNAVAILABLE = 'Unavailable',
+    RESERVED = 'Reserved',
+    OCCUPIED = 'Occupied',
+    OUT_OF_SERVICE = 'Out of Service'
 }

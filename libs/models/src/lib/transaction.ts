@@ -1,6 +1,8 @@
 export type Transaction = {
-    transactionId: Number;
-    paymentMethodId: Number;
-    guestId: Number;
-    amount: Number;
+    transactionId?: number;
+    paymentMethodId: number;
+    guestId: number;
+    amount: number;
+    description: string;
+    date: Date;
 }

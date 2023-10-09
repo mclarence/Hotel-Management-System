@@ -2,23 +2,19 @@ import {Paper} from "@mui/material";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {ApiResponse, User} from "@hotel-management-system/models";
 import React, {useEffect, useRef, useState} from "react";
-import {getUsers} from "../../api/users";
+import {deleteUser, getUsers} from "../../api/users";
 import {useSelector} from "react-redux";
 import {RootState} from "../../redux/store";
 import {useNavigate} from "react-router-dom";
 import {useAppDispatch} from "../../redux/hooks";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import SpeedDial from '@mui/material/SpeedDial';
-import SpeedDialIcon from '@mui/material/SpeedDialIcon';
-import SpeedDialAction from '@mui/material/SpeedDialAction';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {AddUserDialog} from "./components/AddUserDialog";
-import {RowDeleteButton} from "./components/RowDeleteButton";
 import {CustomNoRowsOverlay} from "../../../util/CustomNoRowsOverlay";
-import {RowEditButton} from "./components/RowEditButton";
 import {EditUserDialog} from "./components/EditUserDialog";
+import { RowDeleteButton } from "../../../util/RowDeleteButton";
+import { RowEditButton } from "../../../util/RowEditButton";
 
 
 export const UsersPage = () => {
@@ -37,6 +33,11 @@ export const UsersPage = () => {
             navigate('/login')
         }
     }, [appState.loggedIn]);
+
+    const handleEditClick = (user: User) => {
+        setSelectedUserForEdit(user);
+        setOpenEditUserDialog(true);
+    }
 
     const fetchUsers = () => {
         setIsLoading(true)
@@ -72,6 +73,47 @@ export const UsersPage = () => {
         })
     }
 
+    const handleDeleteSingleUser = (userId: number) => {
+        if (!window.confirm('Are you sure you want to delete this user?')) {
+            return;
+        }
+
+        deleteUser(userId).then((response) => {
+            return response.json();
+        })
+            .then((data: ApiResponse<User>) => {
+                if (data.success) {
+                    dispatch(appStateSlice.actions.setSnackBarAlert({
+                        show: true,
+                        message: "User deleted successfully",
+                        severity: 'success'
+                    }))
+                    fetchUsers();
+                } else if (!data.success && data.statusCode === 401) {
+                    dispatch(appStateSlice.actions.setSnackBarAlert({
+                        show: true,
+                        message: data.message,
+                        severity: 'warning'
+                    }))
+                } else {
+                    dispatch(appStateSlice.actions.setSnackBarAlert({
+                        show: true,
+                        message: data.message,
+                        severity: 'error'
+                    }))
+                }
+            })
+            .catch((error) => {
+                dispatch(appStateSlice.actions.setSnackBarAlert({
+                    show: true,           
+                    message: error.message,
+                    severity: 'error'
+                }))
+            }).finally(() => {
+        })
+    }
+
+
     const refreshUsers = () => {
         fetchUsers();
     }
@@ -95,7 +137,7 @@ export const UsersPage = () => {
             {field: 'roleId', headerName: 'Role ID'},
             {
                 field: 'actions',
-                headerName: '',
+                headerName: 'Actions',
                 sortable: false,
                 filterable: false,
                 hideable: false,
@@ -103,8 +145,8 @@ export const UsersPage = () => {
                 disableColumnMenu: true,
                 renderCell: (params: any) => (
                     <>
-                        <RowDeleteButton params={params} fetchUsers={fetchUsers}/>
-                        <RowEditButton params={params} fetchUsers={fetchUsers} setSelectedUserForEdit={setSelectedUserForEdit} setShowEditUserDialog={setOpenEditUserDialog}/>
+                        <RowDeleteButton params={params} deleteFunction={handleDeleteSingleUser} idField="userId"/>
+                        <RowEditButton onClick={() => handleEditClick(params.row)}/>
                     </>
                 )
             },

@@ -18,6 +18,16 @@ const strings = {
         invalidField: (fieldName: string) => `The request body contains an invalid field: ${fieldName}`,
         incorrectPassword: "Incorrect password.",
         loginSuccessful: "Login successful.",
+        queryNotProvided: "A query was not provided.",
+        invalidRoomId: "The provided roomId is invalid.",
+        roomIdNotFound: (roomId: number) => `Room with roomId ${roomId} not found.`,
+        roomConflict: (roomCode: string) => `Room with room code ${roomCode} already exists.`,
+        invalidRoomCode: "The provided roomCode is invalid.",
+        invalidTransactionId: "The provided transactionId is invalid.",
+        invalidTransaction: "The provided transaction is invalid.",
+        transactionIdNotFound: (transactionId: number) => `Transaction with transactionId ${transactionId} not found.`,
+        guestIdNotFound: (guestId: number) => `Guest with guestId ${guestId} not found.`,
+        paymentMethodIdNotFound: (paymentMethodId: number) => `Payment method with paymentMethodId ${paymentMethodId} not found.`,
     }
 }
 
