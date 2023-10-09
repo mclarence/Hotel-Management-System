@@ -51,6 +51,17 @@ const queries = {
                 FOREIGN KEY (room_id) REFERENCES rooms(room_id),
                 FOREIGN KEY (guest_id) REFERENCES guests(guest_id)
             );
+            CREATE TABLE IF NOT EXISTS payment_methods (
+                payment_method_id SERIAL PRIMARY KEY,
+                guest_id INTEGER NOT NULL,
+                type VARCHAR(255) NOT NULL,
+                card_number VARCHAR(255),
+                card_cvv VARCHAR(255),
+                card_expiration DATE,
+                card_holder_name VARCHAR(255),
+                bank_account_number VARCHAR(255),
+                bank_bsb VARCHAR(255)
+            );
         `,
     },
     roles: {
@@ -214,6 +225,35 @@ const queries = {
         checkRoomExistsByRoomCode: `
             SELECT EXISTS(SELECT 1 FROM rooms WHERE room_code = $1)
         `,
+    },
+    paymentMethods: {
+        getPaymentMethods: `
+            SELECT * FROM payment_methods
+        `,
+        getPaymentMethodById: `
+            SELECT * FROM payment_methods WHERE payment_method_id = $1
+        `,
+        getPaymentMethodsByGuestId: `
+            SELECT * FROM payment_methods WHERE guest_id = $1
+        `,
+        addPaymentMethod: `
+            INSERT INTO payment_methods (guest_id, type, card_number, card_cvv, card_expiration, card_holder_name, bank_account_number, bank_bsb)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING *
+        `,
+        updatePaymentMethod: `
+            UPDATE payment_methods
+            SET guest_id = $1, type = $2, card_number = $3, card_cvv = $4, card_expiration = $5, card_holder_name = $6, bank_account_number = $7, bank_bsb = $8
+            WHERE payment_method_id = $9
+            RETURNING *
+        `,
+        deletePaymentMethod: `
+            DELETE FROM payment_methods
+            WHERE payment_method_id = $1
+        `,
+        checkPaymentMethodExistsById: `
+            SELECT EXISTS(SELECT 1 FROM payment_methods WHERE payment_method_id = $1)
+        `
     }
 }
 

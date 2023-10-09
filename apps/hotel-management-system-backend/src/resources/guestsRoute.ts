@@ -25,7 +25,8 @@ const makeGuestsRoute = (
         deleteGuest,
         checkGuestExistsById,
         getGuestById,
-        searchGuests
+        searchGuests,
+        getPaymentMethodsByGuestId
     } = guestsDAO
 
     const router = express.Router();
@@ -80,6 +81,48 @@ const makeGuestsRoute = (
         }
     })
 
+    router.get("/:guestId/payment-methods", authentication, authorization("paymentMethods.read"), async (req: express.Request, res: express.Response) => {
+        try {
+            const guestId = parseInt(req.params.guestId);
+
+            if (isNaN(guestId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: "Invalid guest id",
+                    data: null,
+                })
+            }
+
+            // check if guest exists
+            const guestExists = await checkGuestExistsById(guestId);
+
+            if (!guestExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: "Guest not found",
+                    data: null,
+                })
+            }
+
+            const paymentMethods = await getPaymentMethodsByGuestId(guestId);
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: "Payment methods fetched successfully",
+                data: paymentMethods,
+            })
+        } catch (err) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: "Failed to fetch payment methods",
+                data: err.message,
+            })
+        }
+    })
     router.get("/:guestId", authentication, authorization("guests.read"), async (req: express.Request, res: express.Response) => {
         try {
             const guestId = parseInt(req.params.guestId);

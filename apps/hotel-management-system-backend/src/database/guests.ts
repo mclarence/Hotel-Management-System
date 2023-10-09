@@ -1,5 +1,5 @@
 import {
-    Guest
+    Guest, PaymentMethod
 } from "@hotel-management-system/models"
 import pgPromise, {IDatabase} from "pg-promise";
 import queries from "./sql/queries";
@@ -14,9 +14,19 @@ export interface IGuestDAO {
     getGuestById(id: number): Promise<Guest>;
     checkGuestExistsById(id: number): Promise<boolean>;
     searchGuests(query: string): Promise<Guest[]>;
+    getPaymentMethodsByGuestId(guestId: number): Promise<PaymentMethod[]>;
 }
 
 const makeGuestDAO = (db: IDatabase<any, any>): IGuestDAO => {
+
+    const getPaymentMethodsByGuestId = async (guestId: number): Promise<PaymentMethod[]> => {
+        try {
+            const paymentMethods = await db.any(queries.paymentMethods.getPaymentMethodsByGuestId, [guestId]);
+            return paymentMethods;
+        } catch (error) {
+            throw error;
+        }
+    }
     const getGuests = async (): Promise<Guest[]> => {
         try {
             const guests: Guest[] = await db.any(queries.guests.getGuests);
@@ -135,7 +145,8 @@ const makeGuestDAO = (db: IDatabase<any, any>): IGuestDAO => {
         deleteGuest,
         checkGuestExistsById,
         getGuestById,
-        searchGuests
+        searchGuests,
+        getPaymentMethodsByGuestId
     }
 }
 
