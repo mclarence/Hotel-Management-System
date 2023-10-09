@@ -30,3 +30,13 @@ export const deleteUser = (userId: number): Promise<Response> => {
         }
     })
 }
+
+export const getCurrentUser = (): Promise<Response> => {
+    return fetch('/api/users/current', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+        }
+    });
+};

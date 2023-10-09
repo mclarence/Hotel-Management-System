@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Dialog, DialogTitle, DialogContent, Grid, Typography, TextField, Stack } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { addLog, deleteLog, getLogs } from "../../api/logs";
+import { getCurrentUser } from '../../api/users';
 
 export type Logs = {
     logId: number;
@@ -18,7 +19,10 @@ const LogsComponent = () => {
     const [isFetchingLogs, setIsFetchingLogs] = useState<boolean>(false);
     const [isOpenDrawer, setIsOpenDrawer] = useState(false);
     const [isOpenAddLogDialog, setIsOpenAddLogDialog] = useState(false);
-    const [newLog, setNewLog] = useState<Partial<Logs>>({});
+    const [newLog, setNewLog] = useState<Partial<Logs>>({
+        operationType: "Log adjustment"  // 
+    });
+    const [currentUserName, setCurrentUserName] = useState<string | null>(null);
 
     useEffect(() => {
         getLogs()
@@ -28,6 +32,28 @@ const LogsComponent = () => {
                 setIsFetchingLogs(false);
             });
     }, []);
+
+    useEffect(() => {
+        const fetchUserName = async () => {
+            const name = await getCurrentUserName();
+            setCurrentUserName(name);
+        };
+    
+        fetchUserName();
+    }, []);
+    
+    const getCurrentUserName = async () => {
+        try {
+            const response = await getCurrentUser();
+            const data = await response.json();
+            
+            // ***The data structure returned based on the actual API，Get user name***
+            return data.userName || "DefaultUserName";
+        } catch (error) {
+            console.error("Failed to get current user name:", error);
+            return "DefaultUserName";
+        }
+    };
 
     const handleAddLog = (log: Logs) => {
         addLog(log)
@@ -50,20 +76,32 @@ const LogsComponent = () => {
     const handleAddLogDialogClose = () => {
         setIsOpenAddLogDialog(false);
     };
-
-    const handleSubmitLog = () => {
+    const handleSubmitLog = async () => {
         if (newLog) {
-            handleAddLog(newLog as Logs);
-            setNewLog({});
+            const currentTimestamp = new Date();
+            const currentUserName = await getCurrentUserName();
+    
+            const logWithTimestampAndUser = {
+                ...newLog,
+                timestamp: currentTimestamp,
+                operatedBy: currentUserName
+            }
+    
+            handleAddLog(logWithTimestampAndUser as Logs);
+            setNewLog({
+                operationType: "Log adjustment"
+            });
             handleAddLogDialogClose();
         }
     };
+    
 
     const columns: GridColDef[] = [
         { field: 'logId', headerName: 'Log ID', width: 130 },
         { field: 'operationType', headerName: 'Operation Type', width: 180 },
         { field: 'timestamp', headerName: 'Timestamp', width: 250 },
         { field: 'operatedBy', headerName: 'Operated By', width: 180 },
+        { field: 'additionalInfo', headerName: 'Additional Info', width: 250 },
         {
             field: 'actions',
             headerName: 'Actions',
@@ -109,18 +147,29 @@ const LogsComponent = () => {
                                 label="Operation Type"
                                 fullWidth
                                 value={newLog.operationType || ""}
-                                onChange={(e) => setNewLog(prev => ({ ...prev, operationType: e.target.value }))}
+                                InputProps={{
+                                    readOnly: true,  
+                                }}
                             />
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
                                 label="Operated By"
                                 fullWidth
-                                value={newLog.operatedBy || ""}
-                                onChange={(e) => setNewLog(prev => ({ ...prev, operatedBy: e.target.value }))}
+                                value={newLog.operatedBy || getCurrentUserName()}
+                                InputProps={{
+                                    readOnly: true,  
+                                }}
                             />
                         </Grid>
-                        {/*... (Add more fields as needed) */}
+                        <Grid item xs={12}>
+                            <TextField
+                                label="Additional Info"
+                                fullWidth
+                                value={newLog.additionalInfo || ""}
+                                onChange={(e) => setNewLog(prev => ({ ...prev, additionalInfo: e.target.value }))}
+                            />
+                        </Grid>
                     </Grid>
                     <Button onClick={handleSubmitLog} variant="contained" color="primary" style={{ float: 'right', marginTop: 30 }}>
                         Submit
