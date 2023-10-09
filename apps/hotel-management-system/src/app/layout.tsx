@@ -21,7 +21,7 @@ import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-import {Avatar, ButtonBaseProps, Paper, Stack} from '@mui/material';
+import {Avatar, Paper, Stack} from '@mui/material';
 import {useSelector} from 'react-redux';
 import {RootState} from './redux/store';
 import {useAppDispatch} from './redux/hooks';
@@ -33,6 +33,7 @@ import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import HailIcon from '@mui/icons-material/Hail';
 import LoginIcon from '@mui/icons-material/Login';
 import EventSeatIcon from '@mui/icons-material/EventSeat';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 
 const drawerWidth = 240;
 
@@ -143,6 +144,15 @@ const sidebarItems = [
         text: 'Reservations',
         icon: <EventSeatIcon/>,
         to: '/reservations',
+    },
+    {
+        text: 'Finance',
+        isHeader: true,
+    },
+    {
+        text: 'Transactions',
+        icon: <ReceiptLongIcon/>,
+        to: '/transactions',
     },
     {
         text: 'User Management',

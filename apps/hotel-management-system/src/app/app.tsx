@@ -16,6 +16,7 @@ import {block} from "million/react";
 import GuestsPage from './pages/guests-page/GuestsPage';
 import CheckInOutPage from './pages/checkin-out-page/CheckInOutPage';
 import ReservationsPage from './pages/reservations-page/ReservationsPage';
+import {TransactionsPage} from "./pages/transactions/TransactionsPage";
 
 export const theme = createTheme({
     palette: {
@@ -49,6 +50,7 @@ export function App() {
                         <Route path="guests" element={<GuestsPage/>}/>
                         <Route path="check-in-out" element={<CheckInOutPage/>}/>
                         <Route path="reservations" element={<ReservationsPage/>}/>
+                        <Route path="transactions" element={<TransactionsPage/>}/>
                     </Route>
                     <Route path="login" element={<LoginPage/>}/>
                 </Routes>

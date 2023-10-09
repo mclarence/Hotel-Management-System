@@ -28,6 +28,8 @@ import {makeReservationsRoute} from "./resources/reservationsRoute";
 import {makeRoomsDAO} from "./database/rooms";
 import {makePaymentMethodsDAO} from "./database/paymentMethods";
 import {makePaymentMethodRoute} from "./resources/paymentMethodRoute";
+import {makeTransactionsDAO} from "./database/transaction";
+import {makeTransactionsRoute} from "./resources/transactionsRoute";
 
 const createDefaultRoleAndAdmin = async (
     rolesDAO: IRolesDAO,
@@ -120,6 +122,7 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
     const tokenRevocationListDAO = makeTokenRevocationListDAO(db.db);
     const roomsDAO = makeRoomsDAO(db.db);
     const paymentMethodsDAO = makePaymentMethodsDAO(db.db)
+    const transactionsDAO = makeTransactionsDAO(db.db)
 
     await createDefaultRoleAndAdmin(rolesDAO, usersDAO);
 
@@ -177,12 +180,20 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
         authorizationMiddleware
     )
 
+    const transactionsRoute = makeTransactionsRoute(
+        transactionsDAO,
+        guestsDAO,
+        authenticationMiddleware,
+        authorizationMiddleware
+    )
+
     app.use("/api/users", usersRoute.router);
     app.use("/api/roles", rolesRoute.router);
     app.use("/api/rooms", roomsRoute.router);
     app.use("/api/guests", guestsRoute.router);
     app.use("/api/reservations", reservationsRoute.router);
     app.use("/api/payment-methods", paymentMethodsRoute.router);
+    app.use("/api/transactions", transactionsRoute.router);
     app.use(express.static(path.join(__dirname, "assets")));
 
     // catch all errors

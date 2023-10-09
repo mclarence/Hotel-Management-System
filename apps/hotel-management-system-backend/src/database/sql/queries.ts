@@ -62,6 +62,17 @@ const queries = {
                 bank_account_number VARCHAR(255),
                 bank_bsb VARCHAR(255)
             );
+            CREATE TABLE IF NOT EXISTS transaction (
+                transaction_id SERIAL PRIMARY KEY,
+                payment_method_id INTEGER NOT NULL,
+                guest_id INTEGER NOT NULL,
+                amount FLOAT NOT NULL,
+                description VARCHAR(255) NOT NULL,
+                date TIMESTAMP NOT NULL,
+                FOREIGN KEY (payment_method_id) REFERENCES payment_methods(payment_method_id),
+                FOREIGN KEY (guest_id) REFERENCES guests(guest_id)
+            )
+          
         `,
     },
     roles: {
@@ -254,6 +265,36 @@ const queries = {
         checkPaymentMethodExistsById: `
             SELECT EXISTS(SELECT 1 FROM payment_methods WHERE payment_method_id = $1)
         `
+    },
+    transactions: {
+        getTransactions: `
+            SELECT * FROM transaction
+            `,
+        getTransactionById: `
+            SELECT * FROM transaction WHERE transaction_id = $1
+        `,
+        getTransactionsByGuestId: `
+            SELECT * FROM transaction WHERE guest_id = $1
+        `,
+        addTransaction: `
+            INSERT INTO transaction (payment_method_id, guest_id, amount, description, date)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING *
+        `,
+        updateTransaction: `
+            UPDATE transaction
+            SET payment_method_id = $1, guest_id = $2, amount = $3, description = $4, date = $5
+            WHERE transaction_id = $6
+            RETURNING *
+        `,
+        deleteTransaction: `
+            DELETE FROM transaction
+            WHERE transaction_id = $1
+        `,
+        checkTransactionExistsById: `
+            SELECT EXISTS(SELECT 1 FROM transaction WHERE transaction_id = $1)
+        `
+        
     }
 }
 
