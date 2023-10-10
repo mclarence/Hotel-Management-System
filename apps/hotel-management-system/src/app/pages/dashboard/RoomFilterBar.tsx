@@ -21,6 +21,7 @@ function RoomFilterBar({ filterStatus, setFilterStatus, searchRoomNumber, setSea
                             <MenuItem key={status} value={status}>{status}</MenuItem>
                         ))
                     }
+                    <MenuItem value={''}>All (Clear Selection)</MenuItem>
                 </Select>
             </FormControl>
             <TextField

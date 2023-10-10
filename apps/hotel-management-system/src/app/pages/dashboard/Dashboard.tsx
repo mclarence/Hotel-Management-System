@@ -4,15 +4,14 @@ import {Cell, Pie, PieChart, Tooltip} from 'recharts';
 import RoomCard from './RoomCard';
 import RoomFilterBar from './RoomFilterBar';
 import {Card, Stack, Typography} from '@mui/material';
-import appStateSlice from '../../redux/slices/AppStateSlice';
 import {useAppDispatch} from "../../redux/hooks";
 import {useNavigate} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {RootState} from "../../redux/store";
-import {searchReservations} from "../../api/reservations";
-import {ApiResponse, Reservation, Room} from "@hotel-management-system/models";
-import {getRooms} from "../../api/rooms";
-import {handleApiResponse} from "../../api/handleApiResponse";
+import {searchReservations} from "../../api/resources/reservations";
+import {Reservation, Room, RoomStatuses} from "@hotel-management-system/models";
+import {getRooms, getRoomStatusCount} from "../../api/resources/rooms";
+import {makeApiRequest} from "../../api/makeApiRequest";
 import dayjs from "dayjs";
 
 export function Dashboard() {
@@ -22,11 +21,25 @@ export function Dashboard() {
     const [checkInsToday, setCheckInsToday] = useState(0);
     const [checkOutsToday, setCheckOutsToday] = useState(0);
     const [rooms, setRooms] = useState<Room[]>([]);
+    const [pieChartData, setPieChartData] = useState<{ status: string, count: number }[]>([]);
 
     useEffect(() => {
-        const currentDate = dayjs.utc().utcOffset(0).toDate();
+        const currentDate = dayjs.utc()
 
-        handleApiResponse<Reservation[]>(
+        makeApiRequest<{ status: string, count: string }[]>(
+            getRoomStatusCount(),
+            dispatch,
+            (data) => {
+                setPieChartData(data.map((item) => {
+                    return {
+                        status: item.status,
+                        count: parseInt(item.count)
+                    }
+                }))
+            }
+        )
+
+        makeApiRequest<Reservation[]>(
             searchReservations({
                 checkInDate: currentDate,
             }),
@@ -35,7 +48,7 @@ export function Dashboard() {
                 setCheckInsToday(data.length);
             })
 
-        handleApiResponse<Reservation[]>(
+        makeApiRequest<Reservation[]>(
             searchReservations({
                 checkOutDate: currentDate,
             }),
@@ -45,7 +58,7 @@ export function Dashboard() {
             }
         )
 
-        handleApiResponse<Room[]>(
+        makeApiRequest<Room[]>(
             getRooms(),
             dispatch,
             (data) => {
@@ -56,15 +69,15 @@ export function Dashboard() {
     }, []);
 
 
-    const occupancyRate = 78;
-    const vacancyRate = 100 - occupancyRate;
-
-    const data = [
-        {name: 'OccupancyRate', value: occupancyRate},
-        {name: 'VacancyRate', value: vacancyRate},
-    ];
-
-    const COLORS = ['#36A2EB', '#FFCE56'];
+    const colours: {
+        [key: string]: string
+    } = {
+        [RoomStatuses.AVAILABLE]: '#00C49F',
+        [RoomStatuses.OUT_OF_SERVICE]: '#FF8042',
+        [RoomStatuses.UNAVAILABLE]: '#FFBB28',
+        [RoomStatuses.OCCUPIED]: '#0088FE',
+        [RoomStatuses.RESERVED]: '#FF8042'
+    }
 
 // 筛选和搜索的状态
     const [filterStatus, setFilterStatus] = useState('');
@@ -103,17 +116,19 @@ export function Dashboard() {
                 <Stack gap={2} padding={1}>
                     <Card>
                         <Stack margin={2}>
-                            <Typography variant='h5'>Occupancy rate</Typography>
+                            <Typography variant='h5'>Room Status Overview</Typography>
                             <PieChart width={300} height={300}>
                                 <Pie
-                                    data={data}
+                                    data={pieChartData}
                                     outerRadius={100}
                                     fill="#8884d8"
-                                    dataKey="value"
+                                    dataKey="count"
+                                    nameKey="status"
+                                    label
                                 >
-                                    {
-                                        data.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index]}/>)
-                                    }
+                                    {pieChartData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={colours[entry.status]}/>
+                                    ))}
                                 </Pie>
                                 <Tooltip/>
                             </PieChart>
@@ -126,18 +141,8 @@ export function Dashboard() {
                             <Typography variant='body1'>Departures: {checkOutsToday}</Typography>
                         </Stack>
                     </Card>
-                    <Card>
-                        <Stack margin={2}>
-                            <Typography variant='h5'>Room status</Typography>
-                            <ul>
-                                <li>Booked: 20</li>
-                                <li>Checked in: 45</li>
-                                <li>To be maintained: 15</li>
-                            </ul>
-                        </Stack>
-                    </Card>
                 </Stack>
             </section>
         </div>
-    );
+);
 }

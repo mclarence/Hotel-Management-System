@@ -32,6 +32,10 @@ function RoomCard({roomNumber, occupantName, roomInfo, roomStatus}: RoomProps) {
                 setRoomColor('red')
                 setCenterDisplay(occupantName || 'Unavailable');
                 break;
+            case RoomStatuses.RESERVED:
+                setRoomColor('#FF7F50')
+                setCenterDisplay(occupantName || 'Reserved');
+                break;
             default:
                 setRoomColor('gray')
                 setCenterDisplay(occupantName || 'unknown state');
