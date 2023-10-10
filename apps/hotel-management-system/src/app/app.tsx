@@ -22,7 +22,7 @@ import {LocalizationProvider} from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { LogsComponent } from './pages/logsystem/logpage';
+import LogsComponent from './pages/logsystem/logpage';
 
 
 

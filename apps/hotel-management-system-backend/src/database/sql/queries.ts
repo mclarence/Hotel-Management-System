@@ -1,4 +1,3 @@
-
 const queries = {
     tables: {
         createAll: `

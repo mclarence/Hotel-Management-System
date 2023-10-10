@@ -126,11 +126,8 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
     const logsDAO = makeLogsDAO(db.db)
     const tokenRevocationListDAO = makeTokenRevocationListDAO(db.db)
     const calendarDAO = makeNotesDAO(db.db)
-    const usersDAO = makeUsersDAO(db.db);
-    const rolesDAO = makeRolesDAO(db.db);
     const guestsDAO = makeGuestDAO(db.db);
     const reservationsDAO = makeReservationDAO(db.db);
-    const tokenRevocationListDAO = makeTokenRevocationListDAO(db.db);
     const roomsDAO = makeRoomsDAO(db.db);
     const paymentMethodsDAO = makePaymentMethodsDAO(db.db)
     const transactionsDAO = makeTransactionsDAO(db.db)
@@ -220,7 +217,7 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
 
     app.use("/api/users", usersRoute.router);
     app.use("/api/roles", rolesRoute.router);
-    app.use("/api/rooms", roomsRouter);
+    app.use("/api/rooms", roomsRoute.router);
     app.use("/api/logs", logsRoute.router);
     app.use("/api/calendar", calendarRoute.router);
     app.use("/api/rooms", roomsRoute.router);
