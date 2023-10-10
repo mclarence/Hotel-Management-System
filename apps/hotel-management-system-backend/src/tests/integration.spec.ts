@@ -149,3 +149,170 @@ describe("user management", () => {
     })
 })
 
+describe("role management", () => {
+    let token: string;
+    it("should return a jwt token when the correct credentials are provided", async () => {
+        const response = await request(app)
+            .post("/api/users/login")
+            .send({
+                username: "admin",
+                password: "admin"
+            })
+            .expect(200)
+        expect(response.body.data).toHaveProperty("jwt")
+        token = response.body.data.jwt;
+        console.log(token)
+    })
+
+    it("should return a list of roles", async () => {
+        await request(app)
+            .get("/api/roles")
+            .set("Authorization", `Bearer ${token}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.data.length).toBe(1)
+            })
+    })
+
+    it("should add a new role", async () => {
+        await request(app)
+            .post("/api/roles/add")
+            .set("Authorization", `Bearer ${token}`)
+            .send({
+                name: "test",
+                permissionData: ["users.read"]
+            })
+            .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
+            .expect(201)
+    })
+
+    it("should get a role", async () => {
+        await request(app)
+            .get("/api/roles/2")
+            .set("Authorization", `Bearer ${token}`)
+            .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.data).toHaveProperty("name", "test")
+                expect(res.body.data).toHaveProperty("permissionData", ["users.read"])
+            })
+    })
+
+    it("should delete a role", async () => {
+        await request(app)
+            .delete("/api/roles/2")
+            .set("Authorization", `Bearer ${token}`)
+            .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
+            .expect(200)
+
+        await request(app)
+            .get("/api/roles/2")
+            .set("Authorization", `Bearer ${token}`)
+            .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
+            .expect(404)
+    })
+
+})
+
+describe("guest management", () => {
+    let token: string;
+    it("should return a jwt token when the correct credentials are provided", async () => {
+        const response = await request(app)
+            .post("/api/users/login")
+            .send({
+                username: "admin",
+                password: "admin"
+            })
+            .expect(200)
+        expect(response.body.data).toHaveProperty("jwt")
+        token = response.body.data.jwt;
+        console.log(token)
+    })
+
+    it("should add a new guest", async () => {
+        await request(app)
+            .post("/api/guests/add")
+            .set("Authorization", `Bearer ${token}`)
+            .send({
+                firstName: "test",
+                lastName: "test",
+                email: "test@example.com",
+                phoneNumber: "123456789",
+                address: "test address"
+            })
+            .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
+            .expect(201)
+    })
+
+    it("should get a guest", async () => {
+        await request(app)
+            .get("/api/guests/1")
+            .set("Authorization", `Bearer ${token}`)
+            .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.data).toHaveProperty("firstName", "test")
+                expect(res.body.data).toHaveProperty("lastName", "test")
+                expect(res.body.data).toHaveProperty("email", "test@example.com")
+                expect(res.body.data).toHaveProperty("phoneNumber", "123456789")
+                expect(res.body.data).toHaveProperty("address", "test address")
+            })
+    })
+
+    it("should update a guest", async () => {
+        await request(app)
+            .patch("/api/guests/1")
+            .set("Authorization", `Bearer ${token}`)
+            .send({
+                firstName: "test1",
+                lastName: "test2",
+                email: "test1@example.com",
+                phoneNumber: "1234",
+                address: "test address 1"
+            })
+            .expect((res) => (res.status != 200 ? console.log(res.body) : 0))
+            .expect((res) => {
+                expect(res.body.data).toHaveProperty("firstName", "test1")
+                expect(res.body.data).toHaveProperty("lastName", "test2")
+                expect(res.body.data).toHaveProperty("email", "test1@example.com")
+                expect(res.body.data).toHaveProperty("phoneNumber", "1234")
+                expect(res.body.data).toHaveProperty("address", "test address 1")
+            })
+    })
+
+    it("should list all guests", async () => {
+        await request(app)
+            .get("/api/guests")
+            .set("Authorization", `Bearer ${token}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.data.length).toBeGreaterThan(0)
+            })
+    })
+
+    it("should search for a guest by name", async () => {
+        await request(app)
+            .get("/api/guests/search?q=test1")
+            .set("Authorization", `Bearer ${token}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.data.length).toBeGreaterThan(0)
+            })
+            .expect((res) => {
+                expect(res.body.data[0]).toHaveProperty("firstName", "test1")
+                expect(res.body.data[0]).toHaveProperty("lastName", "test2")
+            })
+    })
+
+    it("should delete a guest", async () => {
+        await request(app)
+            .delete("/api/guests/1")
+            .set("Authorization", `Bearer ${token}`)
+            .expect(200)
+
+        await request(app)
+            .get("/api/guests/1")
+            .set("Authorization", `Bearer ${token}`)
+            .expect(404)
+    })
+})

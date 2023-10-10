@@ -9,31 +9,32 @@ import appStateSlice from "../../../redux/slices/AppStateSlice";
 import IconButton from "@mui/material/IconButton";
 import {CircularProgress} from "@mui/material";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
-
+import DeleteIcon from "@mui/icons-material/Delete";
+import { deleteRole } from "../../../api/roles";
 export const RowDeleteButton = (props: {
     params: GridCellParams,
-    fetchUsers: () => void
+    fetchRoles: () => void
 }) => {
     const appState = useSelector((state: RootState) => state.appState);
     const dispatch = useAppDispatch();
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-    const handleDeleteSingleUser = (userId: number) => {
-        if (!window.confirm('Are you sure you want to delete this user?')) {
+    const handleDeletingSignleRole = (roleId: number) => {
+        if (!window.confirm('Are you sure you want to delete this role?')) {
             return;
         }
         setIsDeleting(true);
-        deleteUser(userId).then((response) => {
+        deleteRole(roleId).then((response) => {
             return response.json();
         })
             .then((data: ApiResponse<User>) => {
                 if (data.success) {
                     dispatch(appStateSlice.actions.setSnackBarAlert({
                         show: true,
-                        message: "User deleted successfully",
+                        message: "Role deleted successfully",
                         severity: 'success'
                     }))
-                    props.fetchUsers();
+                    props.fetchRoles();
                 } else if (!data.success && data.statusCode === 401) {
                     dispatch(appStateSlice.actions.setSnackBarAlert({
                         show: true,
@@ -60,9 +61,9 @@ export const RowDeleteButton = (props: {
     }
 
     return (
-        <IconButton size={"small"} color={"error"} onClick={() => handleDeleteSingleUser(props.params.row.userId)}
+        <IconButton size={"small"} color={"error"} onClick={() => handleDeletingSignleRole(props.params.row.roleId)}
                     disabled={isDeleting}>
-            {isDeleting ? <CircularProgress size={20}/> : <PersonRemoveIcon fontSize={"inherit"}/>}
+            {isDeleting ? <CircularProgress size={20}/> : <DeleteIcon fontSize={"inherit"}/>}
         </IconButton>
     )
 

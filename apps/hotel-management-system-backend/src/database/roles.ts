@@ -1,4 +1,4 @@
-import {Role} from "@hotel-management-system/models";
+import {Role, User} from "@hotel-management-system/models";
 import pgPromise, {IDatabase} from "pg-promise";
 import queryResultErrorCode = pgPromise.errors.queryResultErrorCode;
 import QueryResultError = pgPromise.errors.QueryResultError;
@@ -9,7 +9,9 @@ export interface IRolesDAO {
     checkRoleExists: (roleId: number) => Promise<boolean>,
     addRole: (role: Role) => Promise<Role>,
     updateRole: (role: Role) => Promise<Role>,
-    getAllRoles: () => Promise<Role[]>
+    getAllRoles: () => Promise<Role[]>,
+    deleteRole: (roleId: number) => Promise<void>,
+    getUsersWithRoles: (roleId: number) => Promise<User[]>
 }
 
 export const makeRolesDAO = (db: IDatabase<any, any>): IRolesDAO => {
@@ -79,6 +81,27 @@ export const makeRolesDAO = (db: IDatabase<any, any>): IRolesDAO => {
         }
     }
 
+    const getUsersWithRoles = async (roleId: number): Promise<User[]> => {
+        try {
+            const result: any = await db.manyOrNone(queries.roles.getUsersWithRoles, [roleId]);
+            return result;
+        } catch (err) {
+            if (err instanceof QueryResultError && err.code === queryResultErrorCode.noData) {
+                return [];
+            }
+            throw err;
+        }
+    }
+
+    const deleteRole = async (roleId: number): Promise<void> => {
+        try {
+            const role: Role = await db.none(queries.roles.deleteRole, [roleId]);
+        } catch (err) {
+            throw err;
+        }
+
+    }
+
     /**
      * Get all roles.
      * @returns A promise that resolves to an array of roles.
@@ -93,7 +116,9 @@ export const makeRolesDAO = (db: IDatabase<any, any>): IRolesDAO => {
         checkRoleExists,
         addRole,
         updateRole,
-        getAllRoles
+        getAllRoles,
+        deleteRole,
+        getUsersWithRoles
     }
 
 

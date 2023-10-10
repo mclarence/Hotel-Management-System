@@ -1,5 +1,5 @@
 export type Role = {
-    roleId: number;
+    roleId?: number;
     name: string;
     permissionData: string[];
 }

@@ -21,7 +21,7 @@ import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-import {Avatar, ButtonBaseProps, Paper, Stack} from '@mui/material';
+import {Avatar, Paper, Stack} from '@mui/material';
 import {useSelector} from 'react-redux';
 import {RootState} from './redux/store';
 import {useAppDispatch} from './redux/hooks';
@@ -30,6 +30,11 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import {logout} from "./api/auth";
 import PeopleIcon from '@mui/icons-material/People';
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
+import HailIcon from '@mui/icons-material/Hail';
+import LoginIcon from '@mui/icons-material/Login';
+import EventSeatIcon from '@mui/icons-material/EventSeat';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 const drawerWidth = 240;
 
@@ -121,6 +126,43 @@ const sidebarItems = [
         text: 'Tickets',
         icon: <ConfirmationNumberIcon/>,
         to: '/tickets',
+    },
+    {
+        text: 'Scheduling',
+        isHeader: true,
+    },
+    {
+        text: 'Calendar',
+        icon: <CalendarMonthIcon/>,
+        to: '/calendar',
+    },
+    {
+        text: 'Guest Management',
+        isHeader: true,
+    },
+    {
+        text: 'Guests',
+        icon: <HailIcon/>,
+        to: '/guests',
+    },
+    {
+        text: 'Check In/Out',
+        icon: <LoginIcon/>,
+        to: '/check-in-out',
+    },
+    {
+        text: 'Reservations',
+        icon: <EventSeatIcon/>,
+        to: '/reservations',
+    },
+    {
+        text: 'Finance',
+        isHeader: true,
+    },
+    {
+        text: 'Transactions',
+        icon: <ReceiptLongIcon/>,
+        to: '/transactions',
     },
     {
         text: 'User Management',

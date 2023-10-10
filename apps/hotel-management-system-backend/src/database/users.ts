@@ -13,6 +13,7 @@ export interface IUsersDAO {
     checkUserExistsById: (userId: number) => Promise<boolean>;
     deleteUser: (userId: number) => Promise<void>;
     updateUser: (user: User) => Promise<User>;
+    searchUsers: (query: string) => Promise<User[]>;
 }
 
 const makeUsersDAO = (db: IDatabase<any, any>): IUsersDAO => {
@@ -169,6 +170,27 @@ const makeUsersDAO = (db: IDatabase<any, any>): IUsersDAO => {
         ]);
     };
 
+    /**
+     * Search for users by first name or last name
+     * @param query
+     * @returns A promise that resolves to a list of users, an empty list if no users are found.
+     */
+    const searchUsers = async (query: string): Promise<User[]> => {
+        try {
+            const users: User[] = await db.any(queries.users.searchUsers, [
+                query,
+            ]);
+            return users;
+        } catch (err) {
+            if (
+                err instanceof QueryResultError &&
+                err.code === queryResultErrorCode.noData
+            ) {
+                return [];
+            }
+        }
+    }
+
     return {
         getUsers,
         getUserById,
@@ -178,6 +200,7 @@ const makeUsersDAO = (db: IDatabase<any, any>): IUsersDAO => {
         checkUserExistsById,
         deleteUser,
         updateUser,
+        searchUsers,
     };
 };
 

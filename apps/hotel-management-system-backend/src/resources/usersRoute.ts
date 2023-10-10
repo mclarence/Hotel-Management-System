@@ -34,7 +34,8 @@ const makeUsersRoute = (
         checkUserExists,
         checkUserExistsById,
         deleteUser,
-        updateUser
+        updateUser,
+        searchUsers
     } = usersDAO
 
     const {
@@ -69,6 +70,37 @@ const makeUsersRoute = (
         }
 
     });
+
+    router.get("/search", authentication, authorization('users.read'), async (req, res) => {
+        try {
+            const query = req.query.q;
+
+            if (query === undefined) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.queryNotProvided,
+                    data: null
+                })
+            }
+
+            const users = await searchUsers(query.toString());
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.success,
+                data: users
+            })
+        } catch (e) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: e
+            })
+        }
+    })
 
     router.get('/me', authentication, async (req: any, res) => {
         try {
@@ -416,12 +448,12 @@ const makeUsersRoute = (
 
             const schema = Joi.object({
                 username: Joi.string(),
-                password: Joi.string(),
+                password: Joi.string().optional(),
                 firstName: Joi.string(),
                 lastName: Joi.string(),
-                email: Joi.string().email(),
-                phoneNumber: Joi.string(),
-                position: Joi.string(),
+                email: Joi.string().email().optional().allow(''),
+                phoneNumber: Joi.string().optional().allow(''),
+                position: Joi.string().optional().allow(''),
                 roleId: Joi.number()
             })
 
