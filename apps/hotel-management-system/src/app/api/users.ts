@@ -57,7 +57,7 @@ export const deleteUser = (userId: number): Promise<Response> => {
 }
 
 export const getCurrentUser = (): Promise<Response> => {
-    return fetch('/api/users/current', {
+    return fetch('/api/users/me', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

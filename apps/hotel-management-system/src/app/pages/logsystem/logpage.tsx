@@ -3,15 +3,11 @@ import { Box, Button, Dialog, DialogTitle, DialogContent, Grid, Typography, Text
 import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { addLog, deleteLog, getLogs } from "../../api/logs";
 import { getCurrentUser } from '../../api/users';
+import { useAppDispatch } from "../../redux/hooks";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { Logs } from "@hotel-management-system/models";
 
-export type Logs = {
-    logId: number;
-    operationType: string;
-    timestamp: Date;
-    operatedBy: string;
-    guestName?: string;
-    additionalInfo?: string;
-};
 
 const LogsComponent = () => {
     const [selectedLog, setSelectedLog] = useState<Logs | null>(null);
@@ -19,10 +15,11 @@ const LogsComponent = () => {
     const [isFetchingLogs, setIsFetchingLogs] = useState<boolean>(false);
     const [isOpenDrawer, setIsOpenDrawer] = useState(false);
     const [isOpenAddLogDialog, setIsOpenAddLogDialog] = useState(false);
-    const [newLog, setNewLog] = useState<Partial<Logs>>({
-        operationType: "Log adjustment"  // 
-    });
+    const [operationType, setOperationType] = useState("Adjustment log");//The default value for this page
+    const [additionalInfo, setAdditionalInfo] = useState("");
     const [currentUserName, setCurrentUserName] = useState<string | null>(null);
+    const appState = useSelector((state: RootState) => state.appState);
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         getLogs()
@@ -77,20 +74,17 @@ const LogsComponent = () => {
         setIsOpenAddLogDialog(false);
     };
     const handleSubmitLog = async () => {
-        if (newLog) {
+        if (operationType !== "" && additionalInfo !== "") {
             const currentTimestamp = new Date();
-            const currentUserName = await getCurrentUserName();
     
-            const logWithTimestampAndUser = {
-                ...newLog,
+            const logWithTimestampAndUser: Logs = {
                 timestamp: currentTimestamp,
-                operatedBy: currentUserName
+                operatedBy: appState.currentlyLoggedInUser?.userId!,
+                operationType: operationType,
+                additionalInfo: additionalInfo
             }
     
-            handleAddLog(logWithTimestampAndUser as Logs);
-            setNewLog({
-                operationType: "Log adjustment"
-            });
+            handleAddLog(logWithTimestampAndUser as Logs)
             handleAddLogDialogClose();
         }
     };
@@ -114,7 +108,8 @@ const LogsComponent = () => {
                     }}>
                         Edit
                     </Button>
-                    <Button variant="outlined" color="error" onClick={() => handleDeleteLog((params.row as Logs).logId)}>
+                    <Button variant="outlined" color="error" onClick={() => handleDeleteLog((params.row as Logs).logId!)
+}>
                         Delete
                     </Button>
                 </>
@@ -129,12 +124,21 @@ const LogsComponent = () => {
                     Add Log
                 </Button>
                 <DataGrid
+                    density="compact"
                     disableRowSelectionOnClick={true}
+                    checkboxSelection={false}
                     rows={logs}
                     columns={columns}
+                    loading={isFetchingLogs}
+                    initialState={{
+                        pagination: {
+                            paginationModel: { page: 0, pageSize: 10 },
+                        },
+                    }}
                     pageSizeOptions={[5, 10]}
-                    getRowId={(row) => (row as Logs).logId}
-                    checkboxSelection
+                    getRowId={(row) => (row as Logs).logId!}//There is a problem with this line of code
+                    autoHeight={true}
+                    sx={{ height: '100%' }}
                 />
             </Stack>
 
@@ -146,17 +150,7 @@ const LogsComponent = () => {
                             <TextField
                                 label="Operation Type"
                                 fullWidth
-                                value={newLog.operationType || ""}
-                                InputProps={{
-                                    readOnly: true,  
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                label="Operated By"
-                                fullWidth
-                                value={newLog.operatedBy || getCurrentUserName()}
+                                value={operationType}
                                 InputProps={{
                                     readOnly: true,  
                                 }}
@@ -166,8 +160,10 @@ const LogsComponent = () => {
                             <TextField
                                 label="Additional Info"
                                 fullWidth
-                                value={newLog.additionalInfo || ""}
-                                onChange={(e) => setNewLog(prev => ({ ...prev, additionalInfo: e.target.value }))}
+                                value={additionalInfo}
+                                onChange={(e) => {
+                                    setAdditionalInfo(e.target.value)
+                                }}
                             />
                         </Grid>
                     </Grid>

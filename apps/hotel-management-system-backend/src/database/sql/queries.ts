@@ -28,7 +28,7 @@ const queries = {
                 log_id SERIAL PRIMARY KEY,
                 operation_type VARCHAR(255) NOT NULL, 
                 timestamp TIMESTAMP NOT NULL DEFAULT current_timestamp,
-                operated_by VARCHAR(255) NOT NULL,
+                operated_by INTEGER NOT NULL,
                 room_id INTEGER NOT NULL,
                 guest_name VARCHAR(255),
                 additional_info TEXT
