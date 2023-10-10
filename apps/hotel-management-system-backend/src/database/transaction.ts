@@ -20,11 +20,7 @@ export interface ITransactionDAO {
 
 export const makeTransactionsDAO = (db: IDatabase<any, any>): ITransactionDAO => {
     const getTransactions = async (): Promise<Transaction[]> => {
-        try {
-            return await db.any(queries.transactions.getTransactions);
-        } catch (e) {
-            throw e;
-        }
+        return await db.any(queries.transactions.getTransactions);
     }
 
     const getTransaction = async (transactionId: number): Promise<Transaction> => {
@@ -39,37 +35,20 @@ export const makeTransactionsDAO = (db: IDatabase<any, any>): ITransactionDAO =>
     }
 
     const createTransaction = async (transaction: Transaction): Promise<Transaction> => {
-        try {
-            return await db.one(queries.transactions.addTransaction, [transaction.paymentMethodId, transaction.guestId, transaction.amount, transaction.description, transaction.date]);
-        } catch (e) {
-            console.log(e)
-            throw e;
-        }
+        return await db.one(queries.transactions.addTransaction, [transaction.paymentMethodId, transaction.guestId, transaction.amount, transaction.description, transaction.date]);
     }
 
     const updateTransaction = async (transaction: Transaction): Promise<Transaction> => {
-        try {
-            return await db.one(queries.transactions.updateTransaction, [transaction.paymentMethodId, transaction.guestId, transaction.amount, transaction.description, transaction.date, transaction.transactionId]);
-        } catch (e) {
-            throw e;
-        }
+        return await db.one(queries.transactions.updateTransaction, [transaction.paymentMethodId, transaction.guestId, transaction.amount, transaction.description, transaction.date, transaction.transactionId]);
     }
 
     const deleteTransaction = async (transactionId: number): Promise<Transaction> => {
-        try {
-            return await db.none(queries.transactions.deleteTransaction, [transactionId]);
-        } catch (e) {
-            throw e;
-        }
+        return await db.none(queries.transactions.deleteTransaction, [transactionId]);
     }
 
     const checkTransactionExistsById = async (transactionId: number): Promise<boolean> => {
-        try {
-            const exists = await db.one(queries.transactions.checkTransactionExistsById, [transactionId]);
-            return exists.exists;
-        } catch (e) {
-            throw e
-        }
+        const exists = await db.one(queries.transactions.checkTransactionExistsById, [transactionId]);
+        return exists.exists;
     }
 
     return {

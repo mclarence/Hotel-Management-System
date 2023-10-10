@@ -15,13 +15,13 @@ import {
 import Divider from "@mui/material/Divider";
 import {Role, User} from "@hotel-management-system/models";
 import {useEffect, useState} from "react";
-import {getRoles} from "../../../api/roles";
+import {getRoles} from "../../../api/resources/roles";
 import {useAppDispatch} from "../../../redux/hooks";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import EditIcon from "@mui/icons-material/Edit";
-import {updateUser} from "../../../api/users";
+import {updateUser} from "../../../api/resources/users";
 import {DialogHeader} from "../../../../util/components/DialogHeader";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 interface EditUserDialog {
     user: User | null;
@@ -92,7 +92,7 @@ export const EditUserDialog = (props: EditUserDialog) => {
             editedUser.password = password;
         }
 
-        handleApiResponse<User>(
+        makeApiRequest<User>(
             updateUser(editedUser),
             dispatch,
             (data) => {
@@ -139,7 +139,7 @@ export const EditUserDialog = (props: EditUserDialog) => {
     ]);
 
     useEffect(() => {
-        handleApiResponse<Role[]>(
+        makeApiRequest<Role[]>(
             getRoles(),
             dispatch,
             (data) => {

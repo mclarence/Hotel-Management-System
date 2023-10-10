@@ -3,7 +3,7 @@ import {useAppDispatch} from "../../app/redux/hooks";
 import {useEffect, useState} from "react";
 import appStateSlice from "../../app/redux/slices/AppStateSlice";
 import {Autocomplete, TextField} from "@mui/material";
-import {getPaymentMethodsByGuestId} from "../../app/api/paymentMethods";
+import {getPaymentMethodsByGuestId} from "../../app/api/resources/paymentMethods";
 
 export const GuestPaymentMethodAutoCompleteBox = (props: {
     guest: Guest | null,

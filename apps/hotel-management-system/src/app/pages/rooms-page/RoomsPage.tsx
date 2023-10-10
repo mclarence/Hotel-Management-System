@@ -8,12 +8,12 @@ import appStateSlice from "../../redux/slices/AppStateSlice";
 import {useSelector} from "react-redux";
 import {useAppDispatch} from "../../redux/hooks";
 import {RootState} from "../../redux/store";
-import {deleteRoom, getRooms} from "../../api/rooms";
+import {deleteRoom, getRooms} from "../../api/resources/rooms";
 import {AddRoomDialog} from "./components/AddRoomDialog";
 import {RowEditButton} from "../../../util/components/RowEditButton";
 import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
 import EditRoomDialog from "./components/EditRoomDialog";
-import {handleApiResponse} from "../../api/handleApiResponse";
+import {makeApiRequest} from "../../api/makeApiRequest";
 
 export const RoomsPage = () => {
 
@@ -26,7 +26,7 @@ export const RoomsPage = () => {
     const dispatch = useAppDispatch();
 
     const handleDeleteButtonClicked = (roomId: number) => {
-        handleApiResponse<null>(
+        makeApiRequest<null>(
             deleteRoom(roomId),
             dispatch,
             (data) => {
@@ -49,8 +49,8 @@ export const RoomsPage = () => {
 
     const columns = useRef(
         [
-            {field: 'roomId', headerName: 'RoomCard ID'},
-            {field: 'roomCode', headerName: 'RoomCard Code'},
+            {field: 'roomId', headerName: 'Room ID'},
+            {field: 'roomCode', headerName: 'Room Code'},
             {field: 'pricePerNight', headerName: 'Price Per Night'},
             {field: 'description', headerName: 'Description'},
             {field: 'status', headerName: 'Status'},
@@ -76,7 +76,7 @@ export const RoomsPage = () => {
     )
 
     const fetchRooms = () => {
-        handleApiResponse<Room[]>(
+        makeApiRequest<Room[]>(
             getRooms(),
             dispatch,
             (data) => {

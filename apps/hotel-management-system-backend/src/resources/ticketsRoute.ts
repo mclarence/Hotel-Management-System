@@ -7,6 +7,8 @@ import sendResponse from "../util/sendResponse";
 import {StatusCodes} from "http-status-codes";
 import Joi from "joi";
 import {Ticket, TicketMessages, TicketStatuses} from "@hotel-management-system/models";
+import {IEventLogger} from "../util/logEvent";
+import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
 
 interface ITicketsRoute {
     router: express.Router;
@@ -15,6 +17,7 @@ interface ITicketsRoute {
 export const makeTicketsRoute = (
     ticketsDAO: ITicketsDAO,
     usersDAO: IUsersDAO,
+    log: IEventLogger,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware
 ): ITicketsRoute => {
@@ -157,6 +160,12 @@ export const makeTicketsRoute = (
 
             const message = await addCommentToTicket(newTicketMessage);
 
+            log(
+                LogEventTypes.TICKET_COMMENT_CREATE,
+                req.userId,
+                "Added a new comment to ticket with id: " + ticketId + " with message: " + req.body.message,
+            )
+
             return sendResponse(res, {
                 success: true,
                 data: message,
@@ -256,6 +265,12 @@ export const makeTicketsRoute = (
 
             const ticket = await addTicket(value);
 
+            log(
+                LogEventTypes.TICKET_CREATE,
+                req.userId,
+                "Created a new ticket with title: " + req.body.title + " and description: " + req.body.description,
+            )
+
             return sendResponse(res, {
                 success: true,
                 data: ticket,
@@ -342,6 +357,12 @@ export const makeTicketsRoute = (
 
             const ticket = await updateTicket(updatedTicket);
 
+            log(
+                LogEventTypes.TICKET_UPDATE,
+                req.userId,
+                "Updated ticket with id: " + ticketId + " with title: " + req.body.title + " and description: " + req.body.description,
+            )
+
             return sendResponse(res, {
                 success: true,
                 data: ticket,
@@ -387,6 +408,12 @@ export const makeTicketsRoute = (
             }
 
             await deleteTicket(ticketId);
+
+            log(
+                LogEventTypes.TICKET_DELETE,
+                req.userId,
+                "Deleted ticket with id: " + ticketId,
+            )
 
             return sendResponse(res, {
                 success: true,

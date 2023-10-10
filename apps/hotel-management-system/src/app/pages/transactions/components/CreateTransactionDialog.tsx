@@ -7,9 +7,9 @@ import {GuestPaymentMethodAutoCompleteBox} from "../../../../util/components/Gue
 import {Guest, PaymentMethod, Transaction} from "@hotel-management-system/models";
 import InputAdornment from '@mui/material/InputAdornment';
 import {DateTimePicker} from "@mui/x-date-pickers";
-import {createTransaction} from "../../../api/transactions";
+import {createTransaction} from "../../../api/resources/transactions";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 export const CreateTransactionDialog = (props: {
     open: boolean,
@@ -62,7 +62,7 @@ export const CreateTransactionDialog = (props: {
                 date: transactionDate!
             }
             setIsSubmitting(true)
-            handleApiResponse<Transaction>(
+            makeApiRequest<Transaction>(
                 createTransaction(transaction),
                 dispatch,
                 (data) => {

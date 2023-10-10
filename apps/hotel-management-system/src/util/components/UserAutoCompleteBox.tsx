@@ -1,10 +1,10 @@
 import {ApiResponse, Guest, User} from "@hotel-management-system/models";
 import { useAppDispatch } from "../../app/redux/hooks";
 import { useState } from "react";
-import { searchGuests } from "../../app/api/guests";
+import { searchGuests } from "../../app/api/resources/guests";
 import appStateSlice from "../../app/redux/slices/AppStateSlice";
 import { Autocomplete, TextField } from "@mui/material";
-import {searchUser} from "../../app/api/users";
+import {searchUser} from "../../app/api/resources/users";
 
 export const UserAutoCompleteBox = (props: {
     value: React.Dispatch<React.SetStateAction<User | null>>

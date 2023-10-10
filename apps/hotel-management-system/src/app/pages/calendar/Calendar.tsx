@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import dayjs, {Dayjs} from 'dayjs';
 import React, {useEffect, useState} from 'react';
-import {createNote, deleteNote, getNoteById, updateNote} from '../../api/calendar';
+import {createNote, deleteNote, getNoteById, updateNote} from '../../api/resources/calendar';
 import {ApiResponse, CalendarNotes} from '@hotel-management-system/models';
 import {useAppDispatch} from '../../redux/hooks';
 import appStateSlice from '../../redux/slices/AppStateSlice';
@@ -12,15 +12,18 @@ import Divider from "@mui/material/Divider";
 import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
-import {handleApiResponse} from "../../api/handleApiResponse";
+import {makeApiRequest} from "../../api/makeApiRequest";
+import {useSelector} from "react-redux";
+import {RootState} from "../../redux/store";
 
 export function Calendar() {
     const dispatch = useAppDispatch();
-    const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs(new Date()));
+    const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs.utc());
     const [currentNote, setCurrentNote] = useState<CalendarNotes[]>([]);
+    const appState = useSelector((state: RootState) => state.appState);
 
     function fetchNote(date: Date) {
-        handleApiResponse<CalendarNotes[]>(
+        makeApiRequest<CalendarNotes[]>(
             getNoteById(date),
             dispatch,
             (data) => {
@@ -38,7 +41,7 @@ export function Calendar() {
                 date: selectedDate.toDate(),
             }
 
-            handleApiResponse<null>(
+            makeApiRequest<null>(
                 createNote(note),
                 dispatch,
                 (data) => {
@@ -56,7 +59,7 @@ export function Calendar() {
     }
 
     const handleDeleteNote = (noteId: number) => {
-        handleApiResponse<null>(
+        makeApiRequest<null>(
             deleteNote(noteId),
             dispatch,
             (data) => {
@@ -83,7 +86,7 @@ export function Calendar() {
                 date: noteObj.date,
             }
 
-            handleApiResponse<CalendarNotes>(
+            makeApiRequest<CalendarNotes>(
                 updateNote(updatedNote),
                 dispatch,
                 (data) => {
@@ -111,7 +114,7 @@ export function Calendar() {
             <Grid container spacing={2}>
                 <Grid item xs={4}>
                     <Paper>
-                        <DateCalendar value={selectedDate} onChange={(newValue) => setSelectedDate(newValue)}/>
+                        <DateCalendar value={selectedDate} onChange={setSelectedDate} timezone={appState.timeZone}/>
                     </Paper>
                 </Grid>
                 <Grid item xs={8}>

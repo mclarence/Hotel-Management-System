@@ -6,14 +6,14 @@ import {RoomAutoCompleteBox} from "../../../../util/components/RoomAutoCompleteB
 import {ApiResponse, Guest, Reservation, Room} from "@hotel-management-system/models";
 import {GuestAutoCompleteBox} from "../../../../util/components/GuestAutoCompleteBox";
 import {DatePicker} from "@mui/x-date-pickers";
-import {createReservation} from "../../../api/reservations";
+import {createReservation} from "../../../api/resources/reservations";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../../redux/hooks";
 import {ReservationStatuses} from "../../../../../../../libs/models/src/lib/enums/ReservationStatuses";
 import dayjs, {Dayjs} from "dayjs";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../redux/store";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 export const CreateReservationDialog = (props: {
     open: boolean;
@@ -68,7 +68,7 @@ export const CreateReservationDialog = (props: {
 
         setIsSubmitting(true);
 
-        handleApiResponse<Reservation>(
+        makeApiRequest<Reservation>(
             createReservation(newReservation),
             dispatch,
             (data) => {

@@ -27,7 +27,7 @@ import {RootState} from './redux/store';
 import {useAppDispatch} from './redux/hooks';
 import appStateSlice, {fetchUserDetails} from "./redux/slices/AppStateSlice";
 import LogoutIcon from '@mui/icons-material/Logout';
-import {logout} from "./api/auth";
+import {logout} from "./api/resources/auth";
 import PeopleIcon from '@mui/icons-material/People';
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import HailIcon from '@mui/icons-material/Hail';

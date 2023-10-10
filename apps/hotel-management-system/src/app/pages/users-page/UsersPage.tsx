@@ -2,7 +2,7 @@ import {Paper} from "@mui/material";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {ApiResponse, User} from "@hotel-management-system/models";
 import React, {useEffect, useRef, useState} from "react";
-import {deleteUser, getUsers} from "../../api/users";
+import {deleteUser, getUsers} from "../../api/resources/users";
 import {useSelector} from "react-redux";
 import {RootState} from "../../redux/store";
 import {useNavigate} from "react-router-dom";
@@ -15,7 +15,7 @@ import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay"
 import {EditUserDialog} from "./components/EditUserDialog";
 import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
 import {RowEditButton} from "../../../util/components/RowEditButton";
-import {handleApiResponse} from "../../api/handleApiResponse";
+import {makeApiRequest} from "../../api/makeApiRequest";
 
 
 export const UsersPage = () => {
@@ -43,7 +43,7 @@ export const UsersPage = () => {
     const fetchUsers = () => {
         setIsLoading(true)
 
-        handleApiResponse<User[]>(
+        makeApiRequest<User[]>(
             getUsers(),
             dispatch,
             (data) => {
@@ -58,7 +58,7 @@ export const UsersPage = () => {
             return;
         }
 
-        handleApiResponse<User>(
+        makeApiRequest<User>(
             deleteUser(userId),
             dispatch,
             (data) => {

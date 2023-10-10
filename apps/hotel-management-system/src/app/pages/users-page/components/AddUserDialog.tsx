@@ -16,12 +16,12 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import Divider from "@mui/material/Divider";
 import {ApiResponse, Role, User} from "@hotel-management-system/models";
 import {useEffect, useState} from "react";
-import {getRoles} from "../../../api/roles";
+import {getRoles} from "../../../api/resources/roles";
 import {useAppDispatch} from "../../../redux/hooks";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
-import {addUser} from "../../../api/users";
+import {addUser} from "../../../api/resources/users";
 import {DialogHeader} from "../../../../util/components/DialogHeader";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 
 interface AddUserDialogProps {
@@ -88,7 +88,7 @@ export const AddUserDialog = (props: AddUserDialogProps) => {
             roleId: parseInt(selectedRoleId),
         };
 
-        handleApiResponse<User>(
+        makeApiRequest<User>(
             addUser(newUser),
             dispatch,
             (data) => {
@@ -137,7 +137,7 @@ export const AddUserDialog = (props: AddUserDialogProps) => {
     }, [firstName, lastName, username, password, selectedRoleId, emailAddress, phoneNumber, position]);
 
     useEffect(() => {
-        handleApiResponse<Role[]>(
+        makeApiRequest<Role[]>(
             getRoles(),
             dispatch,
             (data) => {

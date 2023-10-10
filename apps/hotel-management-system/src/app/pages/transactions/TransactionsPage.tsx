@@ -4,13 +4,13 @@ import {DataGrid} from "@mui/x-data-grid";
 import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay";
 import AddIcon from "@mui/icons-material/Add";
 import {ApiResponse, Transaction} from "@hotel-management-system/models";
-import {deleteTransaction, getTransactions} from "../../api/transactions";
+import {deleteTransaction, getTransactions} from "../../api/resources/transactions";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../redux/hooks";
 import {CreateTransactionDialog} from "./components/CreateTransactionDialog";
 import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
 import {RowEditButton} from "../../../util/components/RowEditButton";
-import {handleApiResponse} from "../../api/handleApiResponse";
+import {makeApiRequest} from "../../api/makeApiRequest";
 
 export const TransactionsPage = () => {
 
@@ -20,7 +20,7 @@ export const TransactionsPage = () => {
     const dispatch = useAppDispatch();
 
     const fetchTransactions = () => {
-        handleApiResponse<Transaction[]>(
+        makeApiRequest<Transaction[]>(
             getTransactions(),
             dispatch,
             (data) => {
@@ -29,7 +29,7 @@ export const TransactionsPage = () => {
         )
     }
     const handleDeleteSingleTransaction = (id: number) => {
-        handleApiResponse<null>(
+        makeApiRequest<null>(
             deleteTransaction(id),
             dispatch,
             (data) => {

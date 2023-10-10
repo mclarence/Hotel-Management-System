@@ -8,6 +8,8 @@ import strings from "../util/strings";
 import Joi from "joi";
 import {IGuestDAO} from "../database/guests";
 import {Transaction} from "@hotel-management-system/models";
+import {IEventLogger} from "../util/logEvent";
+import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
 
 export interface ITransactionRoute {
     router: express.Router;
@@ -16,6 +18,7 @@ export interface ITransactionRoute {
 export const makeTransactionsRoute = (
     transactionsDAO: ITransactionDAO,
     guestDAO: IGuestDAO,
+    log: IEventLogger,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware
 ): ITransactionRoute => {
@@ -159,6 +162,13 @@ export const makeTransactionsRoute = (
             }
 
             const createdTransaction = await createTransaction(newTransaction);
+
+            log(
+                LogEventTypes.TRANSACTION_CREATE,
+                req.userId,
+                "Created a new transaction for guest: " + req.body.guestId + " with amount: " + req.body.amount,
+            )
+
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.OK,
@@ -245,6 +255,12 @@ export const makeTransactionsRoute = (
 
             const updated = await updateTransaction(updatedTransaction);
 
+            log(
+                LogEventTypes.TRANSACTION_UPDATE,
+                req.userId,
+                "Updated transaction with id: " + transactionId + " for guest: " + req.body.guestId + " with amount: " + req.body.amount,
+            )
+
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.OK,
@@ -289,6 +305,12 @@ export const makeTransactionsRoute = (
             }
 
             await deleteTransaction(transactionId);
+
+            log(
+                LogEventTypes.TRANSACTION_DELETE,
+                req.userId,
+                "Deleted transaction with id: " + transactionId,
+            )
 
             return sendResponse(res, {
                 success: true,

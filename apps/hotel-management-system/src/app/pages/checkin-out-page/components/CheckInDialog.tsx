@@ -7,8 +7,8 @@ import LoginIcon from "@mui/icons-material/Login";
 import dayjs, {Dayjs} from "dayjs";
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import {ApiResponse, Reservation} from "@hotel-management-system/models";
-import {updateReservation} from "../../../api/reservations";
+import {ApiResponse, Reservation, Room, RoomStatuses} from "@hotel-management-system/models";
+import {updateReservation} from "../../../api/resources/reservations";
 import {ReservationStatuses} from "../../../../../../../libs/models/src/lib/enums/ReservationStatuses";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../../redux/hooks";
@@ -16,7 +16,8 @@ import {Logout} from "@mui/icons-material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import {useSelector} from "react-redux";
 import {RootState} from "../../../redux/store";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
+import {getRoomById, updateRoom} from "../../../api/resources/rooms";
 
 
 export const CheckInDialog = (props: {
@@ -61,21 +62,41 @@ export const CheckInDialog = (props: {
             tempReservationObj.reservationStatus = ReservationStatuses.CHECKED_OUT;
         }
 
-        console.log(tempReservationObj)
-
-        handleApiResponse<Reservation>(
-            updateReservation(tempReservationObj),
+        // get the room
+        makeApiRequest<Room>(
+            getRoomById(tempReservationObj.roomId),
             dispatch,
-            (data) => {
-                props.setOpen(false);
-                props.fetchGuestReservations();
-                dispatch(
-                    appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: checkIn ? "Checked in successfully" : "Checked out successfully",
-                        severity: "success",
-                    })
-                );
+            (roomData) => {
+                if (checkIn) {
+                    roomData.status = RoomStatuses.OCCUPIED;
+                } else {
+                    roomData.status = RoomStatuses.AVAILABLE;
+                }
+
+                // make the request to update the reservation
+                makeApiRequest<Reservation>(
+                    updateReservation(tempReservationObj),
+                    dispatch,
+                    (reservationData) => {
+
+                        // make the request to update the room
+                        makeApiRequest<Room>(
+                            updateRoom(roomData),
+                            dispatch,
+                            (roomData2) => {
+                                props.setOpen(false);
+                                props.fetchGuestReservations();
+                                dispatch(
+                                    appStateSlice.actions.setSnackBarAlert({
+                                        show: true,
+                                        message: checkIn ? "Checked in successfully" : "Checked out successfully",
+                                        severity: "success",
+                                    })
+                                );
+                            }
+                        )
+                    }
+                )
             }
         )
 

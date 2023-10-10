@@ -1,6 +1,6 @@
 import {ApiResponse} from "@hotel-management-system/models";
 import {ThunkDispatch} from "@reduxjs/toolkit";
-import appStateSlice from "../redux/slices/AppStateSlice";
+import appStateSlice from "../../redux/slices/AppStateSlice";
 import {NavigateFunction} from "react-router-dom";
 
 export const login = (username: string, password: string): Promise<Response> => {

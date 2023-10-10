@@ -13,19 +13,19 @@ import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {useEffect, useRef, useState} from "react";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../redux/hooks";
-import {searchGuests} from "../../api/guests";
+import {searchGuests} from "../../api/resources/guests";
 import {
     Guest,
     ApiResponse,
     Reservation,
 } from "@hotel-management-system/models";
 import {GuestAutoCompleteBox} from "../../../util/components/GuestAutoCompleteBox";
-import {searchReservations} from "../../api/reservations";
+import {searchReservations} from "../../api/resources/reservations";
 import {CheckInDialog} from "./components/CheckInDialog";
 import {useSelector} from "react-redux";
 import {RootState} from "../../redux/store";
 import {dateValueFormatter} from "../../../util/dateValueFormatter";
-import {handleApiResponse} from "../../api/handleApiResponse";
+import {makeApiRequest} from "../../api/makeApiRequest";
 
 interface CheckInPageProps {
 }
@@ -85,7 +85,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
             setReservationTableLoading(true);
             // fetch the reservations for the selected guest
 
-            handleApiResponse<Reservation[]>(
+            makeApiRequest<Reservation[]>(
                 searchReservations({
                     guestId: selectedGuest?.guestId,
                 }),

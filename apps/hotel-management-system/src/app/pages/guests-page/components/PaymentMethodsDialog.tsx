@@ -5,10 +5,10 @@ import {useEffect, useRef, useState} from "react";
 import {DataGrid} from "@mui/x-data-grid";
 import AddCardIcon from '@mui/icons-material/AddCard';
 import {AddPaymentMethodDialog} from "./AddPaymentMethodDialog";
-import {getPaymentMethodsByGuestId} from "../../../api/paymentMethods";
+import {getPaymentMethodsByGuestId} from "../../../api/resources/paymentMethods";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../../redux/hooks";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 import {PaymentMethodTypes} from "../../../../../../../libs/models/src/lib/enums/PaymentMethodTypes";
 
 export const PaymentMethodsDialog = (props: {
@@ -35,7 +35,7 @@ export const PaymentMethodsDialog = (props: {
         if (props.guest) {
             setTableLoading(true)
 
-            handleApiResponse<PaymentMethod[]>(
+            makeApiRequest<PaymentMethod[]>(
                 getPaymentMethodsByGuestId(props.guest.guestId!),
                 dispatch,
                 (data) => {

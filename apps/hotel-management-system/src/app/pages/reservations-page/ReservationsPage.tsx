@@ -7,10 +7,10 @@ import AddIcon from '@mui/icons-material/Add';
 import {useSelector} from "react-redux";
 import {useAppDispatch} from "../../redux/hooks";
 import {RootState} from "../../redux/store";
-import {getReservations} from "../../api/reservations";
+import {getReservations} from "../../api/resources/reservations";
 import {CreateReservationDialog} from "./components/CreateReservationDialog";
 import {dateValueFormatter} from "../../../util/dateValueFormatter";
-import {handleApiResponse} from "../../api/handleApiResponse";
+import {makeApiRequest} from "../../api/makeApiRequest";
 
 const ReservationsPage = () => {
 
@@ -38,7 +38,7 @@ const ReservationsPage = () => {
     )
 
     const fetchReservations = () => {
-        handleApiResponse<Reservation[]>(
+        makeApiRequest<Reservation[]>(
             getReservations(),
             dispatch,
             (data) => {

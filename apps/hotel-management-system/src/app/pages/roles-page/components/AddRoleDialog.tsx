@@ -14,11 +14,11 @@ import {DialogHeader} from "../../../../util/components/DialogHeader";
 import {useEffect, useState} from "react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {addRole} from "../../../api/roles";
+import {addRole} from "../../../api/resources/roles";
 import {Role} from "@hotel-management-system/models";
 import {useAppDispatch} from "../../../redux/hooks";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 interface IAddRoleDialogProps {
     open: boolean;
@@ -78,7 +78,7 @@ export const AddRoleDialog = (props: IAddRoleDialogProps) => {
             permissionData: permissions,
         };
 
-        handleApiResponse<Role>(
+        makeApiRequest<Role>(
             addRole(newRole),
             dispatch,
             (data) => {

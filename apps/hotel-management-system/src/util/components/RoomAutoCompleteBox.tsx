@@ -3,7 +3,7 @@ import { useAppDispatch } from "../../app/redux/hooks";
 import { useState } from "react";
 import appStateSlice from "../../app/redux/slices/AppStateSlice";
 import { Autocomplete, TextField } from "@mui/material";
-import { searchRoom } from "../../app/api/rooms";
+import { searchRoom } from "../../app/api/resources/rooms";
 
 export const RoomAutoCompleteBox = (props: {
     value: React.Dispatch<React.SetStateAction<Room | null>>

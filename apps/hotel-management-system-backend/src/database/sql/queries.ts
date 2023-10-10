@@ -169,12 +169,11 @@ const queries = {
     },
     users: {
         getUserById: `
-            SELECT users.*, roles.name as role_name FROM users
-            INNER JOIN roles ON users.role_id = roles.role_id
+            SELECT * FROM users WHERE user_id = $1
         `,
         getUserByUsername: `
-            SELECT users.*, roles.name as role_name FROM users
-            INNER JOIN roles ON users.role_id = roles.role_id
+            SELECT * FROM users
+            WHERE username = $1
         `,
         createUser: `
             INSERT INTO users (username, password, password_salt, first_name, last_name, email, phone_number, position, role_id)
@@ -341,6 +340,12 @@ const queries = {
         checkRoomExistsByRoomCode: `
             SELECT EXISTS(SELECT 1 FROM rooms WHERE room_code = $1)
         `,
+        getStatusCount: `
+        SELECT status, COUNT(*) AS count
+            FROM rooms
+            GROUP BY status
+            ORDER BY status;
+        `
     },
     paymentMethods: {
         getPaymentMethods: `

@@ -1,7 +1,7 @@
 import {Alert, Button, CircularProgress, Grid, Stack, TextField, Typography} from '@mui/material';
 import Card from '@mui/material/Card';
 import {useEffect, useState} from 'react';
-import {login} from "../../api/auth";
+import {login} from "../../api/resources/auth";
 import {ApiResponse} from "@hotel-management-system/models";
 import {useAppDispatch} from "../../redux/hooks";
 import {useNavigate} from "react-router-dom";

@@ -12,11 +12,7 @@ export interface ILogsDAO {
 const makeLogsDAO = (db: IDatabase<any, any>): ILogsDAO => {
 
     const getAllLogs = async (): Promise<Logs[]> => {
-        try {
-            return await db.any(queries.logs.getAllLogs)
-        } catch (error) {
-            throw error;
-        }
+        return await db.any(queries.logs.getAllLogs)
     }
 
     const addLog = async (log: Logs): Promise<Logs | null> => {
@@ -32,11 +28,7 @@ const makeLogsDAO = (db: IDatabase<any, any>): ILogsDAO => {
 
 
     const deleteLog = async (logId: number): Promise<void> => {
-        try {
-            await db.none(queries.logs.deleteLog, {logId});
-        } catch (error) {
-            throw error;
-        }
+        await db.none(queries.logs.deleteLog, {logId});
     }
 
     return {

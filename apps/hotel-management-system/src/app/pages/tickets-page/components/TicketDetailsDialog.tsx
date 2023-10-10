@@ -5,13 +5,13 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import {UserAutoCompleteBox} from "../../../../util/components/UserAutoCompleteBox";
 import React, {useEffect, useState} from "react";
-import {getUserById} from "../../../api/users";
+import {getUserById} from "../../../api/resources/users";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {TicketStatusAutoCompleteBox} from "./TicketStatusAutoCompleteComboBox";
-import {addCommentToTicket, getTicketComments, updateTicket} from "../../../api/tickets";
+import {addCommentToTicket, getTicketComments, updateTicket} from "../../../api/resources/tickets";
 import {useAppDispatch} from "../../../redux/hooks";
 import AddIcon from "@mui/icons-material/Add";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 export const TicketDetailsDialog = (props: {
     open: boolean
@@ -29,7 +29,7 @@ export const TicketDetailsDialog = (props: {
 
     const fetchTicketComments = () => {
         if (props.ticket !== null) {
-            handleApiResponse<TicketMessages[]>(
+            makeApiRequest<TicketMessages[]>(
                 getTicketComments(props.ticket.ticketId!),
                 dispatch,
                 (data) => {
@@ -51,7 +51,7 @@ export const TicketDetailsDialog = (props: {
                     dateCreated: new Date()
                 }
 
-                handleApiResponse<TicketMessages>(
+                makeApiRequest<TicketMessages>(
                     addCommentToTicket(ticketMessage),
                     dispatch,
                     (data) => {

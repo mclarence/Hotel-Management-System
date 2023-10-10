@@ -14,11 +14,11 @@ import {
 import {useEffect, useState} from "react";
 import {DialogHeader} from "../../../../util/components/DialogHeader";
 import EditIcon from "@mui/icons-material/Edit";
-import {updateGuest} from "../../../api/guests";
+import {updateGuest} from "../../../api/resources/guests";
 import {Guest, ApiResponse} from "@hotel-management-system/models"
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../../redux/hooks";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 interface EditGuestDialogProps {
     guest: Guest | null;
@@ -88,7 +88,7 @@ const EditGuestDialog = (props: EditGuestDialogProps) => {
             address: address,
         };
 
-        handleApiResponse<Guest>(
+        makeApiRequest<Guest>(
             updateGuest(newGuest),
             dispatch,
             (data) => {

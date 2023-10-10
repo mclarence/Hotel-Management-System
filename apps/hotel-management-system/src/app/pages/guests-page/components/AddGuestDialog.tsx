@@ -10,10 +10,10 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { DialogHeader } from "../../../../util/components/DialogHeader";
-import { addGuest } from "../../../api/guests";
+import { addGuest } from "../../../api/resources/guests";
 import { useAppDispatch } from "../../../redux/hooks";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 interface AddGuestDialogProps {
   open: boolean;
@@ -65,7 +65,7 @@ const AddGuestDialog = (props: AddGuestDialogProps) => {
         address: address,
         };
 
-    handleApiResponse<Guest>(
+    makeApiRequest<Guest>(
         addGuest(newGuest),
         dispatch,
         (data) => {

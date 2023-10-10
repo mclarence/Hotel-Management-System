@@ -1,10 +1,10 @@
 import {PayloadAction, createSlice, createAsyncThunk} from "@reduxjs/toolkit";
-import {getCurrentUser} from "../../api/auth";
+import {getCurrentUser} from "../../api/resources/auth";
 import {ApiResponse, User} from "@hotel-management-system/models";
 import UnauthorisedError from "../../../../errors/UnauthorisedError";
 import UnknownError from "../../../../errors/UnknownError";
 import { Logs } from "@hotel-management-system/models";
-import { getLogs } from "../../api/logs"; 
+import { getLogs } from "../../api/resources/logs";
 
 interface AppStateSlice {
     appBarTitle: string;

@@ -4,7 +4,7 @@ import {useAppDispatch} from "../../redux/hooks";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import {RootState} from "../../redux/store";
 import {ApiResponse, Role, User} from "@hotel-management-system/models";
-import {deleteRole, getRoles} from "../../api/roles";
+import {deleteRole, getRoles} from "../../api/resources/roles";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {Paper, SpeedDial} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -12,7 +12,7 @@ import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay"
 import {AddRoleDialog} from "./components/AddRoleDialog";
 import {useNavigate} from "react-router-dom";
 import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
-import {handleApiResponse} from "../../api/handleApiResponse";
+import {makeApiRequest} from "../../api/makeApiRequest";
 
 export const RolesPage = () => {
     const [roles, setRoles] = useState([] as Role[]);
@@ -29,7 +29,7 @@ export const RolesPage = () => {
     }, [appState.loggedIn]);
 
     const fetchRoles = () => {
-        handleApiResponse<Role[]>(
+        makeApiRequest<Role[]>(
             getRoles(),
             dispatch,
             (data) => {
@@ -47,7 +47,7 @@ export const RolesPage = () => {
             return;
         }
 
-        handleApiResponse<null>(
+        makeApiRequest<null>(
             deleteRole(roleId),
             dispatch,
             (data) => {

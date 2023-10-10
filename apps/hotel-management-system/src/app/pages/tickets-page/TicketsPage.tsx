@@ -4,13 +4,13 @@ import {Paper, SpeedDial} from "@mui/material";
 import React, {useEffect, useRef, useState} from "react";
 import {Ticket} from "@hotel-management-system/models";
 import AddIcon from "@mui/icons-material/Add";
-import {getAllTickets} from "../../api/tickets";
+import {getAllTickets} from "../../api/resources/tickets";
 import {CreateTicketDialog} from "./components/CreateTicketDialog";
 import IconButton from "@mui/material/IconButton";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import {TicketDetailsDialog} from "./components/TicketDetailsDialog";
 import {useAppDispatch} from "../../redux/hooks";
-import {handleApiResponse} from "../../api/handleApiResponse";
+import {makeApiRequest} from "../../api/makeApiRequest";
 
 export const TicketsPage = () => {
     const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -50,7 +50,7 @@ export const TicketsPage = () => {
     ])
 
     const fetchTickets = () => {
-        handleApiResponse<Ticket[]>(
+        makeApiRequest<Ticket[]>(
             getAllTickets(),
             dispatch,
             (data) => {

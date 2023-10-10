@@ -2,12 +2,12 @@ import {Button, Dialog, DialogContent, Stack, TextField} from "@mui/material";
 import {DialogHeader} from "../../../../util/components/DialogHeader";
 import {ApiResponse, Ticket, TicketStatuses, User} from "@hotel-management-system/models";
 import {useEffect, useState} from "react";
-import {addTicket} from "../../../api/tickets";
+import {addTicket} from "../../../api/resources/tickets";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {UserAutoCompleteBox} from "../../../../util/components/UserAutoCompleteBox";
 import {TicketStatusAutoCompleteBox} from "./TicketStatusAutoCompleteComboBox";
 import {useAppDispatch} from "../../../redux/hooks";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 interface CreateTicketDialogProps {
     open: boolean;
@@ -39,7 +39,7 @@ export const CreateTicketDialog = (props: CreateTicketDialogProps) => {
 
     const handleSubmit = () => {
         if (user !== null && title !== "" && description !== "" && status) {
-            handleApiResponse<Ticket>(
+            makeApiRequest<Ticket>(
                 addTicket({
                     title: title,
                     description: description,

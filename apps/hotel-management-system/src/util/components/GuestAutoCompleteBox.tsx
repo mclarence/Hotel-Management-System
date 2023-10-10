@@ -1,7 +1,7 @@
 import { ApiResponse, Guest } from "@hotel-management-system/models";
 import { useAppDispatch } from "../../app/redux/hooks";
 import { useState } from "react";
-import { searchGuests } from "../../app/api/guests";
+import { searchGuests } from "../../app/api/resources/guests";
 import appStateSlice from "../../app/redux/slices/AppStateSlice";
 import { Autocomplete, TextField } from "@mui/material";
 

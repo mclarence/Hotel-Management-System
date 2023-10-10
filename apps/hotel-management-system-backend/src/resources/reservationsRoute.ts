@@ -9,6 +9,8 @@ import {Reservation} from "@hotel-management-system/models"
 import {IGuestDAO} from "../database/guests";
 import {IRoomsDAO} from "../database/rooms";
 import {ReservationStatuses} from "../../../../libs/models/src/lib/enums/ReservationStatuses";
+import {IEventLogger} from "../util/logEvent";
+import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
 const dayjs = require('dayjs')
 const utc = require('dayjs/plugin/utc')
 dayjs.extend(utc)
@@ -20,6 +22,7 @@ export const makeReservationsRoute = (
     reservationsDAO: IReservationDAO,
     guestsDAO: IGuestDAO,
     roomsDAO: IRoomsDAO,
+    log: IEventLogger,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware,
 ): IReservationsRoute => {
@@ -284,6 +287,12 @@ export const makeReservationsRoute = (
 
             const newReservation = await createReservation(reservation);
 
+            log(
+                LogEventTypes.RESERVATION_CREATE,
+                req.userId,
+                "Created reservation with id: " + newReservation.reservationId + " for guest: " + newReservation.guestId + " with room: " + newReservation.roomId,
+            )
+
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.OK,
@@ -382,6 +391,12 @@ export const makeReservationsRoute = (
 
             const updatedReservation = await updateReservation(reservation);
 
+            log(
+                LogEventTypes.RESERVATION_UPDATE,
+                req.userId,
+                "Updated reservation with id: " + reservationId + " for guest: " + req.body.guestId + " with room: " + req.body.roomId,
+            )
+
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.OK,
@@ -428,6 +443,12 @@ export const makeReservationsRoute = (
             }
 
             await deleteReservation(reservationId);
+
+            log(
+                LogEventTypes.RESERVATION_DELETE,
+                req.userId,
+                "Deleted reservation with id: " + reservationId,
+            )
 
             return sendResponse(res, {
                 success: true,

@@ -7,6 +7,8 @@ import {StatusCodes} from "http-status-codes";
 import Joi from "joi";
 import {IGuestDAO} from "../database/guests";
 import {PaymentMethodTypes} from "../../../../libs/models/src/lib/enums/PaymentMethodTypes";
+import {IEventLogger} from "../util/logEvent";
+import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
 
 interface IPaymentMethodRoute {
     router: express.Router
@@ -15,6 +17,7 @@ interface IPaymentMethodRoute {
 export const makePaymentMethodRoute = (
     paymentMethodsDAO: IPaymentMethodsDAO,
     guestsDAO: IGuestDAO,
+    log: IEventLogger,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware,
 ): IPaymentMethodRoute => {
@@ -98,6 +101,12 @@ export const makePaymentMethodRoute = (
 
             const paymentMethod = await addPaymentMethod(req.body);
 
+            log(
+                LogEventTypes.PAYMENT_METHOD_CREATE,
+                req.userId,
+                "Created a new payment method for guest: " + req.body.guestId + " with type: " + req.body.type,
+            )
+
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.OK,
@@ -168,6 +177,12 @@ export const makePaymentMethodRoute = (
 
             const paymentMethod = await updatePaymentMethod(req.body);
 
+            log(
+                LogEventTypes.PAYMENT_METHOD_UPDATE,
+                req.userId,
+                "Updated payment method with id: " + req.body.paymentMethodId + " for guest: " + req.body.guestId + " with type: " + req.body.type,
+            )
+
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.OK,
@@ -213,6 +228,12 @@ export const makePaymentMethodRoute = (
             }
 
             await deletePaymentMethod(id);
+
+            log(
+                LogEventTypes.PAYMENT_METHOD_DELETE,
+                req.userId,
+                "Deleted payment method with id: " + id,
+            )
 
             return sendResponse(res, {
                 success: true,

@@ -8,7 +8,7 @@ import {Paper, SpeedDial} from "@mui/material";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay";
 import AddIcon from "@mui/icons-material/Add";
-import {deleteGuest, getGuests} from "../../api/guests";
+import {deleteGuest, getGuests} from "../../api/resources/guests";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
 import AddGuestDialog from "./components/AddGuestDialog";
@@ -16,7 +16,7 @@ import {RowEditButton} from "../../../util/components/RowEditButton";
 import EditGuestDialog from "./components/EditGuestDialog";
 import {PaymentMethodsRowButton} from "./components/PaymentMethodsRowButton";
 import {PaymentMethodsDialog} from "./components/PaymentMethodsDialog";
-import {handleApiResponse} from "../../api/handleApiResponse";
+import {makeApiRequest} from "../../api/makeApiRequest";
 
 const GuestsPage = () => {
     const [guests, setGuests] = useState<Guest[]>([]);
@@ -30,7 +30,7 @@ const GuestsPage = () => {
     const navigate = useNavigate();
 
     const fetchGuests = () => {
-        handleApiResponse<Guest[]>(
+        makeApiRequest<Guest[]>(
             getGuests(),
             dispatch,
             (data) => {
@@ -44,7 +44,7 @@ const GuestsPage = () => {
             return;
         }
 
-        handleApiResponse<null>(
+        makeApiRequest<null>(
             deleteGuest(id),
             dispatch,
             (data) => {

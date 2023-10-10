@@ -2,7 +2,7 @@ import {ThunkDispatch} from "@reduxjs/toolkit";
 import appStateSlice from "../redux/slices/AppStateSlice";
 import {ApiResponse} from "@hotel-management-system/models";
 
-export const handleApiResponse = <T>(
+export const makeApiRequest = <T>(
     response: Promise<Response>,
     dispatch: ThunkDispatch<any, any, any>,
     onSuccess: (data: T) => void,

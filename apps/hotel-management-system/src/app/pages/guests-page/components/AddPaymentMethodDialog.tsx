@@ -9,11 +9,11 @@ import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import AddCardIcon from '@mui/icons-material/AddCard';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import dayjs from "dayjs";
-import {addPaymentMethod} from "../../../api/paymentMethods";
+import {addPaymentMethod} from "../../../api/resources/paymentMethods";
 import {PaymentMethodTypes} from "../../../../../../../libs/models/src/lib/enums/PaymentMethodTypes";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../../redux/hooks";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -96,7 +96,7 @@ export const AddPaymentMethodDialog = (props: {
     }, [bankAccountNumber, bankBSB])
 
     const handleAddPaymentMethod = (paymentMethod: PaymentMethod) => {
-        handleApiResponse<PaymentMethod>(
+        makeApiRequest<PaymentMethod>(
             addPaymentMethod(paymentMethod),
             dispatch,
             (data) => {

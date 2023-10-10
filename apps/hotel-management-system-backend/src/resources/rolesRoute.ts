@@ -6,6 +6,8 @@ import sendResponse from "../util/sendResponse";
 import {StatusCodes} from "http-status-codes";
 import {Role} from "@hotel-management-system/models"
 import Joi from "joi";
+import {IEventLogger} from "../util/logEvent";
+import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
 
 export interface IRolesRoute {
     router: express.Router
@@ -14,6 +16,7 @@ export interface IRolesRoute {
 
 const makeRolesRoute = (
     rolesDAO: IRolesDAO,
+    log: IEventLogger,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware,
 ): IRolesRoute => {
@@ -75,6 +78,12 @@ const makeRolesRoute = (
 
             const role = await addRole(newRole);
 
+            log(
+                LogEventTypes.ROLE_CREATE,
+                req.userId,
+                "Created a new role with name: " + req.body.name + " and permissions: " + req.body.permissionData,
+            )
+
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.CREATED,
@@ -121,6 +130,13 @@ const makeRolesRoute = (
             }
 
             const role = await deleteRole(roleId);
+
+            log(
+                LogEventTypes.ROLE_DELETE,
+                req.userId,
+                "Deleted role with id: " + roleId,
+            )
+
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.OK,

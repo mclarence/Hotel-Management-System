@@ -2,12 +2,12 @@ import {Button, Dialog, DialogContent, Stack, TextField, Typography,} from "@mui
 import React, {useEffect, useState} from "react";
 import {DialogHeader} from "../../../../util/components/DialogHeader";
 import EditIcon from "@mui/icons-material/Edit";
-import {updateRoom} from "../../../api/rooms";
+import {updateRoom} from "../../../api/resources/rooms";
 import {ApiResponse, Room, RoomStatuses} from "@hotel-management-system/models";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../../redux/hooks";
 import {StatusAutoCompleteComboBox} from "./StatusAutoCompleteComboBox";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 interface EditRoomDialogProps {
     room: Room | null;
@@ -67,7 +67,7 @@ const EditRoomDialog = (props: EditRoomDialogProps) => {
             status: status,
         };
 
-        handleApiResponse<Room>(
+        makeApiRequest<Room>(
             updateRoom(newRoom),
             dispatch,
             (data) => {

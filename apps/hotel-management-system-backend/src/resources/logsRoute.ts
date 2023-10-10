@@ -21,7 +21,7 @@ const makeLogsRoute = (
         getAllLogs,
     } = logsDAO;
 
-    router.get("/", authentication, authorization("logs.read"), async (req, res) => {
+    router.get("/", authentication, authorization("logs.read"), async (req: express.Request, res: express.Response) => {
         try {
             const logs = await getAllLogs();
 

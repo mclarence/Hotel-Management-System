@@ -1,12 +1,12 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Paper} from '@mui/material';
 import {DataGrid} from "@mui/x-data-grid";
-import {getLogs} from "../../api/logs";
+import {getLogs} from "../../api/resources/logs";
 import {ApiResponse, Logs} from "@hotel-management-system/models";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../redux/hooks";
 import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay";
-import {handleApiResponse} from "../../api/handleApiResponse";
+import {makeApiRequest} from "../../api/makeApiRequest";
 
 const LogsComponent = () => {
     const [logs, setLogs] = useState<Logs[]>([]);
@@ -14,7 +14,7 @@ const LogsComponent = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        handleApiResponse<Logs[]>(
+        makeApiRequest<Logs[]>(
             getLogs(),
             dispatch,
             (data) => {

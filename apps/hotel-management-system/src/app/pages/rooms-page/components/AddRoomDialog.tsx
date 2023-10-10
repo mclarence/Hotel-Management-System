@@ -4,11 +4,11 @@ import {ApiResponse, Room, RoomStatuses} from "@hotel-management-system/models";
 import React, {SyntheticEvent, useEffect, useState} from "react";
 import {useAppDispatch} from "../../../redux/hooks";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
-import {addRoom} from "../../../api/rooms";
+import {addRoom} from "../../../api/resources/rooms";
 import {DialogHeader} from "../../../../util/components/DialogHeader";
 import AddIcon from "@mui/icons-material/Add";
 import {StatusAutoCompleteComboBox} from "./StatusAutoCompleteComboBox";
-import {handleApiResponse} from "../../../api/handleApiResponse";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 interface AddRoomDialogProps {
     open: boolean;
@@ -56,7 +56,7 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
             status: status,
         };
 
-        handleApiResponse<Room>(
+        makeApiRequest<Room>(
             addRoom(newRoom),
             dispatch,
             (data) => {
@@ -96,15 +96,15 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
 
     return (
         <Dialog open={props.open} fullWidth>
-            <DialogHeader title={"Add RoomCard"} onClose={handleClose}/>
+            <DialogHeader title={"Add Room"} onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
-                    <Typography variant={"body1"}>Enter RoomCard details below.</Typography>
-                    <Typography variant={"subtitle2"}>RoomCard Details</Typography>
+                    <Typography variant={"body1"}>Enter room details below.</Typography>
+                    <Typography variant={"subtitle2"}>Room Details</Typography>
                     <TextField
                         fullWidth
                         required
-                        label="RoomCard Code"
+                        label="Room Code"
                         value={roomCode}
                         onChange={(e) => setRoomCode(e.target.value)}
                     />
@@ -134,7 +134,7 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
                         disabled={saveButtonDisabled || isSubmitting}
                         onClick={handleAddRoom}
                     >
-                        {isSubmitting ? "Adding RoomCard..." : "Add RoomCard"}
+                        {isSubmitting ? "Adding Room..." : "Add Room"}
                     </Button>
                 </Stack>
             </DialogContent>
