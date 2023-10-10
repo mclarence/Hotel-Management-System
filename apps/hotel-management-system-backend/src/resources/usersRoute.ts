@@ -12,6 +12,9 @@ import jwt from "jsonwebtoken";
 import sendResponse from "../util/sendResponse";
 import {StatusCodes} from "http-status-codes";
 import Joi from "joi";
+import {IEventLogger} from "../util/logEvent";
+import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
+
 interface UsersRoute {
     router: express.Router
 }
@@ -22,6 +25,7 @@ const makeUsersRoute = (
     tokenRevocationListDAO: ITokenRevocationListDAO,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware,
+    log: IEventLogger,
     jwtSecret: string
 ): UsersRoute => {
     const router = express.Router();
@@ -376,6 +380,12 @@ const makeUsersRoute = (
                 expiresIn: '24h'
             })
 
+            log(
+                LogEventTypes.USER_LOGIN,
+                user.userId,
+                `User ${user.username} logged in`
+            ).then()
+
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.OK,
@@ -412,6 +422,15 @@ const makeUsersRoute = (
             }
 
             await revokeToken(token);
+
+            // decode the token to get the user id
+            const decodedToken = jwt.decode(token);
+
+            log(
+                LogEventTypes.USER_LOGOUT,
+                decodedToken['userId'],
+                `User ${decodedToken['username']} logged out`
+            ).then()
 
             return sendResponse(res, {
                 success: true,

@@ -36,6 +36,7 @@ import { makeNotesDAO } from "./database/calendar";
 import { makeCalendarRoute } from "./resources/calendarRoute";
 import {makeTicketsDAO} from "./database/tickets";
 import {makeTicketsRoute} from "./resources/ticketsRoute";
+import {makeEventLogger} from "./util/logEvent";
 
 const createDefaultRoleAndAdmin = async (
     rolesDAO: IRolesDAO,
@@ -123,7 +124,10 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
 
     const usersDAO = makeUsersDAO(db.db)
     const rolesDAO = makeRolesDAO(db.db)
+
     const logsDAO = makeLogsDAO(db.db)
+    const eventLogger = makeEventLogger(logsDAO)
+
     const tokenRevocationListDAO = makeTokenRevocationListDAO(db.db)
     const calendarDAO = makeNotesDAO(db.db)
     const guestsDAO = makeGuestDAO(db.db);
@@ -153,6 +157,7 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
         tokenRevocationListDAO,
         authenticationMiddleware,
         authorizationMiddleware,
+        eventLogger,
         serverOptions.jwt.secret
     );
 

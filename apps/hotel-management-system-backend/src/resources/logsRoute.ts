@@ -1,69 +1,48 @@
 import express from "express";
-import { ILogsDAO } from "../database/logs"; // Adjust for function
-import { IAuthenticationMiddleware } from "../middleware/authentication";
-import { IAuthorizationMiddleware } from "../middleware/authorization";
+import {ILogsDAO} from "../database/logs"; // Adjust for function
+import {IAuthenticationMiddleware} from "../middleware/authentication";
+import {IAuthorizationMiddleware} from "../middleware/authorization";
 import sendResponse from "../util/sendResponse";
+import {StatusCodes} from "http-status-codes";
+import strings from "../util/strings";
 
 interface IMakeLogsRoute {
-  router: express.Router;
+    router: express.Router;
 }
 
 const makeLogsRoute = (
     logsDAO: ILogsDAO,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware,
-) => {
-  const router = express.Router();
+): IMakeLogsRoute => {
+    const router = express.Router();
 
-  const {
-    getAllLogs,
-    addLog,
-    deleteLog,
-} = logsDAO;
+    const {
+        getAllLogs,
+    } = logsDAO;
 
-  router.get("/", (req, res) => {
-    // return the list of all logs
-    getAllLogs
-      .then((logs) => {
-        sendResponse(res, {
-            statusCode: 200,
-            data: logs,
-            success: true,
-            message: "Successfully retrieved logs",
-        })
-      })
-      .catch(() => {
-        res.sendStatus(500);
-      });
-  });
+    router.get("/", authentication, authorization("logs.read"), async (req, res) => {
+        try {
+            const logs = await getAllLogs();
 
-  router.post("/", (req, res) => {
-    // create a new log
-    const log = req.body;
-    addLog(log)
-      .then((newLog) => {
-        res.send(newLog);
-      })
-      .catch(() => {
-        res.sendStatus(500);
-      });
-  });
-
-  router.delete("/:logId", (req, res) => {
-    // delete a log by logId
-    const logId = parseInt(req.params.logId);
-    deleteLog(logId)
-      .then(() => {
-        res.sendStatus(200);
-      })
-      .catch(() => {
-        res.sendStatus(404);
-      });
-  });
-
-  return {
-    router
-  }
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.success,
+                data: logs
+            })
+        } catch (error) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: error
+            })
+        }
+    })
+    return {
+        router
+    }
 };
 
 export default makeLogsRoute;

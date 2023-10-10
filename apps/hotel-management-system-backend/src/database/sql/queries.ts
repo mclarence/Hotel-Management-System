@@ -24,14 +24,12 @@ const queries = {
                 token VARCHAR(255) NOT NULL,
                 revokedAt TIMESTAMP NOT NULL
             );
-            CREATE TABLE IF NOT EXISTS room_logs (
+            CREATE TABLE IF NOT EXISTS logs (
                 log_id SERIAL PRIMARY KEY,
-                operation_type VARCHAR(255) NOT NULL, 
+                event_type VARCHAR(255) NOT NULL, 
                 timestamp TIMESTAMP NOT NULL DEFAULT current_timestamp,
-                operated_by VARCHAR(255) NOT NULL,
-                room_id INTEGER NOT NULL,
-                guest_name VARCHAR(255),
-                additional_info TEXT
+                user_id INTEGER NOT NULL,
+                description TEXT
             );
             CREATE TABLE IF NOT EXISTS calendar_notes(
                 note_id SERIAL PRIMARY KEY,
@@ -206,31 +204,19 @@ const queries = {
             SELECT * FROM token_revocation_list WHERE token = $1
         `,
     },
-    roomLogs: {
+    logs: {
         addLog: `
-            INSERT INTO room_logs (operation_type, operated_by, room_id, guest_name, additional_info)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING log_id
-        `,
-        getLogsForRoom: `
-            SELECT * FROM room_logs WHERE room_id = $1
+            INSERT INTO logs (event_type, timestamp, user_id, description)
+            VALUES ($1, $2, $3, $4)
+            RETURNING *
         `,
         getAllLogs: `
-            SELECT * FROM room_logs
+            SELECT * FROM logs
         `,
-        logCheckIn: `
-        INSERT INTO room_logs (operation_type, operated_by, room_id, guest_name)
-        VALUES ('CHECK_IN', $1, $2, $3)
-        `,
-         logCheckOut: `
-        INSERT INTO room_logs (operation_type, operated_by, room_id)
-        VALUES ('CHECK_OUT', $1, $2)
-        `,
-        deleteLogById: `
-        DELETE FROM room_logs
+        deleteLog: `
+        DELETE FROM logs
          WHERE log_id = $1
         `,
-        // Add other required queries as needed
     },
     notes: {
         getNoteById: `
