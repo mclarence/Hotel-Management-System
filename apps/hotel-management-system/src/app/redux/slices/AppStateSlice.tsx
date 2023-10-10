@@ -19,6 +19,7 @@ interface AppStateSlice {
     isFetchingUserList: boolean;
     logs: Logs[];
     isFetchingLogs: boolean;
+    timeZone: string;
 }
 
 const initialState: AppStateSlice = {
@@ -32,7 +33,8 @@ const initialState: AppStateSlice = {
     lastPageVisited: '',
     isFetchingUserList: false,
     logs: [],
-    isFetchingLogs: false
+    isFetchingLogs: false,
+    timeZone: 'Australia/Sydney'
 };
 
 export const fetchUserDetails = createAsyncThunk(

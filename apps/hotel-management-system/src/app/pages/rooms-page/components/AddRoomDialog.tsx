@@ -5,9 +5,10 @@ import React, {SyntheticEvent, useEffect, useState} from "react";
 import {useAppDispatch} from "../../../redux/hooks";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {addRoom} from "../../../api/rooms";
-import {DialogHeader} from "../../../../util/DialogHeader";
+import {DialogHeader} from "../../../../util/components/DialogHeader";
 import AddIcon from "@mui/icons-material/Add";
 import {StatusAutoCompleteComboBox} from "./StatusAutoCompleteComboBox";
+import {handleApiResponse} from "../../../api/handleApiResponse";
 
 interface AddRoomDialogProps {
     open: boolean;
@@ -34,7 +35,7 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
     };
 
     const handleClose = () => {
-        // ask Room if they want to discard changes
+        // ask RoomCard if they want to discard changes
         if (hasChangedSomething) {
             if (window.confirm("Are you sure you want to discard changes?")) {
                 resetState();
@@ -55,53 +56,22 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
             status: status,
         };
 
-        // send request to add Room
-        addRoom(newRoom)
-            .then((response) => {
-                return response.json();
-            })
-            .then((data: ApiResponse<Room>) => {
-                if (data.success) {
-                    props.setOpen(false);
-                    resetState();
-                    props.refreshRooms();
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: "Room added successfully",
-                            severity: "success",
-                        })
-                    );
-                } else if (!data.success && data.statusCode === 401) {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "warning",
-                        })
-                    );
-                } else {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "error",
-                        })
-                    );
-                }
-            })
-            .catch(() => {
+        handleApiResponse<Room>(
+            addRoom(newRoom),
+            dispatch,
+            (data) => {
+                props.setOpen(false);
+                resetState();
+                props.refreshRooms();
                 dispatch(
                     appStateSlice.actions.setSnackBarAlert({
                         show: true,
-                        message: "An unknown error occurred",
-                        severity: "error",
+                        message: "RoomCard added successfully",
+                        severity: "success",
                     })
                 );
-            })
-            .finally(() => {
-                setIsSubmitting(false);
-            });
+            }
+        )
     };
 
     useEffect(() => {
@@ -118,8 +88,7 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
         }
     }, [roomCode, pricePerNight, description, status]);
 
-    const handleStatusChange = (event: SyntheticEvent, value: RoomStatuses | null) =>
-    {
+    const handleStatusChange = (event: SyntheticEvent, value: RoomStatuses | null) => {
         if (value !== null) {
             setStatus(value as RoomStatuses);
         }
@@ -127,15 +96,15 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
 
     return (
         <Dialog open={props.open} fullWidth>
-            <DialogHeader title={"Add Room"} onClose={handleClose}/>
+            <DialogHeader title={"Add RoomCard"} onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
-                    <Typography variant={"body1"}>Enter Room details below.</Typography>
-                    <Typography variant={"subtitle2"}>Room Details</Typography>
+                    <Typography variant={"body1"}>Enter RoomCard details below.</Typography>
+                    <Typography variant={"subtitle2"}>RoomCard Details</Typography>
                     <TextField
                         fullWidth
                         required
-                        label="Room Code"
+                        label="RoomCard Code"
                         value={roomCode}
                         onChange={(e) => setRoomCode(e.target.value)}
                     />
@@ -165,7 +134,7 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
                         disabled={saveButtonDisabled || isSubmitting}
                         onClick={handleAddRoom}
                     >
-                        {isSubmitting ? "Adding Room..." : "Add Room"}
+                        {isSubmitting ? "Adding RoomCard..." : "Add RoomCard"}
                     </Button>
                 </Stack>
             </DialogContent>

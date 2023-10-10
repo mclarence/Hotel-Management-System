@@ -11,10 +11,11 @@ import appStateSlice from "../../redux/slices/AppStateSlice";
 import SpeedDial from '@mui/material/SpeedDial';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {AddUserDialog} from "./components/AddUserDialog";
-import {CustomNoRowsOverlay} from "../../../util/CustomNoRowsOverlay";
+import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay";
 import {EditUserDialog} from "./components/EditUserDialog";
-import { RowDeleteButton } from "../../../util/RowDeleteButton";
-import { RowEditButton } from "../../../util/RowEditButton";
+import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
+import {RowEditButton} from "../../../util/components/RowEditButton";
+import {handleApiResponse} from "../../api/handleApiResponse";
 
 
 export const UsersPage = () => {
@@ -41,36 +42,15 @@ export const UsersPage = () => {
 
     const fetchUsers = () => {
         setIsLoading(true)
-        getUsers().then((response) => {
-            return response.json();
-        })
-            .then((data: ApiResponse<User[]>) => {
-                if (data.statusCode === 401 && !data.success) {
-                    console.log(data.message);
-                    dispatch(appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: data.message,
-                        severity: 'warning'
-                    }))
-                } else if (!data.success) {
-                    dispatch(appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: data.message,
-                        severity: 'error'
-                    }))
-                }
 
-                setRows(data.data);
-            })
-            .catch((error) => {
-                dispatch(appStateSlice.actions.setSnackBarAlert({
-                    show: true,
-                    message: error.message,
-                    severity: 'error'
-                }))
-            }).finally(() => {
-            setIsLoading(false)
-        })
+        handleApiResponse<User[]>(
+            getUsers(),
+            dispatch,
+            (data) => {
+                setRows(data);
+                setIsLoading(false)
+            }
+        )
     }
 
     const handleDeleteSingleUser = (userId: number) => {
@@ -78,39 +58,18 @@ export const UsersPage = () => {
             return;
         }
 
-        deleteUser(userId).then((response) => {
-            return response.json();
-        })
-            .then((data: ApiResponse<User>) => {
-                if (data.success) {
-                    dispatch(appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: "User deleted successfully",
-                        severity: 'success'
-                    }))
-                    fetchUsers();
-                } else if (!data.success && data.statusCode === 401) {
-                    dispatch(appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: data.message,
-                        severity: 'warning'
-                    }))
-                } else {
-                    dispatch(appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: data.message,
-                        severity: 'error'
-                    }))
-                }
-            })
-            .catch((error) => {
+        handleApiResponse<User>(
+            deleteUser(userId),
+            dispatch,
+            (data) => {
                 dispatch(appStateSlice.actions.setSnackBarAlert({
-                    show: true,           
-                    message: error.message,
-                    severity: 'error'
+                    show: true,
+                    message: "User deleted successfully",
+                    severity: 'success'
                 }))
-            }).finally(() => {
-        })
+                fetchUsers();
+            }
+        )
     }
 
 
@@ -119,8 +78,6 @@ export const UsersPage = () => {
     }
 
     useEffect(() => {
-        dispatch(appStateSlice.actions.setAppBarTitle('Users'));
-        dispatch(appStateSlice.actions.setLastPageVisited('/users'));
         // fetch users
         fetchUsers();
 
@@ -134,7 +91,7 @@ export const UsersPage = () => {
             {field: 'lastName', headerName: 'Last Name'},
             {field: 'username', headerName: 'Username'},
             {field: 'email', headerName: 'Email'},
-            {field: 'roleId', headerName: 'Role ID'},
+            {field: 'roleName', headerName: 'Role'},
             {
                 field: 'actions',
                 headerName: 'Actions',
@@ -157,7 +114,8 @@ export const UsersPage = () => {
         <>
             <Paper sx={{padding: 2}}>
                 <AddUserDialog open={openAddUserDialog} setOpen={setOpenAddUserDialog} refreshUsers={refreshUsers}/>
-                <EditUserDialog open={openEditUserDialog}setOpen={setOpenEditUserDialog} user={selectedUserForEdit} refreshUsers={refreshUsers}/>
+                <EditUserDialog open={openEditUserDialog} setOpen={setOpenEditUserDialog} user={selectedUserForEdit}
+                                refreshUsers={refreshUsers}/>
                 <DataGrid
                     density={'compact'}
                     disableRowSelectionOnClick={true}

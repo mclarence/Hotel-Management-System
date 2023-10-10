@@ -9,7 +9,7 @@ import {
     styled,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
-import {DataGrid} from "@mui/x-data-grid";
+import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {useEffect, useRef, useState} from "react";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../redux/hooks";
@@ -19,9 +19,13 @@ import {
     ApiResponse,
     Reservation,
 } from "@hotel-management-system/models";
-import {GuestAutoCompleteBox} from "../../../util/GuestAutoCompleteBox";
+import {GuestAutoCompleteBox} from "../../../util/components/GuestAutoCompleteBox";
 import {searchReservations} from "../../api/reservations";
 import {CheckInDialog} from "./components/CheckInDialog";
+import {useSelector} from "react-redux";
+import {RootState} from "../../redux/store";
+import {dateValueFormatter} from "../../../util/dateValueFormatter";
+import {handleApiResponse} from "../../api/handleApiResponse";
 
 interface CheckInPageProps {
 }
@@ -34,6 +38,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
     const [reservationTableLoading, setReservationTableLoading] = useState(false);
     const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
     const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+    const appState = useSelector((state: RootState) => state.appState);
 
 
     const openCheckInDialog = (reservation: Reservation) => {
@@ -43,9 +48,9 @@ const CheckInOutPage = (props: CheckInPageProps) => {
 
     const columns = useRef([
         {field: "reservationId", headerName: "Reservation ID", flex: 1},
-        {field: "roomId", headerName: "Room ID", flex: 1},
-        {field: "startDate", headerName: "Start Date", flex: 1},
-        {field: "endDate", headerName: "End Date", flex: 1},
+        {field: "roomId", headerName: "RoomCard ID", flex: 1},
+        {field: "startDate", headerName: "Start Date", flex: 1, valueFormatter: dateValueFormatter(appState.timeZone)},
+        {field: "endDate", headerName: "End Date", flex: 1, valueFormatter: dateValueFormatter(appState.timeZone)},
         {
             field: "reservationStatus",
             headerName: "Reservation Status",
@@ -61,60 +66,34 @@ const CheckInOutPage = (props: CheckInPageProps) => {
             flex: 2,
             renderCell: (params: any) => (
                 <Stack direction={"row"} gap={2}>
-                    <Button color="success" variant="contained" disabled={params.row.checkInDate !== null} onClick={() => openCheckInDialog(params.row)}>
+                    <Button color="success" variant="contained" disabled={params.row.checkInDate !== null}
+                            onClick={() => openCheckInDialog(params.row)}>
                         Check In
                     </Button>
-                    <Button color="error" variant="contained" disabled={params.row.checkInDate === null || params.row.checkOutDate !== null} onClick={() => openCheckInDialog(params.row)}>
+                    <Button color="error" variant="contained"
+                            disabled={params.row.checkInDate === null || params.row.checkOutDate !== null}
+                            onClick={() => openCheckInDialog(params.row)}>
                         Check Out
                     </Button>
                 </Stack>
             ),
         },
-    ]);
+    ] as GridColDef[]);
 
     function fetchGuestReservations() {
         if (selectedGuest !== null) {
             setReservationTableLoading(true);
             // fetch the reservations for the selected guest
-            searchReservations({
-                guestId: selectedGuest?.guestId,
-            })
-                .then((response) => {
-                    return response.json();
-                })
-                .then((data: ApiResponse<Reservation[]>) => {
-                    if (data.success) {
-                        setReservationRows(data.data);
-                    } else if (!data.success && data.statusCode === 401) {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "warning",
-                            })
-                        );
-                    } else {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "error",
-                            })
-                        );
-                    }
-                })
-                .catch(() => {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: "An unknown error occurred",
-                            severity: "error",
-                        })
-                    );
-                })
-                .finally(() => {
-                    setReservationTableLoading(false);
-                });
+
+            handleApiResponse<Reservation[]>(
+                searchReservations({
+                    guestId: selectedGuest?.guestId,
+                }),
+                dispatch,
+                (data) => {
+                    setReservationRows(data);
+                }
+            )
         }
     }
 
@@ -122,14 +101,11 @@ const CheckInOutPage = (props: CheckInPageProps) => {
         fetchGuestReservations();
     }, [selectedGuest]);
 
-    useEffect(() => {
-        dispatch(appStateSlice.actions.setAppBarTitle("Check In/Out"));
-        dispatch(appStateSlice.actions.setLastPageVisited("/check-in-out"));
-    }, []);
 
     return (
         <>
-            <CheckInDialog fetchGuestReservations={fetchGuestReservations} open={checkInDialogOpen} setOpen={setCheckInDialogOpen} reservation={selectedReservation as Reservation}/>
+            <CheckInDialog fetchGuestReservations={fetchGuestReservations} open={checkInDialogOpen}
+                           setOpen={setCheckInDialogOpen} reservation={selectedReservation as Reservation}/>
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Paper sx={{padding: 2}}>

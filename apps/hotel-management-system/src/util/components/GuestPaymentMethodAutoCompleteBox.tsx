@@ -1,9 +1,9 @@
 import {ApiResponse, Guest, PaymentMethod} from "@hotel-management-system/models";
-import {useAppDispatch} from "../app/redux/hooks";
+import {useAppDispatch} from "../../app/redux/hooks";
 import {useEffect, useState} from "react";
-import appStateSlice from "../app/redux/slices/AppStateSlice";
+import appStateSlice from "../../app/redux/slices/AppStateSlice";
 import {Autocomplete, TextField} from "@mui/material";
-import {getPaymentMethodsByGuestId} from "../app/api/paymentMethods";
+import {getPaymentMethodsByGuestId} from "../../app/api/paymentMethods";
 
 export const GuestPaymentMethodAutoCompleteBox = (props: {
     guest: Guest | null,

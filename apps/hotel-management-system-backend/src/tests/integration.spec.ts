@@ -40,7 +40,7 @@ describe("authentication", () => {
                 password: "admin"
             })
             .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
-            .expect(200)
+            .expect(    200)
         expect(response.body.data).toHaveProperty("jwt")
         token = response.body.data.jwt;
         console.log(token)

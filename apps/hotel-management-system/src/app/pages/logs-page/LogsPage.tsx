@@ -5,7 +5,8 @@ import {getLogs} from "../../api/logs";
 import {ApiResponse, Logs} from "@hotel-management-system/models";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../redux/hooks";
-import {CustomNoRowsOverlay} from "../../../util/CustomNoRowsOverlay";
+import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay";
+import {handleApiResponse} from "../../api/handleApiResponse";
 
 const LogsComponent = () => {
     const [logs, setLogs] = useState<Logs[]>([]);
@@ -13,40 +14,14 @@ const LogsComponent = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        getLogs()
-            .then((response) => {
-                return response.json();
-            })
-            .then((data: ApiResponse<Logs[]>) => {
-                if (data.success) {
-                    setLogs(data.data);
-                } else if (!data.success && data.statusCode === 401) {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "warning",
-                        })
-                    );
-                } else {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "error",
-                        })
-                    );
-                }
-            })
-            .catch(() => {
-                dispatch(
-                    appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: "An unknown error occurred",
-                        severity: "error",
-                    })
-                );
-            });
+        handleApiResponse<Logs[]>(
+            getLogs(),
+            dispatch,
+            (data) => {
+                setLogs(data);
+            }
+        )
+
     }, [])
 
 

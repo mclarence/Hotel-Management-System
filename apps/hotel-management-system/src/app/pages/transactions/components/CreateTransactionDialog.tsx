@@ -1,15 +1,15 @@
 import {Button, Dialog, DialogContent, Stack, TextField} from "@mui/material";
-import {DialogHeader} from "../../../../util/DialogHeader";
+import {DialogHeader} from "../../../../util/components/DialogHeader";
 import {useAppDispatch} from "../../../redux/hooks";
-import {GuestAutoCompleteBox} from "../../../../util/GuestAutoCompleteBox";
+import {GuestAutoCompleteBox} from "../../../../util/components/GuestAutoCompleteBox";
 import React, {useEffect, useState} from "react";
-import {GuestPaymentMethodAutoCompleteBox} from "../../../../util/GuestPaymentMethodAutoCompleteBox";
-import {ApiResponse, Guest, PaymentMethod, Transaction} from "@hotel-management-system/models";
+import {GuestPaymentMethodAutoCompleteBox} from "../../../../util/components/GuestPaymentMethodAutoCompleteBox";
+import {Guest, PaymentMethod, Transaction} from "@hotel-management-system/models";
 import InputAdornment from '@mui/material/InputAdornment';
-import {DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
-import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
+import {DateTimePicker} from "@mui/x-date-pickers";
 import {createTransaction} from "../../../api/transactions";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
+import {handleApiResponse} from "../../../api/handleApiResponse";
 
 export const CreateTransactionDialog = (props: {
     open: boolean,
@@ -62,52 +62,22 @@ export const CreateTransactionDialog = (props: {
                 date: transactionDate!
             }
             setIsSubmitting(true)
-            createTransaction(transaction)
-                .then((response) => {
-                    return response.json();
-                })
-                .then((data: ApiResponse<Transaction>) => {
-                    if (data.success) {
-                        props.setOpen(false);
-                        resetState();
-                        props.fetchTransactions();
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: "Transaction added successfully",
-                                severity: "success",
-                            })
-                        );
-                    } else if (!data.success && data.statusCode === 401) {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "warning",
-                            })
-                        );
-                    } else {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "error",
-                            })
-                        );
-                    }
-                })
-                .catch(() => {
+            handleApiResponse<Transaction>(
+                createTransaction(transaction),
+                dispatch,
+                (data) => {
+                    props.setOpen(false);
+                    resetState();
+                    props.fetchTransactions();
                     dispatch(
                         appStateSlice.actions.setSnackBarAlert({
                             show: true,
-                            message: "An unknown error occurred",
-                            severity: "error",
+                            message: "Transaction added successfully",
+                            severity: "success",
                         })
                     );
-                })
-                .finally(() => {
-                    setIsSubmitting(false);
-                });
+                }
+            )
         }
     }
 
@@ -135,14 +105,14 @@ export const CreateTransactionDialog = (props: {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
-                            <DateTimePicker
-                                format={"DD/MM/YYYY hh:mm A"}
-                                value={transactionDate}
-                                timezone={"Australia/Sydney"}
-                                onChange={(newValue) => {
-                                    setTransactionDate(newValue);
-                                }}
-                            />
+                        <DateTimePicker
+                            format={"DD/MM/YYYY hh:mm A"}
+                            value={transactionDate}
+                            timezone={"Australia/Sydney"}
+                            onChange={(newValue) => {
+                                setTransactionDate(newValue);
+                            }}
+                        />
                         <Button variant={"contained"} disabled={saveButtonDisabled} onClick={handleSubmit}>
                             Add Transaction
                         </Button>

@@ -100,7 +100,6 @@ export const makeReservationDAO = (db: IDatabase<any,any>): IReservationDAO => {
     }
 
     const checkIfReservationIsAvailable = async (roomId: number, startDate: Date, endDate: Date): Promise<boolean> => {
-        console.log(roomId, startDate, endDate)
         try {
             const exists = await db.one(queries.reservations.checkIfReservationIsAvailable, [roomId, startDate, endDate]);
             return !exists.exists;

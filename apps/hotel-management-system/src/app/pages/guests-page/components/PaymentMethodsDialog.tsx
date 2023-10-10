@@ -1,5 +1,5 @@
 import {Dialog, DialogContent, SpeedDial} from "@mui/material";
-import {DialogHeader} from "../../../../util/DialogHeader";
+import {DialogHeader} from "../../../../util/components/DialogHeader";
 import {ApiResponse, Guest, PaymentMethod} from "@hotel-management-system/models";
 import {useEffect, useRef, useState} from "react";
 import {DataGrid} from "@mui/x-data-grid";
@@ -8,6 +8,8 @@ import {AddPaymentMethodDialog} from "./AddPaymentMethodDialog";
 import {getPaymentMethodsByGuestId} from "../../../api/paymentMethods";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../../redux/hooks";
+import {handleApiResponse} from "../../../api/handleApiResponse";
+import {PaymentMethodTypes} from "../../../../../../../libs/models/src/lib/enums/PaymentMethodTypes";
 
 export const PaymentMethodsDialog = (props: {
     open: boolean,
@@ -32,43 +34,15 @@ export const PaymentMethodsDialog = (props: {
     const getPaymentMethods = () => {
         if (props.guest) {
             setTableLoading(true)
-            getPaymentMethodsByGuestId(props.guest.guestId!)
-                .then((response) => {
-                    return response.json();
-                })
-                .then((data: ApiResponse<PaymentMethod[]>) => {
-                    if (data.success) {
-                        setPaymentMethods(data.data);
-                    } else if (!data.success && data.statusCode === 401) {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "warning",
-                            })
-                        );
-                    } else {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "error",
-                            })
-                        );
-                    }
-                })
-                .catch(() => {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: "An unknown error occurred",
-                            severity: "error",
-                        })
-                    );
-                })
-                .finally(() => {
+
+            handleApiResponse<PaymentMethod[]>(
+                getPaymentMethodsByGuestId(props.guest.guestId!),
+                dispatch,
+                (data) => {
+                    setPaymentMethods(data);
                     setTableLoading(false);
-                });
+                }
+            )
         }
     }
 

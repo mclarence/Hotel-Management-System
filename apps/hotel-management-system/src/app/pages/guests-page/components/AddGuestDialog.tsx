@@ -9,10 +9,11 @@ import {
   Typography
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { DialogHeader } from "../../../../util/DialogHeader";
+import { DialogHeader } from "../../../../util/components/DialogHeader";
 import { addGuest } from "../../../api/guests";
 import { useAppDispatch } from "../../../redux/hooks";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
+import {handleApiResponse} from "../../../api/handleApiResponse";
 
 interface AddGuestDialogProps {
   open: boolean;
@@ -64,14 +65,11 @@ const AddGuestDialog = (props: AddGuestDialogProps) => {
         address: address,
         };
 
-
-    addGuest(newGuest)
-      .then((response) => {
-        return response.json();
-      })
-      .then((data: ApiResponse<Guest>) => {
-        if (data.success) {
-          props.setOpen(false);
+    handleApiResponse<Guest>(
+        addGuest(newGuest),
+        dispatch,
+        (data) => {
+            props.setOpen(false);
           resetState();
           props.refreshGuests();
           dispatch(
@@ -81,36 +79,8 @@ const AddGuestDialog = (props: AddGuestDialogProps) => {
               severity: "success",
             })
           );
-        } else if (!data.success && data.statusCode === 401) {
-          dispatch(
-            appStateSlice.actions.setSnackBarAlert({
-              show: true,
-              message: data.message,
-              severity: "warning",
-            })
-          );
-        } else {
-          dispatch(
-            appStateSlice.actions.setSnackBarAlert({
-              show: true,
-              message: data.message,
-              severity: "error",
-            })
-          );
         }
-      })
-      .catch(() => {
-        dispatch(
-          appStateSlice.actions.setSnackBarAlert({
-            show: true,
-            message: "An unknown error occurred",
-            severity: "error",
-          })
-        );
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+    )
   };
 
   return (

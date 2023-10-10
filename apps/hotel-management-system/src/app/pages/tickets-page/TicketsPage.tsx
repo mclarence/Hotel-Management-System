@@ -1,16 +1,16 @@
 import {DataGrid} from "@mui/x-data-grid";
-import {CustomNoRowsOverlay} from "../../../util/CustomNoRowsOverlay";
+import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay";
 import {Paper, SpeedDial} from "@mui/material";
 import React, {useEffect, useRef, useState} from "react";
-import {ApiResponse, Ticket} from "@hotel-management-system/models";
+import {Ticket} from "@hotel-management-system/models";
 import AddIcon from "@mui/icons-material/Add";
 import {getAllTickets} from "../../api/tickets";
-import appStateSlice from "../../redux/slices/AppStateSlice";
 import {CreateTicketDialog} from "./components/CreateTicketDialog";
 import IconButton from "@mui/material/IconButton";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import {TicketDetailsDialog} from "./components/TicketDetailsDialog";
 import {useAppDispatch} from "../../redux/hooks";
+import {handleApiResponse} from "../../api/handleApiResponse";
 
 export const TicketsPage = () => {
     const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -50,39 +50,15 @@ export const TicketsPage = () => {
     ])
 
     const fetchTickets = () => {
-        getAllTickets()
-            .then((response) => response.json())
-            .then((data: ApiResponse<Ticket[]>) => {
-
-                if (data.success) {
-                    setTickets(data.data)
-                }
-
-                if (data.statusCode === 401 && !data.success) {
-                    console.log(data.message);
-                    dispatch(appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: data.message,
-                        severity: 'warning'
-                    }))
-                } else if (!data.success) {
-                    dispatch(appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: data.message,
-                        severity: 'error'
-                    }))
-                }
-            })
-            .catch((error) => {
-                dispatch(appStateSlice.actions.setSnackBarAlert({
-                    show: true,
-                    message: error.message,
-                    severity: 'error'
-                }))
-            }).finally(() => {
-            setIsLoading(false)
-        })
+        handleApiResponse<Ticket[]>(
+            getAllTickets(),
+            dispatch,
+            (data) => {
+                setTickets(data);
+            }
+        )
     }
+
     useEffect(() => {
         fetchTickets();
     }, [])
@@ -90,7 +66,8 @@ export const TicketsPage = () => {
         <>
             <CreateTicketDialog open={openCreateTicketDialog} setOpen={setOpenCreateTicketDialog}
                                 fetchTickets={fetchTickets}/>
-            <TicketDetailsDialog open={openViewTicketDialog} setOpen={setOpenViewTicketDialog} ticket={selectedTicket} fetchTickets={fetchTickets}/>
+            <TicketDetailsDialog open={openViewTicketDialog} setOpen={setOpenViewTicketDialog} ticket={selectedTicket}
+                                 fetchTickets={fetchTickets}/>
             <Paper sx={{padding: 2}}>
                 <DataGrid
                     density={"compact"}

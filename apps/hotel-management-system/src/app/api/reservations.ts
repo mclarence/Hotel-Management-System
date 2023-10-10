@@ -1,4 +1,4 @@
-import { Reservation } from "@hotel-management-system/models"
+import {Reservation} from "@hotel-management-system/models"
 
 export const getReservations = async (): Promise<Response> => {
     return fetch('/api/reservations', {
@@ -38,6 +38,8 @@ export const searchReservations = async (searchQueries: {
     startDate?: Date,
     endDate?: Date,
     guestId?: number,
+    checkInDate?: Date,
+    checkOutDate?: Date,
 }): Promise<Response> => {
     // add query params to url. do not add if the query param is null or undefined
     let url = `/api/reservations/search?`
@@ -51,6 +53,24 @@ export const searchReservations = async (searchQueries: {
 
     if (searchQueries.guestId) {
         url += `guestId=${searchQueries.guestId}&`
+    }
+
+    if (searchQueries.checkInDate) {
+        const day = String(searchQueries.checkInDate.getDate()).padStart(2, '0'); // Get day and pad with leading zero if needed
+        const month = String(searchQueries.checkInDate.getMonth() + 1).padStart(2, '0'); // Get month (months are 0-based) and pad with leading zero if needed
+        const year = searchQueries.checkInDate.getFullYear(); // Get full year
+        // Format the date as YYYY-MM-DD
+        const formattedDate = `${year}-${month}-${day}`;
+        url += `checkInDate=${formattedDate}&`
+    }
+
+    if (searchQueries.checkOutDate) {
+        const day = String(searchQueries.checkOutDate.getDate()).padStart(2, '0'); // Get day and pad with leading zero if needed
+        const month = String(searchQueries.checkOutDate.getMonth() + 1).padStart(2, '0'); // Get month (months are 0-based) and pad with leading zero if needed
+        const year = searchQueries.checkOutDate.getFullYear(); // Get full year
+        // Format the date as YYYY-MM-DD
+        const formattedDate = `${year}-${month}-${day}`;
+        url += `checkOutDate=${formattedDate}&`
     }
 
     return fetch(url, {

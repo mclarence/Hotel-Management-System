@@ -5,4 +5,7 @@ export type Transaction = {
     amount: number;
     description: string;
     date: Date;
+    paymentMethodType?: string;
+    guestFirstName?: string;
+    guestLastName?: string;
 }

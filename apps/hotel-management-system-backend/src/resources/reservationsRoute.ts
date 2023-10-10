@@ -9,7 +9,9 @@ import {Reservation} from "@hotel-management-system/models"
 import {IGuestDAO} from "../database/guests";
 import {IRoomsDAO} from "../database/rooms";
 import {ReservationStatuses} from "../../../../libs/models/src/lib/enums/ReservationStatuses";
-
+const dayjs = require('dayjs')
+const utc = require('dayjs/plugin/utc')
+dayjs.extend(utc)
 interface IReservationsRoute {
     router: express.Router
 }
@@ -31,7 +33,7 @@ export const makeReservationsRoute = (
         updateReservation,
         deleteReservation,
         getReservationsByGuestId,
-        checkIfReservationIsAvailable
+        checkIfReservationIsAvailable,
     } = reservationsDAO
 
     const {
@@ -70,11 +72,23 @@ export const makeReservationsRoute = (
             const {
                 startDate,
                 endDate,
-                guestId
+                guestId,
+                checkInDate,
+                checkOutDate,
             } = req.query;
-            
+
             let query = 'SELECT * FROM reservations WHERE 1=1 '
             const params = {}
+
+            if (checkInDate) {
+                query += 'AND DATE(check_in_date) = $/checkInDate/ ';
+                params['checkInDate'] = new Date(checkInDate + 'T00:00:00Z')
+            }
+
+            if (checkOutDate) {
+                query += 'AND DATE(check_out_date) = $/checkOutDate/ ';
+                params['checkOutDate'] = new Date(checkOutDate + 'T00:00:00Z')
+            }
 
             if (startDate) {
                 const startDateParam = new Date(startDate as string);
@@ -205,7 +219,7 @@ export const makeReservationsRoute = (
                 reservationStatus: Joi.string().optional().valid(...Object.values(ReservationStatuses))
             })
 
-            const { error } = schema.validate(req.body);
+            const {error} = schema.validate(req.body);
 
             if (error) {
                 return sendResponse(res, {
@@ -235,11 +249,11 @@ export const makeReservationsRoute = (
                 return sendResponse(res, {
                     success: false,
                     statusCode: StatusCodes.NOT_FOUND,
-                    message: "Room not found",
+                    message: "RoomCard not found",
                     data: null,
                 })
             }
-            console.log(req.body.startDate, req.body.endDate)
+
             //check if reservation is available
             const isAvailable = await checkIfReservationIsAvailable(req.body.roomId, new Date(req.body.startDate), new Date(req.body.endDate));
 
@@ -247,17 +261,22 @@ export const makeReservationsRoute = (
                 return sendResponse(res, {
                     success: false,
                     statusCode: StatusCodes.BAD_REQUEST,
-                    message: "Room is not available for the given dates",
+                    message: "RoomCard is not available for the given dates",
                     data: null,
                 })
             }
 
-            const reservation:Reservation = {
+            console.log(req.body.startDate)
+            console.log(req.body.endDate)
+
+            const startDateParsed = dayjs.utc(req.body.startDate).toDate()
+            const endDateParsed = dayjs.utc(req.body.endDate).toDate()
+            const reservation: Reservation = {
                 reservationId: req.body.reservationId,
                 roomId: req.body.roomId,
                 guestId: req.body.guestId,
-                startDate: req.body.startDate,
-                endDate: req.body.endDate,
+                startDate: startDateParsed,
+                endDate: endDateParsed,
                 checkInDate: req.body.checkInDate,
                 checkOutDate: req.body.checkOutDate,
                 reservationStatus: req.body.reservationStatus
@@ -273,6 +292,7 @@ export const makeReservationsRoute = (
             })
 
         } catch (err) {
+            console.log(err)
             return sendResponse(res, {
                 success: false,
                 statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
@@ -287,7 +307,7 @@ export const makeReservationsRoute = (
      */
     router.patch("/:reservationId", authentication, authorization("reservations.update"), async (req, res) => {
         try {
-            
+
             const reservationId = parseInt(req.params.reservationId);
 
             if (isNaN(reservationId)) {
@@ -321,7 +341,7 @@ export const makeReservationsRoute = (
                 reservationStatus: Joi.string().optional().valid(...Object.values(ReservationStatuses))
             })
 
-            const { error } = schema.validate(req.body);
+            const {error} = schema.validate(req.body);
 
             if (error) {
                 return sendResponse(res, {
@@ -331,7 +351,7 @@ export const makeReservationsRoute = (
                     data: null,
                 })
             }
-            
+
 
             // check if the guest exists
             const guestExists = await checkGuestExistsById(req.body.guestId);
@@ -346,23 +366,15 @@ export const makeReservationsRoute = (
             }
 
             // TODO: check if the room exists
+            const startDateParsed = dayjs.utc(req.body.startDate).toDate()
+            const endDateParsed = dayjs.utc(req.body.endDate).toDate()
 
-            //parse the dates
-            if (req.body.startDate) {
-                req.body.startDate = new Date(req.body.startDate);
-            }
-
-            if (req.body.endDate) {
-                req.body.endDate = new Date(req.body.endDate);
-            }
-            
-
-            const reservation:Reservation = {
+            const reservation: Reservation = {
                 reservationId: reservationId,
                 roomId: req.body.roomId,
                 guestId: req.body.guestId,
-                startDate: req.body.startDate,
-                endDate: req.body.endDate,
+                startDate: startDateParsed,
+                endDate: endDateParsed,
                 checkInDate: req.body.checkInDate,
                 checkOutDate: req.body.checkOutDate,
                 reservationStatus: req.body.reservationStatus

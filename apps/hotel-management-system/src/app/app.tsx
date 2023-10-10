@@ -19,12 +19,10 @@ import ReservationsPage from './pages/reservations-page/ReservationsPage';
 import {TransactionsPage} from "./pages/transactions/TransactionsPage";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {LocalizationProvider} from "@mui/x-date-pickers";
-import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import LogsComponent from './pages/logs-page/LogsPage';
-
-
+import dayjs from "dayjs";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -62,7 +60,7 @@ export function App() {
                             <Route path="check-in-out" element={<CheckInOutPage/>}/>
                             <Route path="reservations" element={<ReservationsPage/>}/>
                             <Route path="transactions" element={<TransactionsPage/>}/>
-                            <Route path="logspage" element={<LogsComponent/>}/>
+                            <Route path="logs" element={<LogsComponent/>}/>
                         </Route>
                         <Route path="login" element={<LoginPage/>}/>
                     </Routes>
