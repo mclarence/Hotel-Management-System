@@ -5,9 +5,10 @@ import {Express} from "express";
 import startServer from "../startServer";
 import {serverConfig} from "./serverConfig";
 import { faker } from "@faker-js/faker";
-import {login} from "./authentication.spec";
+import {addUser, login, makeNewUser} from "./common";
 import request from "supertest";
 import {User} from "@hotel-management-system/models";
+
 
 let app: Express;
 beforeAll(async () => {
@@ -18,34 +19,11 @@ beforeAll(async () => {
     )
 })
 
-
-const makeNewUser = (): User => {
-    return {
-        username: faker.internet.userName(),
-        password: faker.internet.password(),
-        firstName: faker.person.firstName(),
-        lastName: faker.person.lastName(),
-        email: faker.internet.email(),
-        phoneNumber: faker.phone.number(),
-        position: faker.person.jobTitle(),
-        roleId: 1
-    }
-}
-
-const addUser = async (token: string, user: User): Promise<User> => {
-    const response = await request(app)
-        .post("/api/users/add")
-        .set("Authorization", `Bearer ${token}`)
-        .send(user)
-        .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
-        .expect(201)
-    return response.body.data;
-}
 describe("user management", () => {
 
     // test getting a list of users
     it("should return a list of users", async () => {
-        const token = await login();
+        const token = await login(app);
         await request(app)
             .get("/api/users")
             .set("Authorization", `Bearer ${token}`)
@@ -57,14 +35,14 @@ describe("user management", () => {
 
     // test adding a new user
     it("should add a new user", async () => {
-        const token = await login();
-        await addUser(token, makeNewUser());
+        const token = await login(app);
+        await addUser(app, token, makeNewUser());
     })
 
     // test getting a user
     it("should get a user", async () => {
-        const token = await login();
-        const user = await addUser(token, makeNewUser());
+        const token = await login(app);
+        const user = await addUser(app, token, makeNewUser());
         await request(app)
             .get(`/api/users/${user.userId}`)
             .set("Authorization", `Bearer ${token}`)
@@ -83,9 +61,9 @@ describe("user management", () => {
 
     // test updating a user
     it("should update a user", async () => {
-        const token = await login();
+        const token = await login(app);
 
-        const user = await addUser(token, makeNewUser());
+        const user = await addUser(app, token, makeNewUser());
 
         const updatedUser = {
             firstName: "test",
@@ -114,8 +92,8 @@ describe("user management", () => {
 
     // test deleting a user
     it("should delete a user", async () => {
-        const token = await login();
-        const user = await addUser(token, makeNewUser());
+        const token = await login(app);
+        const user = await addUser(app, token, makeNewUser());
 
         await request(app)
             .delete(`/api/users/${user.userId}`)

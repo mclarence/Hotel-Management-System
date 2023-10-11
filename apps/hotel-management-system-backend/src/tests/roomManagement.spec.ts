@@ -1,7 +1,7 @@
 import {Room, RoomStatuses} from "@hotel-management-system/models";
 import {faker} from "@faker-js/faker";
 import request from "supertest";
-import {login} from "./authentication.spec";
+import {addRoom, login, makeNewRoom} from "./common";
 import {Express} from "express";
 import startServer from "../startServer";
 import {serverConfig} from "./serverConfig";
@@ -14,31 +14,13 @@ beforeAll(async () => {
         }
     )
 })
-export const makeNewRoom = (): Room => {
-    return {
-        roomCode: faker.string.alphanumeric(5),
-        status: RoomStatuses.AVAILABLE,
-        pricePerNight: 100,
-        description: "room description",
-    }
-}
 
-export const addRoom = async (token: string, room: Room): Promise<Room> => {
-    const response = await request(app)
-        .post('/api/rooms/add')
-        .set('Authorization', `Bearer ${token}`)
-        .send(room)
-        .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
-        .expect(201)
-
-    return response.body.data;
-}
 
 describe("room management", () => {
     it("should add a room", async () => {
-        const token = await login();
+        const token = await login(app);
         const newRoom = makeNewRoom()
-        const room = await addRoom(token, newRoom)
+        const room = await addRoom(app, token, newRoom)
 
         expect(room.roomCode).toEqual(newRoom.roomCode)
         expect(room.status).toEqual(newRoom.status)
@@ -47,9 +29,9 @@ describe("room management", () => {
     })
 
     it("should update a room", async () => {
-        const token = await login();
+        const token = await login(app);
         const newRoom = makeNewRoom()
-        const room = await addRoom(token, newRoom)
+        const room = await addRoom(app, token, newRoom)
 
         const updatedRoom = {
             ...room,
@@ -68,9 +50,9 @@ describe("room management", () => {
     })
 
     it("should get a room by id", async () => {
-        const token = await login();
+        const token = await login(app);
         const newRoom = makeNewRoom()
-        const room = await addRoom(token, newRoom)
+        const room = await addRoom(app, token, newRoom)
 
         const response = await request(app)
             .get(`/api/rooms/${room.roomId}`)
@@ -81,9 +63,9 @@ describe("room management", () => {
     })
 
     it("should get all rooms", async () => {
-        const token = await login();
+        const token = await login(app);
         const newRoom = makeNewRoom()
-        const room = await addRoom(token, newRoom)
+        const room = await addRoom(app, token, newRoom)
 
         const response = await request(app)
             .get(`/api/rooms`)
@@ -94,9 +76,9 @@ describe("room management", () => {
     })
 
     it("should delete a room", async () => {
-        const token = await login();
+        const token = await login(app);
         const newRoom = makeNewRoom()
-        const room = await addRoom(token, newRoom)
+        const room = await addRoom(app, token, newRoom)
 
         await request(app)
             .delete(`/api/rooms/${room.roomId}`)
@@ -107,5 +89,24 @@ describe("room management", () => {
             .get(`/api/rooms/${room.roomId}`)
             .set('Authorization', `Bearer ${token}`)
             .expect(404)
+    })
+
+    it("should get room status statistics", async () => {
+        const token = await login(app);
+        const newRoom = makeNewRoom()
+        newRoom.status = RoomStatuses.OUT_OF_SERVICE
+        const room = await addRoom(app, token, newRoom)
+
+        const response = await request(app)
+            .get(`/api/rooms/room-status-count`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+
+        // find the room status count for the room we just added
+        const roomStatusCount = response.body.data.find((roomStatusCount: {status: RoomStatuses, count: string}) => {
+            return roomStatusCount.status == newRoom.status
+        })
+
+        expect(roomStatusCount).toHaveProperty("count", "1")
     })
 })

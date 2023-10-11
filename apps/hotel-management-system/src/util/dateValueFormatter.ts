@@ -6,6 +6,6 @@ export const dateValueFormatter = (timezone: string) => {
         if (params.value === null) {
             return "...";
         }
-        return dayjs.utc(params.value).tz(timezone).local().format('DD/MM/YYYY HH:mm');
+        return dayjs.utc(params.value as string).tz(timezone).local().format('DD/MM/YYYY HH:mm');
     }
 }

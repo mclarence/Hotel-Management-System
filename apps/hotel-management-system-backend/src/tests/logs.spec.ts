@@ -1,7 +1,7 @@
 import {Express} from "express";
 import startServer from "../startServer";
 import {serverConfig} from "./serverConfig";
-import {login} from "./authentication.spec";
+import {login} from "./common";
 import request from "supertest";
 import {Logs} from "@hotel-management-system/models";
 
@@ -18,7 +18,7 @@ describe("log system", () => {
 
     // test adding a new log
     it("should add a new log", async () => {
-        const token = await login();
+        const token = await login(app);
         await request(app)
             .get("/api/logs")
             .set("Authorization", `Bearer ${token}`)

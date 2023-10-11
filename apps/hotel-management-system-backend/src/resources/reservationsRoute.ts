@@ -258,13 +258,13 @@ export const makeReservationsRoute = (
             }
 
             //check if reservation is available
-            const isAvailable = await checkIfReservationIsAvailable(req.body.roomId, new Date(req.body.startDate), new Date(req.body.endDate));
+            const isAvailable = await checkIfReservationIsAvailable(req.body.roomId, dayjs.utc(req.body.startDate).toDate(), new dayjs.utc(req.body.endDate).toDate());
 
             if (!isAvailable) {
                 return sendResponse(res, {
                     success: false,
                     statusCode: StatusCodes.BAD_REQUEST,
-                    message: "RoomCard is not available for the given dates",
+                    message: "Room is not available for the given dates",
                     data: null,
                 })
             }

@@ -34,7 +34,6 @@ export const makeCalendarRoute = (
     router.get("/:date", authentication, authorization("calendar.get"), async (req: express.Request, res: express.Response) => {
         const date = req.params.date;
         const parsedDate = dayjs.utc(date).toDate();
-        console.log(date)
         const note = await getNoteByDate(parsedDate);
 
         return sendResponse(res, {
