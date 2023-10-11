@@ -20,11 +20,13 @@ export const TransactionsPage = () => {
     const dispatch = useAppDispatch();
 
     const fetchTransactions = () => {
+        setIsLoading(true)
         makeApiRequest<Transaction[]>(
             getTransactions(),
             dispatch,
             (data) => {
                 setTransactions(data);
+                setIsLoading(false)
             }
         )
     }

@@ -92,6 +92,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
                 dispatch,
                 (data) => {
                     setReservationRows(data);
+                    setReservationTableLoading(false);
                 }
             )
         }
@@ -99,6 +100,12 @@ const CheckInOutPage = (props: CheckInPageProps) => {
 
     useEffect(() => {
         fetchGuestReservations();
+    }, [selectedGuest]);
+
+    useEffect(() => {
+        if (selectedGuest === null) {
+            setReservationRows([]);
+        }
     }, [selectedGuest]);
 
 
@@ -181,6 +188,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
                             <DataGrid
                                 autoHeight
                                 checkboxSelection={false}
+                                loading={reservationTableLoading}
                                 rows={reservationRows}
                                 columns={columns.current}
                                 getRowId={(row: any) => {

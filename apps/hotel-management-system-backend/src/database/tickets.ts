@@ -21,7 +21,17 @@ export interface ITicketsDAO {
     getTicketComments(ticketId: number): Promise<TicketMessages[]>;
 }
 
+/**
+ * Tickets DAO
+ * @param db - database object
+ */
 export const makeTicketsDAO = (db: IDatabase<any, any>): ITicketsDAO => {
+
+    /**
+     * Get ticket by id
+     * @param id
+     * @returns ticket, null if no ticket
+     */
     const getTicketById = async (id: number): Promise<Ticket | null> => {
         try {
             return await db.one(queries.tickets.addTicket, [id]);
@@ -33,31 +43,65 @@ export const makeTicketsDAO = (db: IDatabase<any, any>): ITicketsDAO => {
         }
     }
 
+    /**
+     * Add ticket
+     * @param ticket
+     * @returns ticket
+     */
     const addTicket = async (ticket: Ticket): Promise<Ticket> => {
         return await db.one(queries.tickets.addTicket, [ticket.userId, ticket.title, ticket.description, ticket.status, ticket.dateOpened]);
     }
 
+    /**
+     * Update ticket
+     * @param ticket
+     * @returns ticket
+     */
     const updateTicket = async (ticket: Ticket): Promise<Ticket> => {
         return await db.one(queries.tickets.updateTicket, [ticket.userId, ticket.title, ticket.description, ticket.status, ticket.dateOpened, ticket.ticketId]);
     }
 
+    /**
+     * Delete ticket
+     * @param id
+     * @returns void
+     */
     const deleteTicket = async (id: number): Promise<void> => {
         await db.none(queries.tickets.deleteTicket, [id]);
     }
 
+    /**
+     * Get all tickets
+     * @returns tickets, empty array if no tickets
+     */
     const getAllTickets = async (): Promise<Ticket[]> => {
         return await db.any(queries.tickets.getAllTickets);
     }
 
+    /**
+     * Add comment to ticket
+     * @param ticketMessage
+     * @returns ticket message
+     */
     const addCommentToTicket = async (ticketMessage: TicketMessages): Promise<TicketMessages> => {
         return await db.one(queries.tickets.addCommentToTicket, [ticketMessage.ticketId, ticketMessage.userId, ticketMessage.message, ticketMessage.dateCreated]);
     }
 
+    /**
+     * Check if ticket exists by id
+     * @param id
+     * @returns boolean
+     */
     const checkTicketExistsById = async (id: number): Promise<boolean> => {
         const result = await db.one(queries.tickets.checkTicketExistsById, [id]);
         return result.exists;
     }
 
+    /**
+     * Get ticket comments
+     * @param ticketId
+     * @returns ticket comments, empty array if no comments
+     */
     const getTicketComments = async (ticketId: number): Promise<TicketMessages[]> => {
         return await db.any(queries.tickets.fetchTicketComments, [ticketId]);
     }

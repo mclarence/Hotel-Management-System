@@ -31,6 +31,8 @@ import {makeCalendarRoute} from "./resources/calendarRoute";
 import {makeTicketsDAO} from "./database/tickets";
 import {makeTicketsRoute} from "./resources/ticketsRoute";
 import {makeEventLogger} from "./util/logEvent";
+import sendResponse from "./util/sendResponse";
+import strings from "./util/strings";
 
 const createDefaultRoleAndAdmin = async (
     rolesDAO: IRolesDAO,
@@ -244,8 +246,14 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
                 statusCode: 400,
                 data: err.message,
             } as ApiResponse<string>);
+        } else {
+             return sendResponse<any>(res, {
+                success: false,
+                message: strings.api.generic.error,
+                statusCode: 500,
+                data: err.message,
+            })
         }
-        next();
     });
 
     app.get("/api", (req, res) => {

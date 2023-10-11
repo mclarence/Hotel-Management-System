@@ -4,6 +4,7 @@ import { useState } from "react";
 import { searchGuests } from "../../app/api/resources/guests";
 import appStateSlice from "../../app/redux/slices/AppStateSlice";
 import { Autocomplete, TextField } from "@mui/material";
+import {makeApiRequest} from "../../app/api/makeApiRequest";
 
 export const GuestAutoCompleteBox = (props: {
     value: React.Dispatch<React.SetStateAction<Guest | null>>
@@ -12,44 +13,15 @@ export const GuestAutoCompleteBox = (props: {
     const dispatch = useAppDispatch();
     
     const handleAutoCompleteTypingChange = (event: any) => {
-        searchGuests(event.target.value)
-        .then((response) => {
-          return response.json();
-        })
-        .then((data: ApiResponse<Guest[]>) => {
-          if (data.success) {
-            setAutoCompleteOptions(data.data);
-          } else if (!data.success && data.statusCode === 401) {
-            dispatch(
-              appStateSlice.actions.setSnackBarAlert({
-                show: true,
-                message: data.message,
-                severity: "warning",
-              })
-            );
-          } else {
-            if (data.statusCode === 400) {
-              setAutoCompleteOptions([]);
-              return;
-            }
-            dispatch(
-              appStateSlice.actions.setSnackBarAlert({
-                show: true,
-                message: data.message,
-                severity: "error",
-              })
-            );
-          }
-        })
-        .catch(() => {
-          dispatch(
-            appStateSlice.actions.setSnackBarAlert({
-              show: true,
-              message: "An unknown error occurred",
-              severity: "error",
-            })
-          );
-        });
+        if (event.target.value) {
+            makeApiRequest<Guest[]>(
+                searchGuests(event.target.value),
+                dispatch,
+                (data) => {
+                    setAutoCompleteOptions(data);
+                }
+            )
+        }
       }
     
       const handleAutoCompleteSelectionChange = (event: any, value: any) => {

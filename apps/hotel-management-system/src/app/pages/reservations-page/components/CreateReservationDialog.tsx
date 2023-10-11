@@ -33,7 +33,7 @@ export const CreateReservationDialog = (props: {
     const dispatch = useAppDispatch();
 
     const handleClose = () => {
-        // ask RoomCard if they want to discard changes
+        // ask user if they want to discard changes
         if (hasChangedSomething) {
             if (window.confirm("Are you sure you want to discard changes?")) {
                 resetState();
@@ -97,7 +97,15 @@ export const CreateReservationDialog = (props: {
 
 
         if (guest !== null && room !== null && startDate !== null && endDate !== null) {
-            setSaveButtonDisabled(false);
+            if (startDate.isAfter(endDate)) {
+                setSaveButtonDisabled(true);
+                return;
+            } else if (startDate.diff(endDate, "day") === 0) {
+                setSaveButtonDisabled(true);
+                return;
+            } else {
+                setSaveButtonDisabled(false);
+            }
         } else {
             setSaveButtonDisabled(true);
         }

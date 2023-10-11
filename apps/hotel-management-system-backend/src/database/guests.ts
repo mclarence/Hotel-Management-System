@@ -22,11 +22,26 @@ export interface IGuestDAO {
     getPaymentMethodsByGuestId(guestId: number): Promise<PaymentMethod[]>;
 }
 
+/**
+ * Guest DAO
+ * @param db - database object
+ */
 const makeGuestDAO = (db: IDatabase<any, any>): IGuestDAO => {
 
+    /**
+     * Get payment methods by guest id
+     * @param guestId - guest id
+     * @returns - array of payment methods
+     */
     const getPaymentMethodsByGuestId = async (guestId: number): Promise<PaymentMethod[]> => {
         return await db.any(queries.paymentMethods.getPaymentMethodsByGuestId, [guestId]);
     }
+
+    /**
+     * Get all guests
+     * @returns - array of guests, empty array if no guests
+     * @throws - error
+     */
     const getGuests = async (): Promise<Guest[]> => {
         try {
             return await db.any(queries.guests.getGuests);
@@ -42,6 +57,11 @@ const makeGuestDAO = (db: IDatabase<any, any>): IGuestDAO => {
         }
     }
 
+    /**
+     * Add guest
+     * @param guest
+     * @returns - guest object
+     */
     const addGuest = async (guest: Guest): Promise<Guest> => {
         return await db.one(queries.guests.addGuest, [
             guest.firstName,
@@ -52,6 +72,11 @@ const makeGuestDAO = (db: IDatabase<any, any>): IGuestDAO => {
         ]);
     }
 
+    /**
+     * Update guest
+     * @param guest
+     * @returns - guest object
+     */
     const updateGuest = async (guest: Guest): Promise<Guest> => {
         return await db.one(queries.guests.updateGuest, [
             guest.firstName,
@@ -63,12 +88,22 @@ const makeGuestDAO = (db: IDatabase<any, any>): IGuestDAO => {
         ]);
     }
 
+    /**
+     * Delete guest
+     * @param guestId
+     * @returns - void
+     */
     const deleteGuest = async (guestId: number): Promise<void> => {
         await db.none(queries.guests.deleteGuest, [
             guestId
         ]);
     }
 
+    /**
+     * Check if guest exists by id
+     * @param id
+     * @returns - boolean
+     */
     const checkGuestExistsById = async (id: number): Promise<boolean> => {
         const exists = await db.one(queries.guests.checkGuestExistsById, [
             id
@@ -76,6 +111,11 @@ const makeGuestDAO = (db: IDatabase<any, any>): IGuestDAO => {
         return exists.exists;
     }
 
+    /**
+     * Get guest by id
+     * @param id
+     * @returns - guest object
+     */
     const getGuestById = async (id: number): Promise<Guest> => {
         try {
             return await db.one(queries.guests.getGuestById, [
@@ -93,6 +133,11 @@ const makeGuestDAO = (db: IDatabase<any, any>): IGuestDAO => {
         }
     }
 
+    /**
+     * Search guests
+     * @param query
+     * @returns - array of guests
+     */
     const searchGuests = async (query: string): Promise<Guest[]> => {
         try {
             return await db.any(queries.guests.searchGuests, [

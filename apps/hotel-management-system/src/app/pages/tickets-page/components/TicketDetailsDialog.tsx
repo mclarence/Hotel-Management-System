@@ -12,6 +12,9 @@ import {addCommentToTicket, getTicketComments, updateTicket} from "../../../api/
 import {useAppDispatch} from "../../../redux/hooks";
 import AddIcon from "@mui/icons-material/Add";
 import {makeApiRequest} from "../../../api/makeApiRequest";
+import dayjs from "dayjs";
+import {useSelector} from "react-redux";
+import {RootState} from "../../../redux/store";
 
 export const TicketDetailsDialog = (props: {
     open: boolean
@@ -26,6 +29,7 @@ export const TicketDetailsDialog = (props: {
     const [status, setStatus] = useState<TicketStatuses>(TicketStatuses.OPEN);
     const dispatch = useAppDispatch();
     const [ticketComments, setTicketComments] = useState<TicketMessages[]>([]);
+    const appState = useSelector((state: RootState) => state.appState);
 
     const fetchTicketComments = () => {
         if (props.ticket !== null) {
@@ -48,7 +52,7 @@ export const TicketDetailsDialog = (props: {
                     ticketId: props.ticket.ticketId!,
                     userId: user.userId!,
                     message: comment,
-                    dateCreated: new Date()
+                    dateCreated: dayjs.utc().toDate()
                 }
 
                 makeApiRequest<TicketMessages>(
@@ -80,40 +84,13 @@ export const TicketDetailsDialog = (props: {
 
     useEffect(() => {
         if (props.ticket !== null) {
-            getUserById(props.ticket.userId)
-                .then((response) => {
-                    return response.json();
-                })
-                .then((data: ApiResponse<User>) => {
-                    if (data.success) {
-                        setUser(data.data);
-                    } else if (!data.success && data.statusCode === 401) {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "warning",
-                            })
-                        );
-                    } else {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "error",
-                            })
-                        );
-                    }
-                })
-                .catch(() => {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: "An unknown error occurred",
-                            severity: "error",
-                        })
-                    );
-                })
+            makeApiRequest<User>(
+                getUserById(props.ticket.userId),
+                dispatch,
+                (data) => {
+                    setUser(data);
+                }
+            )
         }
     }, [props.open, props.ticket]);
 
@@ -222,14 +199,16 @@ export const TicketDetailsDialog = (props: {
                                 <Divider/>
                                 {ticketComments.map((comment) => {
 
-                                    const formattedTime = new Date(comment.dateCreated).toISOString()
+                                    const formattedTime = dayjs.utc(comment.dateCreated).tz(appState.timeZone).format("DD/MM/YYYY hh:mm a");
 
                                     return (
                                         <Paper sx={{padding: 2}}>
                                             <Stack direction={"column"} gap={1}>
                                                 <Typography variant={"body1"}>{comment.message}</Typography>
                                                 <Typography
-                                                    variant={"caption"}>{formattedTime}</Typography>
+                                                    variant={"caption"}>
+                                                    {formattedTime} - {comment.userFirstName} {comment.userLastName}
+                                                </Typography>
                                             </Stack>
                                         </Paper>
                                     )

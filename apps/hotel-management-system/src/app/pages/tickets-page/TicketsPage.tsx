@@ -1,4 +1,4 @@
-import {DataGrid} from "@mui/x-data-grid";
+import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay";
 import {Paper, SpeedDial} from "@mui/material";
 import React, {useEffect, useRef, useState} from "react";
@@ -11,6 +11,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import {TicketDetailsDialog} from "./components/TicketDetailsDialog";
 import {useAppDispatch} from "../../redux/hooks";
 import {makeApiRequest} from "../../api/makeApiRequest";
+import {dateValueFormatter} from "../../../util/dateValueFormatter";
+import {useSelector} from "react-redux";
+import {RootState} from "../../redux/store";
 
 export const TicketsPage = () => {
     const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -19,6 +22,7 @@ export const TicketsPage = () => {
     const [openViewTicketDialog, setOpenViewTicketDialog] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
     const dispatch = useAppDispatch();
+    const appState = useSelector((state: RootState) => state.appState);
     const handleViewTicket = (ticket: Ticket) => {
         setSelectedTicket(ticket);
         setOpenViewTicketDialog(true);
@@ -26,11 +30,15 @@ export const TicketsPage = () => {
 
     const columns = useRef([
         {field: 'ticketId', headerName: 'ID', width: 100},
-        {field: 'userId', headerName: 'User ID', width: 150},
+        {
+            field: 'userId', headerName: 'User', width: 150, renderCell: (params: any) => {
+                return params.row.userFirstName + " " + params.row.userLastName;
+            }
+        },
         {field: 'title', headerName: 'Title', width: 150},
         {field: 'description', headerName: 'Description', width: 150},
         {field: 'status', headerName: 'Status', width: 150},
-        {field: 'dateOpened', headerName: 'Date Opened', width: 150},
+        {field: 'dateOpened', headerName: 'Date Opened', width: 150, valueFormatter: dateValueFormatter(appState.timeZone)},
         {
             field: 'actions',
             headerName: 'Actions',
@@ -47,14 +55,16 @@ export const TicketsPage = () => {
                 </>
             )
         },
-    ])
+    ] as GridColDef[])
 
     const fetchTickets = () => {
+        setIsLoading(true)
         makeApiRequest<Ticket[]>(
             getAllTickets(),
             dispatch,
             (data) => {
                 setTickets(data);
+                setIsLoading(false)
             }
         )
     }

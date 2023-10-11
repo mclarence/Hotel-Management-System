@@ -22,27 +22,29 @@ const ReservationsPage = () => {
 
     const columns = useRef(
         [
-            {field: 'reservationId', headerName: 'Reservation ID'},
-            {field: 'roomCode', headerName: 'Room'},
+            {field: 'reservationId', headerName: 'ID', width: 50},
+            {field: 'roomCode', headerName: 'Room', width: 100},
             {
                 field: 'guestName', headerName: 'Guest', renderCell: (params: any) => {
                     return params.row.guestFirstName + " " + params.row.guestLastName;
                 }
             },
-            {field: 'checkInDate', headerName: 'Check In Date', valueFormatter: dateValueFormatter(appState.timeZone)},
-            {field: 'checkOutDate', headerName: 'Check Out Date', valueFormatter: dateValueFormatter(appState.timeZone)},
-            {field: 'reservationStatus', headerName: 'Reservation Status'},
-            {field: 'startDate', headerName: 'Start Date', valueFormatter: dateValueFormatter(appState.timeZone)},
-            {field: 'endDate', headerName: 'End Date', valueFormatter: dateValueFormatter(appState.timeZone)},
+            {field: 'checkInDate', headerName: 'Check In Date', valueFormatter: dateValueFormatter(appState.timeZone), width: 170},
+            {field: 'checkOutDate', headerName: 'Check Out Date', valueFormatter: dateValueFormatter(appState.timeZone), width: 170},
+            {field: 'reservationStatus', headerName: 'Reservation Status', width: 150},
+            {field: 'startDate', headerName: 'Start Date', valueFormatter: dateValueFormatter(appState.timeZone), width: 170},
+            {field: 'endDate', headerName: 'End Date', valueFormatter: dateValueFormatter(appState.timeZone), width: 170},
         ] as GridColDef[]
     )
 
     const fetchReservations = () => {
+        setIsLoading(true)
         makeApiRequest<Reservation[]>(
             getReservations(),
             dispatch,
             (data) => {
                 setRows(data);
+                setIsLoading(false)
             }
         )
     }

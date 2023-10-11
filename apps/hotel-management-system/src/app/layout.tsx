@@ -27,7 +27,7 @@ import {RootState} from './redux/store';
 import {useAppDispatch} from './redux/hooks';
 import appStateSlice, {fetchUserDetails} from "./redux/slices/AppStateSlice";
 import LogoutIcon from '@mui/icons-material/Logout';
-import {logout} from "./api/resources/auth";
+import {logout, verifyLogin} from "./api/resources/auth";
 import PeopleIcon from '@mui/icons-material/People';
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import HailIcon from '@mui/icons-material/Hail';
@@ -110,13 +110,13 @@ const Drawer = styled(MuiDrawer, {
 
 const sidebarItems = [
     {
-        text: 'Core',
-        isHeader: true,
-    },
-    {
         text: 'Dashboard',
         icon: <DashboardIcon/>,
         to: '/',
+    },
+    {
+        text: 'Room Management',
+        isHeader: true,
     },
     {
         text: 'Rooms',
@@ -195,6 +195,7 @@ export function Layout() {
 
     useEffect(() => {
         dispatch(fetchUserDetails())
+        verifyLogin(dispatch, navigate)
     }, []);
 
 
@@ -206,16 +207,9 @@ export function Layout() {
         setOpen(false);
     };
 
-    useEffect(() => {
-        if (!appState.loggedIn) {
-            navigate('/login')
-        }
-    }, [appState.loggedIn]);
-
     const handlePageChange = (pageTitle: string, pageLink: string | undefined) => {
         if (pageLink !== undefined) {
             dispatch(appStateSlice.actions.setAppBarTitle(pageTitle))
-            dispatch(appStateSlice.actions.setLastPageVisited(pageLink))
         }
     }
 

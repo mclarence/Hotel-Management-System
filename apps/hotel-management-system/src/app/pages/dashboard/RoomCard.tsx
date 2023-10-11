@@ -5,12 +5,11 @@ import {RoomStatuses} from "@hotel-management-system/models";
 
 interface RoomProps {
     roomNumber: string;
-    occupantName: string;
     roomInfo: string;
     roomStatus: RoomStatuses;
 }
 
-function RoomCard({roomNumber, occupantName, roomInfo, roomStatus}: RoomProps) {
+function RoomCard({roomNumber, roomInfo, roomStatus}: RoomProps) {
     const [roomColor, setRoomColor] = useState('gray');
     const [centerDisplay, setCenterDisplay] = useState('unknown state');
 
@@ -18,27 +17,27 @@ function RoomCard({roomNumber, occupantName, roomInfo, roomStatus}: RoomProps) {
         switch (roomStatus) {
             case RoomStatuses.AVAILABLE:
                 setRoomColor('green')
-                setCenterDisplay(occupantName || 'Available')
+                setCenterDisplay( 'Available')
                 break;
             case RoomStatuses.OCCUPIED:
                 setRoomColor('#36A2EB)')
-                setCenterDisplay(occupantName || 'Occupied');
+                setCenterDisplay( 'Occupied');
                 break;
             case RoomStatuses.OUT_OF_SERVICE:
                 setRoomColor('#FFD700')
-                setCenterDisplay(occupantName || 'Under Maintenance');
+                setCenterDisplay( 'Under Maintenance');
                 break;
             case RoomStatuses.UNAVAILABLE:
                 setRoomColor('red')
-                setCenterDisplay(occupantName || 'Unavailable');
+                setCenterDisplay( 'Unavailable');
                 break;
             case RoomStatuses.RESERVED:
                 setRoomColor('#FF7F50')
-                setCenterDisplay(occupantName || 'Reserved');
+                setCenterDisplay( 'Reserved');
                 break;
             default:
                 setRoomColor('gray')
-                setCenterDisplay(occupantName || 'unknown state');
+                setCenterDisplay( '...');
         }
     }, [roomStatus]);
 

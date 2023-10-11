@@ -22,18 +22,14 @@ export const RolesPage = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (!appState.loggedIn) {
-            navigate('/login')
-        }
-    }, [appState.loggedIn]);
-
     const fetchRoles = () => {
+        setIsLoading(true)
         makeApiRequest<Role[]>(
             getRoles(),
             dispatch,
             (data) => {
                 setRoles(data);
+                setIsLoading(false)
             }
         )
     }

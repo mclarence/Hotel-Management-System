@@ -14,6 +14,10 @@ export interface IRolesDAO {
     getUsersWithRoles: (roleId: number) => Promise<User[]>
 }
 
+/**
+ * Roles DAO
+ * @param db
+ */
 export const makeRolesDAO = (db: IDatabase<any, any>): IRolesDAO => {
 
     /**
@@ -72,6 +76,11 @@ export const makeRolesDAO = (db: IDatabase<any, any>): IRolesDAO => {
         }
     }
 
+    /**
+     * Delete role.
+     * @param roleId
+     * @returns A promise that resolves to void.
+     */
     const deleteRole = async (roleId: number): Promise<void> => {
         await db.none(queries.roles.deleteRole, [roleId]);
     }

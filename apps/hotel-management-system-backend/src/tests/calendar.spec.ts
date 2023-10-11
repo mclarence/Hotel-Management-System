@@ -33,7 +33,7 @@ describe("calendar management", () => {
 
     it("should get a note from the calendar", async () => {
         const token = await login(app);
-        const newNote = makeNewCalendarNote(dayjs.utc().toDate())
+        const newNote = makeNewCalendarNote(dayjs.utc().startOf("day").toDate())
 
         const note = await addNoteToCalendar(app, token, newNote)
 

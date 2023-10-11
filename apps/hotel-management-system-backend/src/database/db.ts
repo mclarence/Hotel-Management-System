@@ -12,12 +12,19 @@ interface Database {
     testConnection: () => Promise<void>,
 }
 
+/**
+ * Create database
+ * @param options - server options
+ */
 const createDatabase = (options: ServerConfig): Database => {
+
+    // disable warnings in test environment
     let noWarnings = false;
     if (process.env['NODE_ENV'] === 'test') {
         noWarnings = true;
     }
 
+    // create the database object
     const pgp = pg_promise({
         receive(e) {
             camelizeColumns(e.data);
@@ -26,7 +33,7 @@ const createDatabase = (options: ServerConfig): Database => {
     });
 
 
-
+    // create the database connection
     const db = pgp({
         host: options.database.host,
         port: options.database.port,
@@ -35,6 +42,7 @@ const createDatabase = (options: ServerConfig): Database => {
         password: options.database.password,
     });
 
+    // test the database connection
     const testConnection = (): Promise<void> => {
         return new Promise<void>((resolve, reject) => {
             db.connect()
@@ -50,6 +58,8 @@ const createDatabase = (options: ServerConfig): Database => {
         })
 
     }
+
+    // create the tables
     const createTables = async () => {
         logger.debug("Creating tables");
         await db.none(queries.tables.createAll).then(() => {

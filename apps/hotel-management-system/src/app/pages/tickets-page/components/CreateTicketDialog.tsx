@@ -65,7 +65,7 @@ export const CreateTicketDialog = (props: CreateTicketDialogProps) => {
     }
 
     return (
-        <Dialog open={props.open}>
+        <Dialog open={props.open} fullWidth>
             <DialogHeader title={"Create Ticket"} onClose={() => props.setOpen(false)}/>
             <DialogContent>
                 <Stack direction={"column"} spacing={2}>

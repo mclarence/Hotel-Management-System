@@ -29,12 +29,6 @@ export const UsersPage = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (!appState.loggedIn) {
-            navigate('/login')
-        }
-    }, [appState.loggedIn]);
-
     const handleEditClick = (user: User) => {
         setSelectedUserForEdit(user);
         setOpenEditUserDialog(true);

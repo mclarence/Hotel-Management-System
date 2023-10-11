@@ -124,7 +124,8 @@ const queries = {
             WHERE ticket_id = $1
         `,
         getAllTickets: `
-            SELECT * FROM tickets
+            SELECT tickets.*, users.first_name as user_first_name, users.last_name as user_last_name FROM tickets
+            INNER JOIN users ON tickets.user_id = users.user_id
         `,
         addCommentToTicket: `
             INSERT INTO ticket_messages (ticket_id, user_id, message, date_created)
@@ -132,7 +133,8 @@ const queries = {
             RETURNING *
         `,
         fetchTicketComments: `
-            SELECT * FROM ticket_messages WHERE ticket_id = $1
+            SELECT ticket_messages.*, users.first_name as user_first_name, users.last_name as user_last_name FROM ticket_messages
+            INNER JOIN users ON ticket_messages.user_id = users.user_id
         `,
         checkTicketExistsById: `
             SELECT EXISTS(SELECT 1 FROM tickets WHERE ticket_id = $1)

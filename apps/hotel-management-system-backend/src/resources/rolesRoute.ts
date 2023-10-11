@@ -8,12 +8,19 @@ import {Role} from "@hotel-management-system/models"
 import Joi from "joi";
 import {IEventLogger} from "../util/logEvent";
 import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
+import strings from "../util/strings";
 
 export interface IRolesRoute {
     router: express.Router
 }
 
-
+/**
+ * Roles Route
+ * @param rolesDAO - roles DAO
+ * @param log - db event logger
+ * @param authentication - authentication middleware
+ * @param authorization - authorization middleware
+ */
 const makeRolesRoute = (
     rolesDAO: IRolesDAO,
     log: IEventLogger,
@@ -31,161 +38,139 @@ const makeRolesRoute = (
 
     const router = express.Router();
 
+    /**
+     * HTTP GET /api/roles
+     * Get all roles
+     */
     router.get("/", authentication, authorization("roles.read"), async (req: express.Request, res: express.Response) => {
-        try {
-            const roles = await getAllRoles();
-            return sendResponse(res, {
-                success: true,
-                statusCode: StatusCodes.OK,
-                message: "Roles fetched successfully",
-                data: roles,
-            })
-        } catch (err) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-                message: "Failed to fetch roles",
-                data: err.message,
-            })
-        }
+        const roles = await getAllRoles();
+        return sendResponse(res, {
+            success: true,
+            statusCode: StatusCodes.OK,
+            message: strings.api.generic.success,
+            data: roles,
+        })
     })
 
+    /**
+     * HTTP POST /api/roles/add
+     * Add a new role
+     */
     router.post("/add", authentication, authorization("roles.add"), async (req: express.Request, res: express.Response) => {
-        try {
-            const schema = Joi.object({
-                name: Joi.string().required(),
-                permissionData: Joi.array().items(Joi.string()).required()
-            })
+        const schema = Joi.object({
+            name: Joi.string().required(),
+            permissionData: Joi.array().items(Joi.string()).required()
+        })
 
-            const {error} = schema.validate(req.body);
+        const {error} = schema.validate(req.body);
 
-            if (error) {
-                return sendResponse(res, {
-                    success: false,
-                    statusCode: StatusCodes.BAD_REQUEST,
-                    message: "Invalid request body",
-                    data: error.message,
-                })
-            }
-
-            // TODO: validate if permissions are valid
-            // TODO: check if a role with the same name already exists
-
-            const newRole: Role = {
-                name: req.body.name,
-                permissionData: req.body.permissionData
-            }
-
-            const role = await addRole(newRole);
-
-            log(
-                LogEventTypes.ROLE_CREATE,
-                req.userId,
-                "Created a new role with name: " + req.body.name + " and permissions: " + req.body.permissionData,
-            )
-
-            return sendResponse(res, {
-                success: true,
-                statusCode: StatusCodes.CREATED,
-                message: "Role added successfully",
-                data: role,
-            })
-            
-        } catch (err) {
+        if (error) {
             return sendResponse(res, {
                 success: false,
-                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-                message: "Failed to add role",
-                data: err.message,
+                statusCode: StatusCodes.BAD_REQUEST,
+                message: strings.api.generic.invalidRequestBody,
+                data: error.message,
             })
         }
+
+        // TODO: validate if permissions are valid
+        // TODO: check if a role with the same name already exists
+
+        const newRole: Role = {
+            name: req.body.name,
+            permissionData: req.body.permissionData
+        }
+
+        const role = await addRole(newRole);
+
+        log(
+            LogEventTypes.ROLE_CREATE,
+            req.userId,
+            "Created a new role with name: " + req.body.name + " and permissions: " + req.body.permissionData,
+        )
+
+        return sendResponse(res, {
+            success: true,
+            statusCode: StatusCodes.CREATED,
+            message: strings.api.generic.success,
+            data: role,
+        })
     })
 
+    /**
+     * HTTP DELETE /api/roles/:roleId
+     * Delete a role
+     */
     router.delete("/:roleId", authentication, authorization("roles.delete"), async (req: express.Request, res: express.Response) => {
-        try {
-            const roleId = parseInt(req.params.roleId);
+        const roleId = parseInt(req.params.roleId);
 
-            // check if role exists
-            const roleExists = await checkRoleExists(roleId);
+        // check if role exists
+        const roleExists = await checkRoleExists(roleId);
 
-            if (!roleExists) {
-                return sendResponse(res, {
-                    success: false,
-                    statusCode: StatusCodes.NOT_FOUND,
-                    message: "Role not found",
-                    data: null,
-                })
-            }
-
-            // check if any user has this role
-            const usersWithRole = await getUsersWithRoles(roleId);
-
-            if (usersWithRole.length > 0) {
-                return sendResponse(res, {
-                    success: false,
-                    statusCode: StatusCodes.BAD_REQUEST,
-                    message: "Cannot delete role as there are users with this role",
-                    data: null,
-                })
-            }
-
-            const role = await deleteRole(roleId);
-
-            log(
-                LogEventTypes.ROLE_DELETE,
-                req.userId,
-                "Deleted role with id: " + roleId,
-            )
-
-            return sendResponse(res, {
-                success: true,
-                statusCode: StatusCodes.OK,
-                message: "Role deleted successfully",
-                data: role,
-            })
-        } catch (err) {
-            console.log(err)
+        if (!roleExists) {
             return sendResponse(res, {
                 success: false,
-                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-                message: "Failed to delete role",
-                data: err.message,
+                statusCode: StatusCodes.NOT_FOUND,
+                message: strings.api.roles.roleNotFound(roleId),
+                data: null,
             })
         }
+
+        // check if any user has this role
+        const usersWithRole = await getUsersWithRoles(roleId);
+
+        if (usersWithRole.length > 0) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.BAD_REQUEST,
+                message: strings.api.roles.cannotDeleteRoleAsOtherUsersHaveIt,
+                data: null,
+            })
+        }
+
+        const role = await deleteRole(roleId);
+
+        log(
+            LogEventTypes.ROLE_DELETE,
+            req.userId,
+            "Deleted role with id: " + roleId,
+        )
+
+        return sendResponse(res, {
+            success: true,
+            statusCode: StatusCodes.OK,
+            message: strings.api.generic.success,
+            data: role,
+        })
     })
 
+    /**
+     * HTTP GET /api/roles/:roleId
+     * Get role by id
+     */
     router.get("/:roleId", authentication, authorization("roles.read"), async (req: express.Request, res: express.Response) => {
-        try {
-            const roleId = parseInt(req.params.roleId);
+        const roleId = parseInt(req.params.roleId);
 
-            // check if role exists
-            const roleExists = await checkRoleExists(roleId);
+        // check if role exists
+        const roleExists = await checkRoleExists(roleId);
 
-            if (!roleExists) {
-                return sendResponse(res, {
-                    success: false,
-                    statusCode: StatusCodes.NOT_FOUND,
-                    message: "Role not found",
-                    data: null,
-                })
-            }
-
-            const role = await getRoleById(roleId);
-
-            return sendResponse(res, {
-                success: true,
-                statusCode: StatusCodes.OK,
-                message: "Role fetched successfully",
-                data: role,
-            })
-        } catch (err) {
+        if (!roleExists) {
             return sendResponse(res, {
                 success: false,
-                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-                message: "Failed to fetch role",
-                data: err.message,
+                statusCode: StatusCodes.NOT_FOUND,
+                message: strings.api.roles.roleNotFound(roleId),
+                data: null,
             })
         }
+
+        const role = await getRoleById(roleId);
+
+        return sendResponse(res, {
+            success: true,
+            statusCode: StatusCodes.OK,
+            message: strings.api.generic.success,
+            data: role,
+        })
     })
 
     return {

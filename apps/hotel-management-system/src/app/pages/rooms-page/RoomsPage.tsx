@@ -76,11 +76,13 @@ export const RoomsPage = () => {
     )
 
     const fetchRooms = () => {
+        setIsLoading(true)
         makeApiRequest<Room[]>(
             getRooms(),
             dispatch,
             (data) => {
                 setRows(data);
+                setIsLoading(false)
             }
         )
     }

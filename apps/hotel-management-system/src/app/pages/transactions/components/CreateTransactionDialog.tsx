@@ -83,7 +83,7 @@ export const CreateTransactionDialog = (props: {
 
     return (
         <>
-            <Dialog open={props.open}>
+            <Dialog open={props.open} fullWidth>
                 <DialogHeader title={"Add Transaction"} onClose={() => props.setOpen(false)}/>
                 <DialogContent>
                     <Stack gap={2}>

@@ -17,22 +17,12 @@ beforeAll(async () => {
 })
 
 
-
 describe("ticketing system", () => {
     it("should add a ticket", async () => {
         const token = await login(app)
         const ticket = await addTicket(app, token, makeNewTicket(1))
 
         expect(ticket).toHaveProperty("ticketId")
-    })
-
-    it("should add a ticket comment", async () => {
-        const token = await login(app)
-        const ticket = await addTicket(app, token, makeNewTicket(1))
-        const comment = await addCommentToTicket(app, token, 1, ticket.ticketId, "test comment")
-
-        expect(comment).toHaveProperty("ticketMessageId")
-        expect(comment.message).toEqual("test comment")
     })
 
     it("should get ticket comments", async () => {
@@ -47,5 +37,14 @@ describe("ticketing system", () => {
 
         expect(response.body.data.length).toEqual(1)
         expect(response.body.data[0].message).toEqual(comment.message)
+    })
+
+    it("should add a ticket comment", async () => {
+        const token = await login(app)
+        const ticket = await addTicket(app, token, makeNewTicket(1))
+        const comment = await addCommentToTicket(app, token, 1, ticket.ticketId, "test comment")
+
+        expect(comment).toHaveProperty("ticketMessageId")
+        expect(comment.message).toEqual("test comment")
     })
 })

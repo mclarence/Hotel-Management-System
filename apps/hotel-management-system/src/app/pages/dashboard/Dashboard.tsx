@@ -106,7 +106,6 @@ export function Dashboard() {
                             <RoomCard
                                 key={room.roomId}
                                 roomNumber={room.roomCode}
-                                occupantName={""}
                                 roomInfo={room.description}
                                 roomStatus={room.status}
                             />

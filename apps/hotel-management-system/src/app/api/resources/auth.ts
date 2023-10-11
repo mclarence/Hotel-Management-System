@@ -34,10 +34,21 @@ export const logout = (): Promise<Response> => {
 }
 
 export const verifyLogin = (dispatch: ThunkDispatch<any, any, any>, navigate: NavigateFunction) => {
+    // set the previous page so that we can redirect the user back to it after login
+    const previousPage = window.location.pathname;
+
+    // check if the jwt is present in local storage
     if (localStorage.getItem('jwt') !== null) {
+        // the jwt token is present, so we need to verify it
         getCurrentUser()
             .then((response) => {
                 if (response.status === 401) {
+                    // if the token is invalid, remove it from local storage and redirect the user to the login page
+
+                    // do not set the last page visited to the login page
+                    if (previousPage !== '/login') {
+                        dispatch(appStateSlice.actions.setLastPageVisited(previousPage));
+                    }
                     localStorage.removeItem('jwt');
                     navigate('/login');
                     dispatch(appStateSlice.actions.setSnackBarAlert({
@@ -49,10 +60,13 @@ export const verifyLogin = (dispatch: ThunkDispatch<any, any, any>, navigate: Na
                     return response.json();
                 }
             })
-            .then((response) => {
-                console.log(response);
-            })
     } else {
+        // the jwt token is not present, so we need to redirect the user to the login page
+
+        // do not set the last page visited to the login page
+        if (previousPage !== '/login') {
+            dispatch(appStateSlice.actions.setLastPageVisited(previousPage));
+        }
         navigate('/login');
         dispatch(appStateSlice.actions.setSnackBarAlert({
             show: true,

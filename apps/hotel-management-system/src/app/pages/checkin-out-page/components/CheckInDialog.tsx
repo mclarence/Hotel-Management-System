@@ -62,6 +62,8 @@ export const CheckInDialog = (props: {
             tempReservationObj.reservationStatus = ReservationStatuses.CHECKED_OUT;
         }
 
+        setIsSubmitting(true)
+
         // get the room
         makeApiRequest<Room>(
             getRoomById(tempReservationObj.roomId),
@@ -93,6 +95,7 @@ export const CheckInDialog = (props: {
                                         severity: "success",
                                     })
                                 );
+                                setIsSubmitting(false);
                             }
                         )
                     }
@@ -121,6 +124,8 @@ export const CheckInDialog = (props: {
                     <Stack direction={"row"} gap={2}>
                         <Button
                             fullWidth
+                            // make the button show only if the reservation is not checked in
+                            sx={{display: props.reservation?.checkInDate === null ? "inline-flex" : "none"}}
                             variant={"contained"}
                             color={"success"}
                             startIcon={<LoginIcon/>}
@@ -131,6 +136,8 @@ export const CheckInDialog = (props: {
                         </Button>
                         <Button
                             fullWidth
+                            // make the button show only if the reservation is checked in
+                            sx={{display: props.reservation?.checkInDate !== null ? "inline-flex" : "none"}}
                             variant={"contained"}
                             color={"error"}
                             startIcon={<LogoutIcon/>}

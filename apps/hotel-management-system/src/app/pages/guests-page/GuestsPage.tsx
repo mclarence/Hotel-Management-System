@@ -30,11 +30,13 @@ const GuestsPage = () => {
     const navigate = useNavigate();
 
     const fetchGuests = () => {
+        setIsLoading(true)
         makeApiRequest<Guest[]>(
             getGuests(),
             dispatch,
             (data) => {
                 setGuests(data);
+                setIsLoading(false)
             }
         )
     };

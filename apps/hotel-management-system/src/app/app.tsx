@@ -23,6 +23,7 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import LogsComponent from './pages/logs-page/LogsPage';
 import dayjs from "dayjs";
+import {useEffect} from "react";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -73,7 +74,7 @@ export function App() {
                     </Alert>
                 </Snackbar>
             </LocalizationProvider>
-                        
+
         </ThemeProvider>
     );
 }

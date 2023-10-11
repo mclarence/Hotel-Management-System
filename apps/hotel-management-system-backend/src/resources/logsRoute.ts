@@ -10,6 +10,12 @@ interface IMakeLogsRoute {
     router: express.Router;
 }
 
+/**
+ * Logs Route
+ * @param logsDAO - logs DAO
+ * @param authentication - authentication middleware
+ * @param authorization - authorization middleware
+ */
 const makeLogsRoute = (
     logsDAO: ILogsDAO,
     authentication: IAuthenticationMiddleware,
@@ -21,24 +27,19 @@ const makeLogsRoute = (
         getAllLogs,
     } = logsDAO;
 
+    /**
+     * HTTP GET /api/logs
+     * Get all logs
+     */
     router.get("/", authentication, authorization("logs.read"), async (req: express.Request, res: express.Response) => {
-        try {
-            const logs = await getAllLogs();
+        const logs = await getAllLogs();
 
-            return sendResponse(res, {
-                success: true,
-                statusCode: StatusCodes.OK,
-                message: strings.api.success,
-                data: logs
-            })
-        } catch (error) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-                message: strings.api.serverError,
-                data: error
-            })
-        }
+        return sendResponse(res, {
+            success: true,
+            statusCode: StatusCodes.OK,
+            message: strings.api.generic.success,
+            data: logs
+        })
     })
     return {
         router
