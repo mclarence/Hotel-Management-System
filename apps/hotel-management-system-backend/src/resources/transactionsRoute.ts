@@ -10,6 +10,7 @@ import {IGuestDAO} from "../database/guests";
 import {Transaction} from "@hotel-management-system/models";
 import {IEventLogger} from "../util/logEvent";
 import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
+import dayjs from "dayjs";
 
 export interface ITransactionRoute {
     router: express.Router;
@@ -153,12 +154,14 @@ export const makeTransactionsRoute = (
                 })
             }
 
+            const parsedDate = dayjs.utc(req.body.date).toDate()
+
             const newTransaction: Transaction = {
                 paymentMethodId: req.body.paymentMethodId,
                 guestId: req.body.guestId,
                 amount: req.body.amount,
                 description: req.body.description,
-                date: req.body.date
+                date: parsedDate
             }
 
             const createdTransaction = await createTransaction(newTransaction);
@@ -171,7 +174,7 @@ export const makeTransactionsRoute = (
 
             return sendResponse(res, {
                 success: true,
-                statusCode: StatusCodes.OK,
+                statusCode: StatusCodes.CREATED,
                 message: strings.api.success,
                 data: createdTransaction
             })

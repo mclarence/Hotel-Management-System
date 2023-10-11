@@ -80,7 +80,7 @@ export const makeCalendarRoute = (
 
             return sendResponse(res, {
                 success: true,
-                statusCode: StatusCodes.OK,
+                statusCode: StatusCodes.CREATED,
                 message: strings.api.success,
                 data: note,
             })

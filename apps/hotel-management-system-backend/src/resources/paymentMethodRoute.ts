@@ -109,7 +109,7 @@ export const makePaymentMethodRoute = (
 
             return sendResponse(res, {
                 success: true,
-                statusCode: StatusCodes.OK,
+                statusCode: StatusCodes.CREATED,
                 message: "Payment method added successfully",
                 data: paymentMethod,
             })

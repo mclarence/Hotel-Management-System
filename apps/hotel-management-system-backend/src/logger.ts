@@ -14,6 +14,10 @@ if (process.env.NODE_ENV === "development") {
 } else {
     logger = pino();
     expressLogger = pinoHttp();
+    if (process.env["NODE_ENV"] === "test") {
+        logger.level ='silent'
+        expressLogger.logger.level = 'silent';
+    }
 }
 
 export { logger, expressLogger };

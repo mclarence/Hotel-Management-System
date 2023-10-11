@@ -269,9 +269,6 @@ export const makeReservationsRoute = (
                 })
             }
 
-            console.log(req.body.startDate)
-            console.log(req.body.endDate)
-
             const startDateParsed = dayjs.utc(req.body.startDate).toDate()
             const endDateParsed = dayjs.utc(req.body.endDate).toDate()
             const reservation: Reservation = {
@@ -295,13 +292,12 @@ export const makeReservationsRoute = (
 
             return sendResponse(res, {
                 success: true,
-                statusCode: StatusCodes.OK,
+                statusCode: StatusCodes.CREATED,
                 message: "Reservation created successfully",
                 data: newReservation,
             })
 
         } catch (err) {
-            console.log(err)
             return sendResponse(res, {
                 success: false,
                 statusCode: StatusCodes.INTERNAL_SERVER_ERROR,

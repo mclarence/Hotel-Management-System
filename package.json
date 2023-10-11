@@ -36,6 +36,7 @@
     "tslib": "^2.6.2"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.1.0",
     "@nx/cypress": "16.7.2",
     "@nx/eslint-plugin": "16.7.2",
     "@nx/express": "16.7.2",
