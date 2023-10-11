@@ -1,22 +1,22 @@
-import { ApiResponse, Guest } from "@hotel-management-system/models";
-import { useAppDispatch } from "../app/redux/hooks";
+import { ApiResponse, Room } from "@hotel-management-system/models";
+import { useAppDispatch } from "../../app/redux/hooks";
 import { useState } from "react";
-import { searchGuests } from "../app/api/guests";
-import appStateSlice from "../app/redux/slices/AppStateSlice";
+import appStateSlice from "../../app/redux/slices/AppStateSlice";
 import { Autocomplete, TextField } from "@mui/material";
+import { searchRoom } from "../../app/api/resources/rooms";
 
-export const GuestAutoCompleteBox = (props: {
-    value: React.Dispatch<React.SetStateAction<Guest | null>>
+export const RoomAutoCompleteBox = (props: {
+    value: React.Dispatch<React.SetStateAction<Room | null>>
 }) => {
-    const [autoCompleteOptions, setAutoCompleteOptions] = useState<Guest[]>([]);
+    const [autoCompleteOptions, setAutoCompleteOptions] = useState<Room[]>([]);
     const dispatch = useAppDispatch();
     
     const handleAutoCompleteTypingChange = (event: any) => {
-        searchGuests(event.target.value)
+        searchRoom(event.target.value)
         .then((response) => {
           return response.json();
         })
-        .then((data: ApiResponse<Guest[]>) => {
+        .then((data: ApiResponse<Room[]>) => {
           if (data.success) {
             setAutoCompleteOptions(data.data);
           } else if (!data.success && data.statusCode === 401) {
@@ -59,13 +59,13 @@ export const GuestAutoCompleteBox = (props: {
     return (
         <Autocomplete
               fullWidth
-              getOptionLabel={(option) => option.firstName + " " + option.lastName}
-              isOptionEqualToValue={(option, value) => option.guestId === value.guestId}
+              getOptionLabel={(option) => option.roomCode}
+              isOptionEqualToValue={(option, value) => option.roomCode === value.roomCode}
               onChange={handleAutoCompleteSelectionChange}
               id="combo-box-demo"
               options={autoCompleteOptions}
               renderInput={(params) => (
-                <TextField  {...params} label="Guest Name" onChange={handleAutoCompleteTypingChange} />
+                <TextField  {...params} label="RoomCard Code" onChange={handleAutoCompleteTypingChange} />
               )}
             />
     )

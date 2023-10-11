@@ -1,76 +1,114 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import './HotelDashboard.css';
-import { PieChart, Pie, Cell, Tooltip } from 'recharts';
-import Room from './Room';
-import rooms from './roomData';
+import {Cell, Pie, PieChart, Tooltip} from 'recharts';
+import RoomCard from './RoomCard';
 import RoomFilterBar from './RoomFilterBar';
-import { Card, Paper, Stack, Typography } from '@mui/material';
-import appStateSlice from '../../redux/slices/AppStateSlice';
-import { useAppDispatch } from "../../redux/hooks";
-import {getCurrentUser, verifyLogin} from "../../api/auth";
+import {Card, Stack, Typography} from '@mui/material';
+import {useAppDispatch} from "../../redux/hooks";
 import {useNavigate} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {RootState} from "../../redux/store";
+import {searchReservations} from "../../api/resources/reservations";
+import {Reservation, Room, RoomStatuses} from "@hotel-management-system/models";
+import {getRooms, getRoomStatusCount} from "../../api/resources/rooms";
+import {makeApiRequest} from "../../api/makeApiRequest";
+import dayjs from "dayjs";
 
 export function Dashboard() {
     const dispatch = useAppDispatch();
     const appState = useSelector((state: RootState) => state.appState);
     const navigate = useNavigate();
+    const [checkInsToday, setCheckInsToday] = useState(0);
+    const [checkOutsToday, setCheckOutsToday] = useState(0);
+    const [rooms, setRooms] = useState<Room[]>([]);
+    const [pieChartData, setPieChartData] = useState<{ status: string, count: number }[]>([]);
+
     useEffect(() => {
-        dispatch(appStateSlice.actions.setAppBarTitle('Dashboard'));
-        dispatch(appStateSlice.actions.setLastPageVisited('/'));
+        const currentDate = dayjs.utc()
+
+        makeApiRequest<{ status: string, count: string }[]>(
+            getRoomStatusCount(),
+            dispatch,
+            (data) => {
+                setPieChartData(data.map((item) => {
+                    return {
+                        status: item.status,
+                        count: parseInt(item.count)
+                    }
+                }))
+            }
+        )
+
+        makeApiRequest<Reservation[]>(
+            searchReservations({
+                checkInDate: currentDate,
+            }),
+            dispatch,
+            (data) => {
+                setCheckInsToday(data.length);
+            })
+
+        makeApiRequest<Reservation[]>(
+            searchReservations({
+                checkOutDate: currentDate,
+            }),
+            dispatch,
+            (data) => {
+                setCheckOutsToday(data.length);
+            }
+        )
+
+        makeApiRequest<Room[]>(
+            getRooms(),
+            dispatch,
+            (data) => {
+                setRooms(data);
+            }
+        )
+
     }, []);
 
-    useEffect(() => {
-        if (!appState.loggedIn) {
-            navigate('/login')
-        }
-    }, [appState.loggedIn]);
 
-    const occupancyRate = 78;
-    const vacancyRate = 100 - occupancyRate;
+    const colours: {
+        [key: string]: string
+    } = {
+        [RoomStatuses.AVAILABLE]: '#00C49F',
+        [RoomStatuses.OUT_OF_SERVICE]: '#FF8042',
+        [RoomStatuses.UNAVAILABLE]: '#FFBB28',
+        [RoomStatuses.OCCUPIED]: '#0088FE',
+        [RoomStatuses.RESERVED]: '#FF8042'
+    }
 
-    const data = [
-        { name: 'OccupancyRate', value: occupancyRate },
-        { name: 'VacancyRate', value: vacancyRate },
-    ];
-
-    const COLORS = ['#36A2EB', '#FFCE56'];
-
-    // 筛选和搜索的状态
+// 筛选和搜索的状态
     const [filterStatus, setFilterStatus] = useState('');
-    const [filterRoomType, setFilterRoomType] = useState('');
     const [searchRoomNumber, setSearchRoomNumber] = useState('');
 
-    // 根据状态筛选rooms
+// 根据状态筛选rooms
     const filteredRooms = rooms.filter(room => {
         return (
-            (filterStatus === '' || room.roomStatus === filterStatus) &&
-            (filterRoomType === '' || room.roomInfo === filterRoomType) &&
-            (searchRoomNumber === '' || room.roomNumber.includes(searchRoomNumber))
+            (filterStatus === '' || room.status === filterStatus) &&
+            (searchRoomNumber === '' || room.roomCode.includes(searchRoomNumber))
         );
     });
 
     return (
         <div className="dashboard">
             <section className="dashboard-section">
-                <Stack  gap={2} padding={1} width={'100%'}>
+                <Stack gap={2} padding={1} width={'100%'}>
                     <RoomFilterBar
                         filterStatus={filterStatus}
                         setFilterStatus={setFilterStatus}
-                        filterRoomType={filterRoomType}
-                        setFilterRoomType={setFilterRoomType}
                         searchRoomNumber={searchRoomNumber}
                         setSearchRoomNumber={setSearchRoomNumber}
                     />
                     <div className="rooms-container">
                         {filteredRooms.map(room => (
-                            <Room
-                                key={room.roomNumber}
-                                roomNumber={room.roomNumber}
-                                occupantName={room.occupantName}
-                                roomInfo={room.roomInfo}
-                                roomStatus={room.roomStatus}
+                            <RoomCard
+                                key={room.roomId}
+                                roomNumber={room.roomCode}
+                                occupantName={""}
+                                roomInfo={room.description}
+                                roomStatus={room.status}
                             />
                         ))}
                     </div>
@@ -78,41 +116,33 @@ export function Dashboard() {
                 <Stack gap={2} padding={1}>
                     <Card>
                         <Stack margin={2}>
-                            <Typography variant='h5'>Occupancy rate</Typography>
+                            <Typography variant='h5'>Room Status Overview</Typography>
                             <PieChart width={300} height={300}>
                                 <Pie
-                                    data={data}
+                                    data={pieChartData}
                                     outerRadius={100}
                                     fill="#8884d8"
-                                    dataKey="value"
+                                    dataKey="count"
+                                    nameKey="status"
+                                    label
                                 >
-                                    {
-                                        data.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index]} />)
-                                    }
+                                    {pieChartData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={colours[entry.status]}/>
+                                    ))}
                                 </Pie>
-                                <Tooltip />
+                                <Tooltip/>
                             </PieChart>
                         </Stack>
                     </Card>
-                    <Card > 
+                    <Card>
                         <Stack margin={2}>
-                            <Typography variant='h5'>Check-in/check-out today</Typography>
-                            <Typography variant='body1'>Arrivals: 35</Typography>
-                            <Typography variant='body1'>Departures: 28</Typography>
-                        </Stack>
-                    </Card>
-                    <Card >
-                    <Stack margin={2}>
-                        <Typography variant='h5'>Room status</Typography>
-                        <ul>
-                            <li>Booked: 20</li>
-                            <li>Checked in: 45</li>
-                            <li>To be maintained: 15</li>
-                        </ul>
+                            <Typography variant='h5'>Today's check-ins and check-outs</Typography>
+                            <Typography variant='body1'>Arrivals: {checkInsToday}</Typography>
+                            <Typography variant='body1'>Departures: {checkOutsToday}</Typography>
                         </Stack>
                     </Card>
                 </Stack>
             </section>
         </div>
-    );
+);
 }

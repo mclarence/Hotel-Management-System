@@ -1,4 +1,4 @@
-import {Link, Outlet} from 'react-router-dom';
+import {Link, Outlet, useNavigate} from 'react-router-dom';
 import * as React from 'react';
 import {useEffect} from 'react';
 import {CSSObject, styled, Theme, useTheme} from '@mui/material/styles';
@@ -27,7 +27,7 @@ import {RootState} from './redux/store';
 import {useAppDispatch} from './redux/hooks';
 import appStateSlice, {fetchUserDetails} from "./redux/slices/AppStateSlice";
 import LogoutIcon from '@mui/icons-material/Logout';
-import {logout} from "./api/auth";
+import {logout} from "./api/resources/auth";
 import PeopleIcon from '@mui/icons-material/People';
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import HailIcon from '@mui/icons-material/Hail';
@@ -35,6 +35,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import EventSeatIcon from '@mui/icons-material/EventSeat';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import ListIcon from '@mui/icons-material/List';
 
 const drawerWidth = 240;
 
@@ -165,7 +166,7 @@ const sidebarItems = [
         to: '/transactions',
     },
     {
-        text: 'User Management',
+        text: 'System',
         isHeader: true,
     },
     {
@@ -178,6 +179,11 @@ const sidebarItems = [
         icon: <PermIdentityIcon/>,
         to: '/roles',
     },
+    {
+        text: 'Logs',
+        icon: <ListIcon/>,
+        to: '/logs',
+    }
 ];
 
 export function Layout() {
@@ -185,6 +191,7 @@ export function Layout() {
     const [open, setOpen] = React.useState(false);
     const appState = useSelector((state: RootState) => state.appState);
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     useEffect(() => {
         dispatch(fetchUserDetails())
@@ -198,6 +205,19 @@ export function Layout() {
     const handleDrawerClose = () => {
         setOpen(false);
     };
+
+    useEffect(() => {
+        if (!appState.loggedIn) {
+            navigate('/login')
+        }
+    }, [appState.loggedIn]);
+
+    const handlePageChange = (pageTitle: string, pageLink: string | undefined) => {
+        if (pageLink !== undefined) {
+            dispatch(appStateSlice.actions.setAppBarTitle(pageTitle))
+            dispatch(appStateSlice.actions.setLastPageVisited(pageLink))
+        }
+    }
 
     const handleLogoutButton = () => {
         const existingToken = localStorage.getItem('jwt');
@@ -278,6 +298,7 @@ export function Layout() {
                                     <ListItemButton
                                         component={Link as any}
                                         to={item.to}
+                                        onClick={() => handlePageChange(item.text, item.to)}
                                         sx={{
                                             minHeight: 48,
                                             justifyContent: open ? 'initial' : 'center',

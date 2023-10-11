@@ -46,6 +46,16 @@ export const updateGuest = (guest: Guest): Promise<Response> => {
     })
 }
 
+export const getGuestById = (id: number): Promise<Response> => {
+    return fetch(`/api/guests/${id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+        },
+    })
+}
+
 export const searchGuests = (query: string): Promise<Response> => {
     return fetch(`/api/guests/search?q=${query}`, {
         method: 'GET',

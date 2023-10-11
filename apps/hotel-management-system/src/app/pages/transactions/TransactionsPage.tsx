@@ -1,15 +1,16 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Paper, SpeedDial} from "@mui/material";
 import {DataGrid} from "@mui/x-data-grid";
-import {CustomNoRowsOverlay} from "../../../util/CustomNoRowsOverlay";
+import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay";
 import AddIcon from "@mui/icons-material/Add";
 import {ApiResponse, Transaction} from "@hotel-management-system/models";
-import {deleteTransaction, getTransactions} from "../../api/transactions";
+import {deleteTransaction, getTransactions} from "../../api/resources/transactions";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../redux/hooks";
 import {CreateTransactionDialog} from "./components/CreateTransactionDialog";
-import {RowDeleteButton} from "../../../util/RowDeleteButton";
-import {RowEditButton} from "../../../util/RowEditButton";
+import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
+import {RowEditButton} from "../../../util/components/RowEditButton";
+import {makeApiRequest} from "../../api/makeApiRequest";
 
 export const TransactionsPage = () => {
 
@@ -19,84 +20,43 @@ export const TransactionsPage = () => {
     const dispatch = useAppDispatch();
 
     const fetchTransactions = () => {
-        getTransactions()
-            .then((response) => response.json())
-            .then((data: ApiResponse<Transaction[]>) => {
-
-                if (data.success) {
-                    setTransactions(data.data)
-                }
-
-                if (data.statusCode === 401 && !data.success) {
-                    console.log(data.message);
-                    dispatch(appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: data.message,
-                        severity: 'warning'
-                    }))
-                } else if (!data.success) {
-                    dispatch(appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: data.message,
-                        severity: 'error'
-                    }))
-                }
-            })
-            .catch((error) => {
-                dispatch(appStateSlice.actions.setSnackBarAlert({
-                    show: true,
-                    message: error.message,
-                    severity: 'error'
-                }))
-            }).finally(() => {
-            setIsLoading(false)
-        })
-
+        makeApiRequest<Transaction[]>(
+            getTransactions(),
+            dispatch,
+            (data) => {
+                setTransactions(data);
+            }
+        )
     }
     const handleDeleteSingleTransaction = (id: number) => {
-        deleteTransaction(id)
-            .then((response) => response.json())
-            .then((data: ApiResponse<null>) => {
-
-                if (data.success) {
-                    fetchTransactions()
-                    dispatch(appStateSlice.actions.setSnackBarAlert({
+        makeApiRequest<null>(
+            deleteTransaction(id),
+            dispatch,
+            (data) => {
+                fetchTransactions();
+                dispatch(
+                    appStateSlice.actions.setSnackBarAlert({
                         show: true,
                         message: "Transaction deleted successfully",
-                        severity: 'success'
-                    }))
-                }
-
-                if (data.statusCode === 401 && !data.success) {
-                    console.log(data.message);
-                    dispatch(appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: data.message,
-                        severity: 'warning'
-                    }))
-                } else if (!data.success) {
-                    dispatch(appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: data.message,
-                        severity: 'error'
-                    }))
-                }
-            })
-            .catch((error) => {
-                dispatch(appStateSlice.actions.setSnackBarAlert({
-                    show: true,
-                    message: error.message,
-                    severity: 'error'
-                }))
-            }).finally(() => {
-            setIsLoading(false)
-        })
+                        severity: "success",
+                    })
+                );
+            }
+        )
     }
 
     const columns = useRef([
         {field: 'transactionId', headerName: 'Transaction ID', width: 200},
-        {field: 'paymentMethodId', headerName: 'Payment Method ID', width: 200},
-        {field: 'guestId', headerName: 'Guest ID', width: 200},
+        {
+            field: 'payementMethodId', headerName: 'Payment Method', width: 200, renderCell: (params: any) => {
+                return params.row.paymentMethodType
+            }
+        },
+        {
+            field: 'guestId', headerName: 'Guest', width: 200, renderCell: (params: any) => {
+                return params.row.guestFirstName + " " + params.row.guestLastName
+            }
+        },
         {field: 'amount', headerName: 'Amount', width: 200},
         {field: 'description', headerName: 'Description', width: 200},
         {field: 'date', headerName: 'Date', width: 200},

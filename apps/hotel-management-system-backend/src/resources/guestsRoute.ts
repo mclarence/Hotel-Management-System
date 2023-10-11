@@ -1,12 +1,14 @@
 import express from "express";
-import { IGuestDAO } from "../database/guests";
-import { IAuthenticationMiddleware } from "../middleware/authentication";
-import { IAuthorizationMiddleware } from "../middleware/authorization";
+import {IGuestDAO} from "../database/guests";
+import {IAuthenticationMiddleware} from "../middleware/authentication";
+import {IAuthorizationMiddleware} from "../middleware/authorization";
 import sendResponse from "../util/sendResponse";
 import {StatusCodes} from "http-status-codes";
 import {Guest} from "@hotel-management-system/models"
 import Joi from "joi";
 import strings from "../util/strings";
+import {IEventLogger} from "../util/logEvent";
+import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
 
 
 export interface IGuestRoute {
@@ -15,6 +17,7 @@ export interface IGuestRoute {
 
 const makeGuestsRoute = (
     guestsDAO: IGuestDAO,
+    log: IEventLogger,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware,
 ) => {
@@ -192,6 +195,12 @@ const makeGuestsRoute = (
             }
 
             const guest = await addGuest(newGuest);
+
+            log(
+                LogEventTypes.GUEST_ADD,
+                req.userId,
+                "Added a new guest with id: " + guest.guestId + " and name: " + guest.firstName + " " + guest.lastName,
+            )
             
             return sendResponse(res, {
                 success: true,
@@ -264,6 +273,12 @@ const makeGuestsRoute = (
 
             const guest = await updateGuest(updatedGuest);
 
+            log(
+                LogEventTypes.GUEST_UPDATE,
+                req.userId,
+                "Updated guest with id: " + guestId + " to name: " + req.body.firstName + " " + req.body.lastName,
+            )
+
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.OK,
@@ -306,6 +321,12 @@ const makeGuestsRoute = (
             }
 
             const guest = await deleteGuest(guestId);
+
+            log(
+                LogEventTypes.GUEST_DELETE,
+                req.userId,
+                "Deleted guest with id: " + guestId,
+            )
 
             return sendResponse(res, {
                 success: true,

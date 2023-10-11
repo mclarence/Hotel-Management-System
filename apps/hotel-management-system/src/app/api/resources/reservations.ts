@@ -1,4 +1,5 @@
-import { Reservation } from "@hotel-management-system/models"
+import {Reservation} from "@hotel-management-system/models"
+import {Dayjs} from "dayjs";
 
 export const getReservations = async (): Promise<Response> => {
     return fetch('/api/reservations', {
@@ -38,6 +39,8 @@ export const searchReservations = async (searchQueries: {
     startDate?: Date,
     endDate?: Date,
     guestId?: number,
+    checkInDate?: Dayjs,
+    checkOutDate?: Dayjs,
 }): Promise<Response> => {
     // add query params to url. do not add if the query param is null or undefined
     let url = `/api/reservations/search?`
@@ -51,6 +54,14 @@ export const searchReservations = async (searchQueries: {
 
     if (searchQueries.guestId) {
         url += `guestId=${searchQueries.guestId}&`
+    }
+
+    if (searchQueries.checkInDate) {
+        url += `checkInDate=${searchQueries.checkInDate.format('YYYY-MM-DD')}&`
+    }
+
+    if (searchQueries.checkOutDate) {
+        url += `checkOutDate=${searchQueries.checkOutDate.format('YYYY-MM-DD')}&`
     }
 
     return fetch(url, {

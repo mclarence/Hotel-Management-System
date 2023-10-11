@@ -24,6 +24,13 @@ const queries = {
                 token VARCHAR(255) NOT NULL,
                 revokedAt TIMESTAMP NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS logs (
+                log_id SERIAL PRIMARY KEY,
+                event_type VARCHAR(255) NOT NULL, 
+                timestamp TIMESTAMP NOT NULL DEFAULT current_timestamp,
+                user_id INTEGER NOT NULL,
+                description TEXT
+            );
             CREATE TABLE IF NOT EXISTS calendar_notes(
                 note_id SERIAL PRIMARY KEY,
                 date TIMESTAMP NOT NULL,
@@ -165,7 +172,8 @@ const queries = {
             SELECT * FROM users WHERE user_id = $1
         `,
         getUserByUsername: `
-            SELECT * FROM users WHERE username = $1
+            SELECT * FROM users
+            WHERE username = $1
         `,
         createUser: `
             INSERT INTO users (username, password, password_salt, first_name, last_name, email, phone_number, position, role_id)
@@ -183,7 +191,8 @@ const queries = {
             WHERE user_id = $1
         `,
         getAllUsers: `
-            SELECT * FROM users
+            SELECT users.*, roles.name as role_name FROM users
+            INNER JOIN roles ON users.role_id = roles.role_id
         `,
         searchUsers: `
             SELECT * FROM users WHERE first_name ILIKE '%$1#%' OR last_name ILIKE '%$1#%'
@@ -195,6 +204,20 @@ const queries = {
         `,
         checkTokenRevoked: `
             SELECT * FROM token_revocation_list WHERE token = $1
+        `,
+    },
+    logs: {
+        addLog: `
+            INSERT INTO logs (event_type, timestamp, user_id, description)
+            VALUES ($1, $2, $3, $4)
+            RETURNING *
+        `,
+        getAllLogs: `
+            SELECT * FROM logs
+        `,
+        deleteLog: `
+        DELETE FROM logs
+         WHERE log_id = $1
         `,
     },
     notes: {
@@ -251,7 +274,9 @@ const queries = {
     },
     reservations: {
         getReservations: `
-            SELECT * FROM reservations
+            SELECT reservations.*, rooms.room_code, guests.first_name as guest_first_name, guests.last_name as guest_last_name FROM reservations
+            INNER JOIN guests ON reservations.guest_id = guests.guest_id
+            INNER JOIN rooms ON reservations.room_id = rooms.room_id
         `,
         getReservationById: `
             SELECT * FROM reservations WHERE reservation_id = $1
@@ -282,7 +307,7 @@ const queries = {
         `,
         checkIfReservationIsAvailable: `
             SELECT EXISTS(SELECT 1 FROM reservations WHERE room_id = $1 AND start_date <= $2 AND end_date >= $3)
-        `
+        `,
     },
     rooms: {
         getRooms: `
@@ -315,6 +340,12 @@ const queries = {
         checkRoomExistsByRoomCode: `
             SELECT EXISTS(SELECT 1 FROM rooms WHERE room_code = $1)
         `,
+        getStatusCount: `
+        SELECT status, COUNT(*) AS count
+            FROM rooms
+            GROUP BY status
+            ORDER BY status;
+        `
     },
     paymentMethods: {
         getPaymentMethods: `
@@ -347,7 +378,9 @@ const queries = {
     },
     transactions: {
         getTransactions: `
-            SELECT * FROM transaction
+            SELECT transaction.*, payment_methods.type as payment_method_type, guests.first_name as guest_first_name, guests.last_name as guest_last_name FROM transaction
+            INNER JOIN payment_methods ON transaction.payment_method_id = payment_methods.payment_method_id
+            INNER JOIN guests ON transaction.guest_id = guests.guest_id
             `,
         getTransactionById: `
             SELECT * FROM transaction WHERE transaction_id = $1
@@ -375,6 +408,8 @@ const queries = {
         `
         
     }
+    
+    
 }
 
 export default queries;

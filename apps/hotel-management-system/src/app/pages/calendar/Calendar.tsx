@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography';
 import AddIcon from '@mui/icons-material/Add';
 import dayjs, {Dayjs} from 'dayjs';
 import React, {useEffect, useState} from 'react';
-import {createNote, deleteNote, getNoteById, updateNote} from '../../api/calendar';
+import {createNote, deleteNote, getNoteById, updateNote} from '../../api/resources/calendar';
 import {ApiResponse, CalendarNotes} from '@hotel-management-system/models';
 import {useAppDispatch} from '../../redux/hooks';
 import appStateSlice from '../../redux/slices/AppStateSlice';
@@ -12,46 +12,24 @@ import Divider from "@mui/material/Divider";
 import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
+import {makeApiRequest} from "../../api/makeApiRequest";
+import {useSelector} from "react-redux";
+import {RootState} from "../../redux/store";
 
 export function Calendar() {
     const dispatch = useAppDispatch();
-    const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs(new Date()));
+    const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs.utc());
     const [currentNote, setCurrentNote] = useState<CalendarNotes[]>([]);
+    const appState = useSelector((state: RootState) => state.appState);
 
     function fetchNote(date: Date) {
-        getNoteById(date).then((response) => {
-            return response.json();
-        })
-            .then((data: ApiResponse<CalendarNotes[]>) => {
-                if (data.success) {
-                    setCurrentNote(data.data);
-                } else if (!data.success && data.statusCode === 401) {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "warning",
-                        })
-                    );
-                } else {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "error",
-                        })
-                    );
-                }
-            })
-            .catch(() => {
-                dispatch(
-                    appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: "An unknown error occurred",
-                        severity: "error",
-                    })
-                );
-            });
+        makeApiRequest<CalendarNotes[]>(
+            getNoteById(date),
+            dispatch,
+            (data) => {
+                setCurrentNote(data);
+            }
+        )
     }
 
     const handleButtonClick = () => {
@@ -63,95 +41,39 @@ export function Calendar() {
                 date: selectedDate.toDate(),
             }
 
-            createNote(note)
-                .then((response) => {
-                    return response.json();
-                })
-                .then((data: ApiResponse<null>) => {
-                    if (data.success) {
-                        fetchNote(selectedDate.toDate())
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: "Note added successfully.",
-                                severity: "success",
-                            })
-                        );
-                    } else if (!data.success && data.statusCode === 401) {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "warning",
-                            })
-                        );
-                    } else {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "error",
-                            })
-                        );
-                    }
-                })
-                .catch(() => {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: "An unknown error occurred",
-                            severity: "error",
-                        })
-                    );
-                })
-                .finally(() => {
-                });
-
-        }
-    }
-
-    const handleDeleteNote = (noteId: number) => {
-        deleteNote(noteId)
-            .then((response) => response.json())
-            .then((data: ApiResponse<null>) => {
-                if (data.success) {
+            makeApiRequest<null>(
+                createNote(note),
+                dispatch,
+                (data) => {
                     fetchNote(selectedDate!.toDate())
                     dispatch(
                         appStateSlice.actions.setSnackBarAlert({
                             show: true,
-                            message: "Note deleted successfully.",
+                            message: "Note added successfully.",
                             severity: "success",
                         })
                     );
-                } else if (!data.success && data.statusCode === 401) {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "warning",
-                        })
-                    );
-                } else {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "error",
-                        })
-                    );
                 }
-            })
-            .catch(() => {
+            )
+        }
+    }
+
+    const handleDeleteNote = (noteId: number) => {
+        makeApiRequest<null>(
+            deleteNote(noteId),
+            dispatch,
+            (data) => {
+                fetchNote(selectedDate!.toDate())
                 dispatch(
                     appStateSlice.actions.setSnackBarAlert({
                         show: true,
-                        message: "An unknown error occurred",
-                        severity: "error",
+                        message: "Note deleted successfully.",
+                        severity: "success",
                     })
                 );
-            })
-            .finally(() => {
-            });
+            }
+        )
+
     }
 
     const handleEditNote = (noteObj: CalendarNotes) => {
@@ -164,55 +86,22 @@ export function Calendar() {
                 date: noteObj.date,
             }
 
-            updateNote(updatedNote)
-                .then((response) => response.json())
-                .then((data: ApiResponse<CalendarNotes>) => {
-                    if (data.success) {
-                        fetchNote(selectedDate!.toDate())
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: "Note updated successfully.",
-                                severity: "success",
-                            })
-                        );
-                    } else if (!data.success && data.statusCode === 401) {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "warning",
-                            })
-                        );
-                    } else {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "error",
-                            })
-                        );
-                    }
-                })
-                .catch(() => {
+            makeApiRequest<CalendarNotes>(
+                updateNote(updatedNote),
+                dispatch,
+                (data) => {
+                    fetchNote(selectedDate!.toDate())
                     dispatch(
                         appStateSlice.actions.setSnackBarAlert({
                             show: true,
-                            message: "An unknown error occurred",
-                            severity: "error",
+                            message: "Note updated successfully.",
+                            severity: "success",
                         })
                     );
-                })
-                .finally(() => {
-                });
-
+                }
+            )
         }
     }
-
-    useEffect(() => {
-        dispatch(appStateSlice.actions.setAppBarTitle('Calendar'));
-        dispatch(appStateSlice.actions.setLastPageVisited('/calendar'));
-    }, []);
 
     useEffect(() => {
         if (selectedDate != null) {
@@ -225,7 +114,7 @@ export function Calendar() {
             <Grid container spacing={2}>
                 <Grid item xs={4}>
                     <Paper>
-                        <DateCalendar value={selectedDate} onChange={(newValue) => setSelectedDate(newValue)}/>
+                        <DateCalendar value={selectedDate} onChange={setSelectedDate} timezone={appState.timeZone}/>
                     </Paper>
                 </Grid>
                 <Grid item xs={8}>

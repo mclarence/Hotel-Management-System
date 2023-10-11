@@ -13,18 +13,26 @@ interface Database {
 }
 
 const createDatabase = (options: ServerConfig): Database => {
+    let noWarnings = false;
+    if (process.env['NODE_ENV'] === 'test') {
+        noWarnings = true;
+    }
+
     const pgp = pg_promise({
         receive(e) {
             camelizeColumns(e.data);
-        }
+        },
+        noWarnings: noWarnings
     });
+
+
 
     const db = pgp({
         host: options.database.host,
         port: options.database.port,
         database: options.database.database,
         user: options.database.user,
-        password: options.database.password
+        password: options.database.password,
     });
 
     const testConnection = (): Promise<void> => {

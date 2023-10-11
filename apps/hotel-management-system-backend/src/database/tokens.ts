@@ -14,10 +14,8 @@ const makeTokenRevocationListDAO = (db: IDatabase<any, any>): ITokenRevocationLi
 
     const checkTokenRevoked = async (token: string): Promise<boolean> => {
         const tokenRevocationList: any = await db.oneOrNone(queries.tokenRevocationList.checkTokenRevoked, [token]);
-        if (tokenRevocationList === null) {
-            return false;
-        }
-        return true;
+        return tokenRevocationList !== null;
+
     }
 
     return {

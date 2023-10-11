@@ -7,6 +7,10 @@ import {StatusCodes} from "http-status-codes";
 import strings from "../util/strings";
 import Joi from "joi";
 import {CalendarNotes} from "@hotel-management-system/models";
+import {IEventLogger} from "../util/logEvent";
+import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
+import dayjs from "dayjs";
+import "dayjs/plugin/utc";
 
 export interface ICalendarRoute {
     router: express.Router
@@ -14,6 +18,7 @@ export interface ICalendarRoute {
 
 export const makeCalendarRoute = (
     calendarDAO: INotesDAO,
+    log: IEventLogger,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware,
 ): ICalendarRoute => {
@@ -26,10 +31,9 @@ export const makeCalendarRoute = (
 
     const router = express.Router();
 
-    router.get("/:date", authentication, authorization("calendar.get"), async (req, res) => {
+    router.get("/:date", authentication, authorization("calendar.get"), async (req: express.Request, res: express.Response) => {
         const date = req.params.date;
-        const parsedDate = new Date(date);
-        console.log(date)
+        const parsedDate = dayjs.utc(date).toDate();
         const note = await getNoteByDate(parsedDate);
 
         return sendResponse(res, {
@@ -40,7 +44,7 @@ export const makeCalendarRoute = (
         });
     })
 
-    router.post("/add", authentication, authorization("calendar.add"), async (req, res) => {
+    router.post("/add", authentication, authorization("calendar.add"), async (req: express.Request, res: express.Response) => {
         try {
             const schema = Joi.object({
                 date: Joi.date().required(),
@@ -58,16 +62,24 @@ export const makeCalendarRoute = (
                 })
             }
 
+            const parsedDate = dayjs.utc(req.body.date).toDate();
+
             const newNote: CalendarNotes = {
-                date: req.body.date,
+                date: parsedDate,
                 note: req.body.note,
             }
 
             const note = await addNoteToDate(newNote);
 
+            log(
+                LogEventTypes.CALENDAR_NOTE_CREATE,
+                req.userId,
+                "Created a new note for date: " + req.body.date + " with note: " + req.body.note,
+            )
+
             return sendResponse(res, {
                 success: true,
-                statusCode: StatusCodes.OK,
+                statusCode: StatusCodes.CREATED,
                 message: strings.api.success,
                 data: note,
             })
@@ -82,7 +94,7 @@ export const makeCalendarRoute = (
         }
     })
 
-    router.patch("/:noteId", authentication, authorization("calendar.edit"), async (req, res) => {
+    router.patch("/:noteId", authentication, authorization("calendar.edit"), async (req: express.Request, res: express.Response) => {
         try {
             const noteId = parseInt(req.params.noteId)
 
@@ -123,13 +135,21 @@ export const makeCalendarRoute = (
                 })
             }
 
+            const parsedDate = dayjs.utc(req.body.date).toDate();
+
             const updatedNote: CalendarNotes = {
                 noteId: noteId,
-                date: req.body.date,
+                date: parsedDate,
                 note: req.body.note,
             }
 
             const note = await updateNote(updatedNote);
+
+            log(
+                LogEventTypes.CALENDAR_NOTE_UPDATE,
+                req.userId,
+                "Updated note with id: " + noteId + " to date: " + req.body.date + " with note: " + req.body.note,
+            )
 
             return sendResponse(res, {
                 success: true,
@@ -148,7 +168,7 @@ export const makeCalendarRoute = (
         }
     })
 
-    router.delete("/:noteId", authentication, authorization("calendar.delete"), async (req, res) => {
+    router.delete("/:noteId", authentication, authorization("calendar.delete"), async (req: express.Request, res: express.Response) => {
         try {
             const noteId = parseInt(req.params.noteId)
 
@@ -174,6 +194,12 @@ export const makeCalendarRoute = (
             }
 
             await calendarDAO.deleteNote(noteId);
+
+            log(
+                LogEventTypes.CALENDAR_NOTE_DELETE,
+                req.userId,
+                "Deleted note with id: " + noteId,
+            )
 
             return sendResponse(res, {
                 success: true,

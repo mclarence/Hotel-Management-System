@@ -6,16 +6,17 @@ import {RootState} from "../../redux/store";
 import {Guest, ApiResponse} from "@hotel-management-system/models";
 import {Paper, SpeedDial} from "@mui/material";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
-import {CustomNoRowsOverlay} from "../../../util/CustomNoRowsOverlay";
+import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay";
 import AddIcon from "@mui/icons-material/Add";
-import {deleteGuest, getGuests} from "../../api/guests";
+import {deleteGuest, getGuests} from "../../api/resources/guests";
 import appStateSlice from "../../redux/slices/AppStateSlice";
-import {RowDeleteButton} from "../../../util/RowDeleteButton";
+import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
 import AddGuestDialog from "./components/AddGuestDialog";
-import {RowEditButton} from "../../../util/RowEditButton";
+import {RowEditButton} from "../../../util/components/RowEditButton";
 import EditGuestDialog from "./components/EditGuestDialog";
 import {PaymentMethodsRowButton} from "./components/PaymentMethodsRowButton";
 import {PaymentMethodsDialog} from "./components/PaymentMethodsDialog";
+import {makeApiRequest} from "../../api/makeApiRequest";
 
 const GuestsPage = () => {
     const [guests, setGuests] = useState<Guest[]>([]);
@@ -29,40 +30,13 @@ const GuestsPage = () => {
     const navigate = useNavigate();
 
     const fetchGuests = () => {
-        getGuests()
-            .then((response) => {
-                return response.json();
-            })
-            .then((data: ApiResponse<Guest[]>) => {
-                if (data.success) {
-                    setGuests(data.data);
-                } else if (!data.success && data.statusCode === 401) {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "warning",
-                        })
-                    );
-                } else {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "error",
-                        })
-                    );
-                }
-            })
-            .catch(() => {
-                dispatch(
-                    appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: "An unknown error occurred",
-                        severity: "error",
-                    })
-                );
-            });
+        makeApiRequest<Guest[]>(
+            getGuests(),
+            dispatch,
+            (data) => {
+                setGuests(data);
+            }
+        )
     };
 
     const handleDeleteGuest = (id: number) => {
@@ -70,54 +44,23 @@ const GuestsPage = () => {
             return;
         }
 
-        deleteGuest(id)
-            .then((response) => {
-                return response.json();
-            })
-            .then((data: ApiResponse<null>) => {
-                if (data.success) {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: "Guest deleted successfully",
-                            severity: "success",
-                        })
-                    );
-                    fetchGuests();
-                } else if (!data.success && data.statusCode === 401) {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "warning",
-                        })
-                    );
-                } else {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "error",
-                        })
-                    );
-                }
-            })
-            .catch((error) => {
+        makeApiRequest<null>(
+            deleteGuest(id),
+            dispatch,
+            (data) => {
                 dispatch(
                     appStateSlice.actions.setSnackBarAlert({
                         show: true,
-                        message: error.message,
-                        severity: "error",
+                        message: "Guest deleted successfully",
+                        severity: "success",
                     })
                 );
-            })
-            .finally(() => {
-            });
+                fetchGuests();
+            }
+        )
     };
 
     useEffect(() => {
-        dispatch(appStateSlice.actions.setAppBarTitle("Guests"));
-        dispatch(appStateSlice.actions.setLastPageVisited("/guests"));
         fetchGuests();
     }, []);
 

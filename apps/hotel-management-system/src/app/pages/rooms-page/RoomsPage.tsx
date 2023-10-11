@@ -1,18 +1,19 @@
-import { Paper, SpeedDial } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-import { useEffect, useRef, useState } from "react";
-import { CustomNoRowsOverlay } from "../../../util/CustomNoRowsOverlay";
-import {Room, ApiResponse} from "@hotel-management-system/models";
+import {Paper, SpeedDial} from "@mui/material";
+import {DataGrid} from "@mui/x-data-grid";
+import {useEffect, useRef, useState} from "react";
+import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay";
+import {Room} from "@hotel-management-system/models";
 import AddIcon from '@mui/icons-material/Add';
 import appStateSlice from "../../redux/slices/AppStateSlice";
-import { useSelector } from "react-redux";
-import { useAppDispatch } from "../../redux/hooks";
-import { RootState } from "../../redux/store";
-import { deleteRoom, getRooms } from "../../api/rooms";
-import { AddRoomDialog } from "./components/AddRoomDialog";
-import { RowEditButton } from "../../../util/RowEditButton";
-import { RowDeleteButton } from "../../../util/RowDeleteButton";
+import {useSelector} from "react-redux";
+import {useAppDispatch} from "../../redux/hooks";
+import {RootState} from "../../redux/store";
+import {deleteRoom, getRooms} from "../../api/resources/rooms";
+import {AddRoomDialog} from "./components/AddRoomDialog";
+import {RowEditButton} from "../../../util/components/RowEditButton";
+import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
 import EditRoomDialog from "./components/EditRoomDialog";
+import {makeApiRequest} from "../../api/makeApiRequest";
 
 export const RoomsPage = () => {
 
@@ -25,47 +26,20 @@ export const RoomsPage = () => {
     const dispatch = useAppDispatch();
 
     const handleDeleteButtonClicked = (roomId: number) => {
-        deleteRoom(roomId)
-        .then((response) => {
-            return response.json();
-          })
-          .then((data: ApiResponse<null>) => {
-            if (data.success) {
-              fetchRooms();
-              dispatch(
-                appStateSlice.actions.setSnackBarAlert({
-                  show: true,
-                  message: data.message,
-                  severity: "success",
-                })
-              );
-            } else if (!data.success && data.statusCode === 401) {
-              dispatch(
-                appStateSlice.actions.setSnackBarAlert({
-                  show: true,
-                  message: data.message,
-                  severity: "warning",
-                })
-              );
-            } else {
-              dispatch(
-                appStateSlice.actions.setSnackBarAlert({
-                  show: true,
-                  message: data.message,
-                  severity: "error",
-                })
-              );
+        makeApiRequest<null>(
+            deleteRoom(roomId),
+            dispatch,
+            (data) => {
+                fetchRooms();
+                dispatch(
+                    appStateSlice.actions.setSnackBarAlert({
+                        show: true,
+                        message: "RoomCard deleted successfully",
+                        severity: "success",
+                    })
+                );
             }
-          })
-          .catch(() => {
-            dispatch(
-              appStateSlice.actions.setSnackBarAlert({
-                show: true,
-                message: "An unknown error occurred",
-                severity: "error",
-              })
-            );
-          });
+        )
     }
 
     const handleEditButtonClicked = (room: Room) => () => {
@@ -81,66 +55,37 @@ export const RoomsPage = () => {
             {field: 'description', headerName: 'Description'},
             {field: 'status', headerName: 'Status'},
             {
-              field: "actions",
-              headerName: "",
-              sortable: false,
-              filterable: false,
-              hideable: false,
-              disableReorder: true,
-              disableColumnMenu: true,
-              renderCell: (params: any) => (
-                <>
-                  <RowDeleteButton
-                    params={params}
-                    idField="roomId"
-                    deleteFunction={handleDeleteButtonClicked}/>
-                  <RowEditButton onClick={handleEditButtonClicked(params.row)}/>
-                </>
-              ),
+                field: "actions",
+                headerName: "",
+                sortable: false,
+                filterable: false,
+                hideable: false,
+                disableReorder: true,
+                disableColumnMenu: true,
+                renderCell: (params: any) => (
+                    <>
+                        <RowDeleteButton
+                            params={params}
+                            idField="roomId"
+                            deleteFunction={handleDeleteButtonClicked}/>
+                        <RowEditButton onClick={handleEditButtonClicked(params.row)}/>
+                    </>
+                ),
             },
         ]
     )
 
     const fetchRooms = () => {
-        getRooms()
-        .then((response) => {
-            return response.json();
-          })
-          .then((data: ApiResponse<Room[]>) => {
-            if (data.success) {
-              setRows(data.data);
-            } else if (!data.success && data.statusCode === 401) {
-              dispatch(
-                appStateSlice.actions.setSnackBarAlert({
-                  show: true,
-                  message: data.message,
-                  severity: "warning",
-                })
-              );
-            } else {
-              dispatch(
-                appStateSlice.actions.setSnackBarAlert({
-                  show: true,
-                  message: data.message,
-                  severity: "error",
-                })
-              );
+        makeApiRequest<Room[]>(
+            getRooms(),
+            dispatch,
+            (data) => {
+                setRows(data);
             }
-          })
-          .catch(() => {
-            dispatch(
-              appStateSlice.actions.setSnackBarAlert({
-                show: true,
-                message: "An unknown error occurred",
-                severity: "error",
-              })
-            );
-          });
+        )
     }
 
     useEffect(() => {
-        dispatch(appStateSlice.actions.setAppBarTitle('Rooms'));
-        dispatch(appStateSlice.actions.setLastPageVisited('/Rooms'));
         fetchRooms();
     }, []);
 
@@ -148,8 +93,9 @@ export const RoomsPage = () => {
     return (
         <>
             <Paper sx={{padding: 2}}>
-              <AddRoomDialog open={openAddRoomDialog} setOpen={setOpenAddRoomDialog} refreshRooms={fetchRooms}/>
-                <EditRoomDialog open={openEditRoomDialog} setOpen={setOpenEditRoomDialog} refreshRooms={fetchRooms} room={roomToEdit}/>
+                <AddRoomDialog open={openAddRoomDialog} setOpen={setOpenAddRoomDialog} refreshRooms={fetchRooms}/>
+                <EditRoomDialog open={openEditRoomDialog} setOpen={setOpenEditRoomDialog} refreshRooms={fetchRooms}
+                                room={roomToEdit}/>
                 <DataGrid
                     density={'compact'}
                     disableRowSelectionOnClick={true}

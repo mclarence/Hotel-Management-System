@@ -4,12 +4,7 @@ import express, {Express} from "express";
 import makeUsersRoute from "./resources/usersRoute";
 import {makeRoomsRoute} from "./resources/roomsRoute";
 import path from "path";
-import {
-    ApiResponse,
-    Role,
-    ServerConfig,
-    User,
-} from "@hotel-management-system/models";
+import {ApiResponse, Role, ServerConfig, User,} from "@hotel-management-system/models";
 import makeUsersDAO, {IUsersDAO} from "./database/users";
 import makeRolesDAO, {IRolesDAO} from "./database/roles";
 import makeTokenRevocationListDAO from "./database/tokens";
@@ -18,9 +13,10 @@ import makeAuthorizationMiddleware from "./middleware/authorization";
 import * as process from "process";
 
 // hash the password
-import crypto from "crypto";
 import hashPassword from "./util/hashPassword";
 import makeRolesRoute from "./resources/rolesRoute";
+import makeLogsRoute from "./resources/logsRoute";
+import makeLogsDAO from "./database/logs";
 import makeGuestDAO from "./database/guests";
 import makeGuestsRoute from "./resources/guestsRoute";
 import {makeReservationDAO} from "./database/reservations";
@@ -30,10 +26,11 @@ import {makePaymentMethodsDAO} from "./database/paymentMethods";
 import {makePaymentMethodRoute} from "./resources/paymentMethodRoute";
 import {makeTransactionsDAO} from "./database/transaction";
 import {makeTransactionsRoute} from "./resources/transactionsRoute";
-import { makeNotesDAO } from "./database/calendar";
-import { makeCalendarRoute } from "./resources/calendarRoute";
+import {makeNotesDAO} from "./database/calendar";
+import {makeCalendarRoute} from "./resources/calendarRoute";
 import {makeTicketsDAO} from "./database/tickets";
 import {makeTicketsRoute} from "./resources/ticketsRoute";
+import {makeEventLogger} from "./util/logEvent";
 
 const createDefaultRoleAndAdmin = async (
     rolesDAO: IRolesDAO,
@@ -119,12 +116,16 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
             process.exit(1);
         });
 
+    const usersDAO = makeUsersDAO(db.db)
+    const rolesDAO = makeRolesDAO(db.db)
+
+    const logsDAO = makeLogsDAO(db.db)
+    const eventLogger = makeEventLogger(logsDAO)
+
+    const tokenRevocationListDAO = makeTokenRevocationListDAO(db.db)
     const calendarDAO = makeNotesDAO(db.db)
-    const usersDAO = makeUsersDAO(db.db);
-    const rolesDAO = makeRolesDAO(db.db);
     const guestsDAO = makeGuestDAO(db.db);
     const reservationsDAO = makeReservationDAO(db.db);
-    const tokenRevocationListDAO = makeTokenRevocationListDAO(db.db);
     const roomsDAO = makeRoomsDAO(db.db);
     const paymentMethodsDAO = makePaymentMethodsDAO(db.db)
     const transactionsDAO = makeTransactionsDAO(db.db)
@@ -150,17 +151,20 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
         tokenRevocationListDAO,
         authenticationMiddleware,
         authorizationMiddleware,
+        eventLogger,
         serverOptions.jwt.secret
     );
 
     const rolesRoute = makeRolesRoute(
         rolesDAO,
+        eventLogger,
         authenticationMiddleware,
         authorizationMiddleware
     );
 
     const guestsRoute = makeGuestsRoute(
         guestsDAO,
+        eventLogger,
         authenticationMiddleware,
         authorizationMiddleware
     );
@@ -169,12 +173,14 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
         reservationsDAO,
         guestsDAO,
         roomsDAO,
+        eventLogger,
         authenticationMiddleware,
         authorizationMiddleware
     );
 
     const roomsRoute = makeRoomsRoute(
         roomsDAO,
+        eventLogger,
         authenticationMiddleware,
         authorizationMiddleware
     );
@@ -182,12 +188,20 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
     const paymentMethodsRoute = makePaymentMethodRoute(
         paymentMethodsDAO,
         guestsDAO,
+        eventLogger,
+        authenticationMiddleware,
+        authorizationMiddleware
+    )
+
+    const logsRoute = makeLogsRoute(
+        logsDAO,
         authenticationMiddleware,
         authorizationMiddleware
     )
 
     const calendarRoute = makeCalendarRoute(
         calendarDAO,
+        eventLogger,
         authenticationMiddleware,
         authorizationMiddleware
     );
@@ -195,6 +209,7 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
     const transactionsRoute = makeTransactionsRoute(
         transactionsDAO,
         guestsDAO,
+        eventLogger,
         authenticationMiddleware,
         authorizationMiddleware
     )
@@ -202,12 +217,15 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
     const ticketsRoute = makeTicketsRoute(
         ticketsDAO,
         usersDAO,
+        eventLogger,
         authenticationMiddleware,
         authorizationMiddleware
     )
 
     app.use("/api/users", usersRoute.router);
     app.use("/api/roles", rolesRoute.router);
+    app.use("/api/rooms", roomsRoute.router);
+    app.use("/api/logs", logsRoute.router);
     app.use("/api/calendar", calendarRoute.router);
     app.use("/api/rooms", roomsRoute.router);
     app.use("/api/guests", guestsRoute.router);

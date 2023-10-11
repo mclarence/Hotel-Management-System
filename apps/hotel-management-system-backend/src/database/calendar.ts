@@ -1,4 +1,4 @@
-import { IDatabase } from "pg-promise";
+import {IDatabase} from "pg-promise";
 import {CalendarNotes} from "@hotel-management-system/models";
 import queries from "./sql/queries";
 
@@ -12,49 +12,25 @@ export interface INotesDAO {
 
 export const makeNotesDAO = (db: IDatabase<any, any>): INotesDAO => {
     const getNoteByDate = async (day: Date): Promise<CalendarNotes[]> => {
-        try {
-            const isoDate = day.toISOString();
-            const note: CalendarNotes[] = await db.manyOrNone(queries.notes.getNoteById, [isoDate]);
-            return note;
-        }
-        catch (err){
-            return null;
-        }
+        const isoDate = day.toISOString();
+        return await db.manyOrNone(queries.notes.getNoteById, [isoDate]);
     }
-    
+
     const addNoteToDate = async (noteObj: CalendarNotes): Promise<CalendarNotes> => {
-        try {
-            const note = await db.one(queries.notes.addNote, [noteObj.date, noteObj.note]);
-            return note;
-        } catch (err) {
-            throw err
-        }
+        return await db.one(queries.notes.addNote, [noteObj.date, noteObj.note]);
     }
 
     const deleteNote = async (noteId: number): Promise<void> => {
-        try {
-            await db.none(queries.notes.deleteNote, [noteId]);
-        } catch (err) {
-            throw err
-        }
+        await db.none(queries.notes.deleteNote, [noteId]);
     }
 
     const checkNoteExistsById = async (noteId: number): Promise<boolean> => {
-        try {
-            const note = await db.one(queries.notes.checkNoteExistsById, [noteId]);
-            return note.exists;
-        } catch (err) {
-            throw err
-        }
+        const note = await db.one(queries.notes.checkNoteExistsById, [noteId]);
+        return note.exists;
     }
 
     const updateNote = async (noteObj: CalendarNotes): Promise<CalendarNotes> => {
-        try {
-            const note = await db.one(queries.notes.updateNote, [noteObj.note, noteObj.noteId]);
-            return note;
-        } catch (err) {
-            throw err
-        }
+        return await db.one(queries.notes.updateNote, [noteObj.note, noteObj.noteId]);
     }
 
     return {
@@ -65,5 +41,5 @@ export const makeNotesDAO = (db: IDatabase<any, any>): INotesDAO => {
         updateNote,
     }
 
-   
+
 }

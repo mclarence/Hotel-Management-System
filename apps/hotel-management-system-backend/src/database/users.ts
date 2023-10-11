@@ -34,10 +34,9 @@ const makeUsersDAO = (db: IDatabase<any, any>): IUsersDAO => {
      */
     const getUserById = async (userId: number): Promise<User | null> => {
         try {
-            const user: User = await db.oneOrNone(queries.users.getUserById, [
+            return await db.oneOrNone(queries.users.getUserById, [
                 userId,
             ]);
-            return user;
         } catch (err) {
             if (
                 err instanceof QueryResultError &&
@@ -57,10 +56,9 @@ const makeUsersDAO = (db: IDatabase<any, any>): IUsersDAO => {
      */
     const getUserByUsername = async (username: string): Promise<User | null> => {
         try {
-            const user: User = await db.oneOrNone(queries.users.getUserByUsername, [
+            return await db.oneOrNone(queries.users.getUserByUsername, [
                 username,
             ]);
-            return user;
         } catch (err) {
             if (
                 err instanceof QueryResultError &&
@@ -143,19 +141,10 @@ const makeUsersDAO = (db: IDatabase<any, any>): IUsersDAO => {
      * @returns A promise that resolves to void
      */
     const deleteUser = async (userId: number): Promise<void> => {
-        if (!(await checkUserExistsById(userId))) {
-            throw new Error(`User with id ${userId} not found`);
-        }
-
         await db.none(queries.users.deleteUser, [userId]);
     };
 
     const updateUser = async (user: User): Promise<User> => {
-
-        if (!(await checkUserExistsById(user.userId))) {
-            throw new Error(`User with id ${user.userId} does not exist`);
-        }
-
         return await db.one(queries.users.updateUser, [
             user.username,
             user.password,
@@ -177,10 +166,9 @@ const makeUsersDAO = (db: IDatabase<any, any>): IUsersDAO => {
      */
     const searchUsers = async (query: string): Promise<User[]> => {
         try {
-            const users: User[] = await db.any(queries.users.searchUsers, [
+            return await db.any(queries.users.searchUsers, [
                 query,
             ]);
-            return users;
         } catch (err) {
             if (
                 err instanceof QueryResultError &&

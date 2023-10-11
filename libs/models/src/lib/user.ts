@@ -9,4 +9,5 @@ export type User = {
     phoneNumber: string;
     position: string;
     roleId: number;
+    roleName?: string;
 }

@@ -1,12 +1,13 @@
 import {Button, Dialog, DialogContent, Stack, TextField, Typography,} from "@mui/material";
 import React, {useEffect, useState} from "react";
-import {DialogHeader} from "../../../../util/DialogHeader";
+import {DialogHeader} from "../../../../util/components/DialogHeader";
 import EditIcon from "@mui/icons-material/Edit";
-import {updateRoom} from "../../../api/rooms";
+import {updateRoom} from "../../../api/resources/rooms";
 import {ApiResponse, Room, RoomStatuses} from "@hotel-management-system/models";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../../redux/hooks";
 import {StatusAutoCompleteComboBox} from "./StatusAutoCompleteComboBox";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 interface EditRoomDialogProps {
     room: Room | null;
@@ -66,53 +67,23 @@ const EditRoomDialog = (props: EditRoomDialogProps) => {
             status: status,
         };
 
-        updateRoom(newRoom)
-            .then((response) => {
-                return response.json();
-            })
-            .then((data: ApiResponse<Room>) => {
-                if (data.success) {
-                    props.setOpen(false);
-                    resetState();
-                    props.refreshRooms();
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: "Room updated successfully",
-                            severity: "success",
-                        })
-                    );
-                } else if (!data.success && data.statusCode === 401) {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "warning",
-                        })
-                    );
-                } else {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "error",
-                        })
-                    );
-                }
-            })
-            .catch(() => {
+        makeApiRequest<Room>(
+            updateRoom(newRoom),
+            dispatch,
+            (data) => {
+                props.setOpen(false);
+                resetState();
+                props.refreshRooms();
                 dispatch(
                     appStateSlice.actions.setSnackBarAlert({
                         show: true,
-                        message: "An unknown error occurred",
-                        severity: "error",
+                        message: "RoomCard updated successfully",
+                        severity: "success",
                     })
                 );
-            })
-            .finally(() => {
-                setIsSubmitting(false);
-            });
-    };
+            }
+        )
+    }
 
     const handleClose = () => {
         // ask user if they want to discard changes
@@ -129,15 +100,15 @@ const EditRoomDialog = (props: EditRoomDialogProps) => {
 
     return (
         <Dialog open={props.open} fullWidth>
-            <DialogHeader title={"Add Room"} onClose={handleClose}/>
+            <DialogHeader title={"Add RoomCard"} onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
                     <Typography variant={"body1"}>Update room details below.</Typography>
-                    <Typography variant={"subtitle2"}>Room Details</Typography>
+                    <Typography variant={"subtitle2"}>RoomCard Details</Typography>
                     <TextField
                         fullWidth
                         required
-                        label="Room Code"
+                        label="RoomCard Code"
                         value={roomCode}
                         onChange={(e) => setRoomCode(e.target.value)}
                     />
@@ -167,7 +138,7 @@ const EditRoomDialog = (props: EditRoomDialogProps) => {
                         disabled={saveButtonDisabled || isSubmitting}
                         onClick={handleEditRoom}
                     >
-                        {isSubmitting ? "Updating Room..." : "Update Room"}
+                        {isSubmitting ? "Updating RoomCard..." : "Update RoomCard"}
                     </Button>
                 </Stack>
             </DialogContent>

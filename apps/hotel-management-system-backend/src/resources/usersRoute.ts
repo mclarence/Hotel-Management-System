@@ -12,6 +12,9 @@ import jwt from "jsonwebtoken";
 import sendResponse from "../util/sendResponse";
 import {StatusCodes} from "http-status-codes";
 import Joi from "joi";
+import {IEventLogger} from "../util/logEvent";
+import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
+
 interface UsersRoute {
     router: express.Router
 }
@@ -22,6 +25,7 @@ const makeUsersRoute = (
     tokenRevocationListDAO: ITokenRevocationListDAO,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware,
+    log: IEventLogger,
     jwtSecret: string
 ): UsersRoute => {
     const router = express.Router();
@@ -51,7 +55,7 @@ const makeUsersRoute = (
      * Get all users
      * Requires users.read permission
      */
-    router.get('/', authentication, authorization('users.read'), async (req: any, res) => {
+    router.get('/', authentication, authorization('users.read'), async (req: express.Request, res: express.Response) => {
         try {
             const users = await getUsers();
             return sendResponse(res, {
@@ -71,7 +75,7 @@ const makeUsersRoute = (
 
     });
 
-    router.get("/search", authentication, authorization('users.read'), async (req, res) => {
+    router.get("/search", authentication, authorization('users.read'), async (req: express.Request, res: express.Response) => {
         try {
             const query = req.query.q;
 
@@ -102,7 +106,7 @@ const makeUsersRoute = (
         }
     })
 
-    router.get('/me', authentication, async (req: any, res) => {
+    router.get('/me', authentication, async (req: express.Request, res: express.Response) => {
         try {
             const user = await getUserById(req.userId);
 
@@ -137,7 +141,7 @@ const makeUsersRoute = (
      * Get a user by id
      * Requires users.read permission
      */
-    router.get('/:userId', authentication, authorization('users.read'), async (req, res) => {
+    router.get('/:userId', authentication, authorization('users.read'), async (req: express.Request, res: express.Response) => {
         try {
             const userId = parseInt(req.params.userId);
 
@@ -182,7 +186,7 @@ const makeUsersRoute = (
      * HTTP POST - /api/users/add
      * Create a new user
      */
-    router.post('/add', authentication, authorization('users.write'), async (req, res) => {
+    router.post('/add', authentication, authorization('users.write'), async (req: express.Request, res: express.Response) => {
         try {
 
             const schema = Joi.object({
@@ -244,6 +248,11 @@ const makeUsersRoute = (
 
             await createUser(user);
 
+            log(
+                LogEventTypes.USER_CREATE,
+                req.userId,
+                `Created a new user with username: ${req.body.username} and role: ${req.body.roleId}`
+            )
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.CREATED,
@@ -267,7 +276,7 @@ const makeUsersRoute = (
      * HTTP DELETE - /api/users/:userId
      * Delete a user by userId
      */
-    router.delete('/:userId', authentication, authorization('users.delete'), async (req: express.Request, res) => {
+    router.delete('/:userId', authentication, authorization('users.delete'), async (req: express.Request, res: express.Response) => {
         try {
             const userId = parseInt(req.params.userId);
 
@@ -302,6 +311,12 @@ const makeUsersRoute = (
 
             await deleteUser(userId);
 
+            log(
+                LogEventTypes.USER_DELETE,
+                req.userId,
+                `Deleted user with id: ${userId}`
+            )
+
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.OK,
@@ -324,7 +339,7 @@ const makeUsersRoute = (
      * HTTP POST - /api/users/login
      * Login a user
      */
-    router.post('/login', async (req, res) => {
+    router.post('/login', async (req:express.Request, res: express.Response) => {
         try {
 
             const schema = Joi.object({
@@ -376,6 +391,12 @@ const makeUsersRoute = (
                 expiresIn: '24h'
             })
 
+            log(
+                LogEventTypes.USER_LOGIN,
+                user.userId,
+                `User ${user.username} logged in`
+            ).then()
+
             return sendResponse(res, {
                 success: true,
                 statusCode: StatusCodes.OK,
@@ -398,7 +419,7 @@ const makeUsersRoute = (
      * HTTP POST - /api/users/logout
      * Logout a user by revoking the token.
      */
-    router.post('/logout', authentication, async (req, res) => {
+    router.post('/logout', authentication, async (req: express.Request, res: express.Response) => {
         try {
             const token = req.headers.authorization?.split(' ')[1];
 
@@ -412,6 +433,15 @@ const makeUsersRoute = (
             }
 
             await revokeToken(token);
+
+            // decode the token to get the user id
+            const decodedToken = jwt.decode(token);
+
+            log(
+                LogEventTypes.USER_LOGOUT,
+                decodedToken['userId'],
+                `User ${decodedToken['username']} logged out`
+            ).then()
 
             return sendResponse(res, {
                 success: true,
@@ -433,7 +463,7 @@ const makeUsersRoute = (
      * HTTP PATCH - /api/users/:userId
      * Update user properties by userId
      */
-    router.patch('/:userId', authentication, authorization('users.write'), async (req, res) => {
+    router.patch('/:userId', authentication, authorization('users.write'), async (req: express.Request, res: express.Response) => {
         try {
             const userId = parseInt(req.params.userId);
 
@@ -520,6 +550,12 @@ const makeUsersRoute = (
             }
 
             await updateUser(updatedUser);
+
+            log(
+                LogEventTypes.USER_UPDATE,
+                req.userId,
+                `Updated user with id: ${userId}`
+            )
 
             return sendResponse(res, {
                 success: true,

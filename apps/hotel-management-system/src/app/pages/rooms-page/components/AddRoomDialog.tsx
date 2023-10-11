@@ -4,10 +4,11 @@ import {ApiResponse, Room, RoomStatuses} from "@hotel-management-system/models";
 import React, {SyntheticEvent, useEffect, useState} from "react";
 import {useAppDispatch} from "../../../redux/hooks";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
-import {addRoom} from "../../../api/rooms";
-import {DialogHeader} from "../../../../util/DialogHeader";
+import {addRoom} from "../../../api/resources/rooms";
+import {DialogHeader} from "../../../../util/components/DialogHeader";
 import AddIcon from "@mui/icons-material/Add";
 import {StatusAutoCompleteComboBox} from "./StatusAutoCompleteComboBox";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 interface AddRoomDialogProps {
     open: boolean;
@@ -34,7 +35,7 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
     };
 
     const handleClose = () => {
-        // ask Room if they want to discard changes
+        // ask RoomCard if they want to discard changes
         if (hasChangedSomething) {
             if (window.confirm("Are you sure you want to discard changes?")) {
                 resetState();
@@ -55,53 +56,22 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
             status: status,
         };
 
-        // send request to add Room
-        addRoom(newRoom)
-            .then((response) => {
-                return response.json();
-            })
-            .then((data: ApiResponse<Room>) => {
-                if (data.success) {
-                    props.setOpen(false);
-                    resetState();
-                    props.refreshRooms();
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: "Room added successfully",
-                            severity: "success",
-                        })
-                    );
-                } else if (!data.success && data.statusCode === 401) {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "warning",
-                        })
-                    );
-                } else {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "error",
-                        })
-                    );
-                }
-            })
-            .catch(() => {
+        makeApiRequest<Room>(
+            addRoom(newRoom),
+            dispatch,
+            (data) => {
+                props.setOpen(false);
+                resetState();
+                props.refreshRooms();
                 dispatch(
                     appStateSlice.actions.setSnackBarAlert({
                         show: true,
-                        message: "An unknown error occurred",
-                        severity: "error",
+                        message: "RoomCard added successfully",
+                        severity: "success",
                     })
                 );
-            })
-            .finally(() => {
-                setIsSubmitting(false);
-            });
+            }
+        )
     };
 
     useEffect(() => {
@@ -118,8 +88,7 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
         }
     }, [roomCode, pricePerNight, description, status]);
 
-    const handleStatusChange = (event: SyntheticEvent, value: RoomStatuses | null) =>
-    {
+    const handleStatusChange = (event: SyntheticEvent, value: RoomStatuses | null) => {
         if (value !== null) {
             setStatus(value as RoomStatuses);
         }
@@ -130,7 +99,7 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
             <DialogHeader title={"Add Room"} onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
-                    <Typography variant={"body1"}>Enter Room details below.</Typography>
+                    <Typography variant={"body1"}>Enter room details below.</Typography>
                     <Typography variant={"subtitle2"}>Room Details</Typography>
                     <TextField
                         fullWidth

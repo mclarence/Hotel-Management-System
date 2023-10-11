@@ -1,12 +1,13 @@
 import {Button, Dialog, DialogContent, Stack, TextField} from "@mui/material";
-import {DialogHeader} from "../../../../util/DialogHeader";
+import {DialogHeader} from "../../../../util/components/DialogHeader";
 import {ApiResponse, Ticket, TicketStatuses, User} from "@hotel-management-system/models";
 import {useEffect, useState} from "react";
-import {addTicket} from "../../../api/tickets";
+import {addTicket} from "../../../api/resources/tickets";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
-import {UserAutoCompleteBox} from "../../../../util/UserAutoCompleteBox";
+import {UserAutoCompleteBox} from "../../../../util/components/UserAutoCompleteBox";
 import {TicketStatusAutoCompleteBox} from "./TicketStatusAutoCompleteComboBox";
 import {useAppDispatch} from "../../../redux/hooks";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 interface CreateTicketDialogProps {
     open: boolean;
@@ -38,58 +39,28 @@ export const CreateTicketDialog = (props: CreateTicketDialogProps) => {
 
     const handleSubmit = () => {
         if (user !== null && title !== "" && description !== "" && status) {
-            addTicket({
-                title: title,
-                description: description,
-                status: status,
-                userId: user?.userId!,
-                dateOpened: new Date()
-            })
-                .then((response) => {
-                    return response.json();
-                })
-                .then((data: ApiResponse<Ticket>) => {
-                    if (data.success) {
-                        props.setOpen(false);
-                        resetState();
-                        props.fetchTickets();
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: "Ticket created",
-                                severity: "success",
-                            })
-                        );
-                    } else if (!data.success && data.statusCode === 401) {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "warning",
-                            })
-                        );
-                    } else {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "error",
-                            })
-                        );
-                    }
-                })
-                .catch(() => {
+            makeApiRequest<Ticket>(
+                addTicket({
+                    title: title,
+                    description: description,
+                    status: status,
+                    userId: user?.userId!,
+                    dateOpened: new Date()
+                }),
+                dispatch,
+                (data) => {
+                    props.setOpen(false);
+                    resetState();
+                    props.fetchTickets();
                     dispatch(
                         appStateSlice.actions.setSnackBarAlert({
                             show: true,
-                            message: "An unknown error occurred",
-                            severity: "error",
+                            message: "Ticket created",
+                            severity: "success",
                         })
                     );
-                })
-                .finally(() => {
-                    setIsSubmitting(false);
-                });
+                }
+            )
         }
     }
 

@@ -1,12 +1,14 @@
 import express from 'express';
-import { IAuthenticationMiddleware } from '../middleware/authentication';
-import { IAuthorizationMiddleware } from '../middleware/authorization';
-import { IRoomsDAO } from '../database/rooms';
-import { StatusCodes } from 'http-status-codes';
+import {IAuthenticationMiddleware} from '../middleware/authentication';
+import {IAuthorizationMiddleware} from '../middleware/authorization';
+import {IRoomsDAO} from '../database/rooms';
+import {StatusCodes} from 'http-status-codes';
 import sendResponse from '../util/sendResponse';
 import strings from '../util/strings';
 import Joi from 'joi';
 import {Room, RoomStatuses} from '@hotel-management-system/models';
+import {IEventLogger} from "../util/logEvent";
+import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
 
 interface IRoomsRoute {
     router: express.Router
@@ -14,9 +16,10 @@ interface IRoomsRoute {
 
 export const makeRoomsRoute = (
     roomsDAO: IRoomsDAO,
+    log: IEventLogger,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware
-    ): IRoomsRoute => {
+): IRoomsRoute => {
 
     const router = express.Router();
 
@@ -28,7 +31,8 @@ export const makeRoomsRoute = (
         updateRoom,
         deleteRoom,
         checkRoomExistsByRoomCode,
-        searchRoomsByRoomCode
+        searchRoomsByRoomCode,
+        getRoomStatusCount
     } = roomsDAO
 
     /**
@@ -53,6 +57,27 @@ export const makeRoomsRoute = (
             })
         }
     });
+
+    router.get('/room-status-count', authentication, authorization('rooms.read'), async (req: any, res) => {
+        try {
+            const roomStatusCount = await getRoomStatusCount();
+
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.success,
+                data: roomStatusCount
+            })
+        } catch (e) {
+            return sendResponse(res, {
+                success: false,
+                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                message: strings.api.serverError,
+                data: e
+            })
+        }
+    })
 
     /**
      * GET /api/rooms/search?q=roomCode
@@ -150,7 +175,7 @@ export const makeRoomsRoute = (
                 status: Joi.string().required().valid(...Object.values(RoomStatuses))
             })
 
-            const { error } = schema.validate(req.body);
+            const {error} = schema.validate(req.body);
 
             if (error) {
                 return sendResponse(res, {
@@ -181,6 +206,12 @@ export const makeRoomsRoute = (
             }
 
             const newRoom = await createRoom(room);
+
+            log(
+                LogEventTypes.ROOM_CREATE,
+                req.userId,
+                "Created a new room with roomCode: " + req.body.roomCode + " and pricePerNight: " + req.body.pricePerNight,
+            )
 
             return sendResponse(res, {
                 success: true,
@@ -223,7 +254,7 @@ export const makeRoomsRoute = (
                 status: Joi.string().required().valid(...Object.values(RoomStatuses))
             })
 
-            const { error } = schema.validate(req.body);
+            const {error} = schema.validate(req.body);
 
             if (error) {
                 return sendResponse(res, {
@@ -252,8 +283,14 @@ export const makeRoomsRoute = (
                     data: null
                 })
             }
-            
+
             const updatedRoom = await updateRoom(room);
+
+            log(
+                LogEventTypes.ROOM_UPDATE,
+                req.userId,
+                "Updated room with id: " + roomId + " to roomCode: " + req.body.roomCode + " and pricePerNight: " + req.body.pricePerNight,
+            )
 
             return sendResponse(res, {
                 success: true,
@@ -301,6 +338,12 @@ export const makeRoomsRoute = (
             }
 
             await deleteRoom(roomId);
+
+            log(
+                LogEventTypes.ROOM_DELETE,
+                req.userId,
+                "Deleted room with id: " + roomId,
+            )
 
             return sendResponse(res, {
                 success: true,

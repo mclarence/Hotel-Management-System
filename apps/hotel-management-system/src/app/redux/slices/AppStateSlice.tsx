@@ -1,8 +1,11 @@
 import {PayloadAction, createSlice, createAsyncThunk} from "@reduxjs/toolkit";
-import {getCurrentUser} from "../../api/auth";
+import {getCurrentUser} from "../../api/resources/auth";
 import {ApiResponse, User} from "@hotel-management-system/models";
 import UnauthorisedError from "../../../../errors/UnauthorisedError";
 import UnknownError from "../../../../errors/UnknownError";
+import { Logs } from "@hotel-management-system/models";
+import { getLogs } from "../../api/resources/logs";
+
 interface AppStateSlice {
     appBarTitle: string;
     snackBarAlert: {
@@ -14,6 +17,9 @@ interface AppStateSlice {
     loggedIn: boolean;
     lastPageVisited: string;
     isFetchingUserList: boolean;
+    logs: Logs[];
+    isFetchingLogs: boolean;
+    timeZone: string;
 }
 
 const initialState: AppStateSlice = {
@@ -25,7 +31,10 @@ const initialState: AppStateSlice = {
     },
     loggedIn: false,
     lastPageVisited: '',
-    isFetchingUserList: false
+    isFetchingUserList: false,
+    logs: [],
+    isFetchingLogs: false,
+    timeZone: 'Australia/Sydney'
 };
 
 export const fetchUserDetails = createAsyncThunk(
@@ -88,7 +97,34 @@ const appStateSlice = createSlice({
                 }
             }
         })
+        builder.addCase(fetchLogs.fulfilled, (state, action) => {
+            state.logs = action.payload;
+        });
+        builder.addCase(fetchLogs.rejected, (state, action) => {
+            state.snackBarAlert = {
+                show: true,
+                message: action.error.message || 'An unknown error occurred. Please try again later.',
+                severity: 'error'
+            };
+        });      
     }
 });
+
+export const fetchLogs = createAsyncThunk(
+    'appState/fetchLogs',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await getLogs();
+            if (response.status !== 200) {
+                return rejectWithValue(new Error('Failed to fetch logs.'));
+            } else {
+                const responseData: ApiResponse<Logs[]> = await response.json();
+                return responseData.data;
+            }
+        } catch (error) {
+            return rejectWithValue(new Error('An unknown error occurred. Please try again later.'));
+        }
+    }
+);
 
 export default appStateSlice;

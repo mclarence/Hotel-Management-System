@@ -1,6 +1,6 @@
 import {Button, Dialog, DialogContent, Stack, Tab, Tabs, TextField} from "@mui/material";
 import {ApiResponse, Guest, PaymentMethod} from "@hotel-management-system/models";
-import {DialogHeader} from "../../../../util/DialogHeader";
+import {DialogHeader} from "../../../../util/components/DialogHeader";
 import React, {SyntheticEvent, useEffect, useState} from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -9,10 +9,11 @@ import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import AddCardIcon from '@mui/icons-material/AddCard';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import dayjs from "dayjs";
-import {addPaymentMethod} from "../../../api/paymentMethods";
+import {addPaymentMethod} from "../../../api/resources/paymentMethods";
 import {PaymentMethodTypes} from "../../../../../../../libs/models/src/lib/enums/PaymentMethodTypes";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../../redux/hooks";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -95,50 +96,21 @@ export const AddPaymentMethodDialog = (props: {
     }, [bankAccountNumber, bankBSB])
 
     const handleAddPaymentMethod = (paymentMethod: PaymentMethod) => {
-        addPaymentMethod(paymentMethod)
-            .then((response) => {
-                return response.json();
-            })
-            .then((data: ApiResponse<PaymentMethod>) => {
-                if (data.success) {
-                    props.setOpen(false)
-                    props.fetchPaymentMethods()
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: "Payment method added successfully.",
-                            severity: "success",
-                        })
-                    );
-                } else if (!data.success && data.statusCode === 401) {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "warning",
-                        })
-                    );
-                } else {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: data.message,
-                            severity: "error",
-                        })
-                    );
-                }
-            })
-            .catch(() => {
+        makeApiRequest<PaymentMethod>(
+            addPaymentMethod(paymentMethod),
+            dispatch,
+            (data) => {
+                props.setOpen(false)
+                props.fetchPaymentMethods()
                 dispatch(
                     appStateSlice.actions.setSnackBarAlert({
                         show: true,
-                        message: "An unknown error occurred",
-                        severity: "error",
+                        message: "Payment method added successfully.",
+                        severity: "success",
                     })
                 );
-            })
-            .finally(() => {
-            });
+            }
+        )
     }
 
     const handleAddBank = () => {
@@ -194,17 +166,17 @@ export const AddPaymentMethodDialog = (props: {
                             label={"Credit Card CVV"}
                         />
 
-                            <DatePicker
-                                label="Credit Card Expiration Date"
-                                format={"MM/YYYY"}
-                                value={dayjs(creditCardExpirationDate)}
-                                onChange={(newValue) => {
-                                    if (newValue !== null) {
-                                        setCreditCardExpirationDate(newValue.toDate())
-                                    }
-                                }}
-                                views={['month', 'year']}
-                            />
+                        <DatePicker
+                            label="Credit Card Expiration Date"
+                            format={"MM/YYYY"}
+                            value={dayjs(creditCardExpirationDate)}
+                            onChange={(newValue) => {
+                                if (newValue !== null) {
+                                    setCreditCardExpirationDate(newValue.toDate())
+                                }
+                            }}
+                            views={['month', 'year']}
+                        />
                         <TextField
                             fullWidth
                             value={creditCardHolderName}

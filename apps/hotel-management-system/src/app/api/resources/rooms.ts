@@ -54,3 +54,23 @@ export const searchRoom = (roomCode: string): Promise<Response> => {
         },
     })
 }
+
+export const getRoomById = (roomId: number): Promise<Response> => {
+    return fetch(`/api/rooms/${roomId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+        },
+    })
+}
+
+export const getRoomStatusCount = (): Promise<Response> => {
+    return fetch(`/api/rooms/room-status-count`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+        }
+    })
+}

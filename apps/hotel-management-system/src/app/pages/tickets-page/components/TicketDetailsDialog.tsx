@@ -1,16 +1,17 @@
 import {Button, Dialog, DialogContent, Grid, Paper, SpeedDial, Stack, TextField} from "@mui/material";
 import {ApiResponse, Ticket, TicketMessages, TicketStatuses, User} from "@hotel-management-system/models";
-import {DialogHeader} from "../../../../util/DialogHeader";
+import {DialogHeader} from "../../../../util/components/DialogHeader";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
-import {UserAutoCompleteBox} from "../../../../util/UserAutoCompleteBox";
+import {UserAutoCompleteBox} from "../../../../util/components/UserAutoCompleteBox";
 import React, {useEffect, useState} from "react";
-import {getUserById} from "../../../api/users";
+import {getUserById} from "../../../api/resources/users";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {TicketStatusAutoCompleteBox} from "./TicketStatusAutoCompleteComboBox";
-import {addCommentToTicket, getTicketComments, updateTicket} from "../../../api/tickets";
+import {addCommentToTicket, getTicketComments, updateTicket} from "../../../api/resources/tickets";
 import {useAppDispatch} from "../../../redux/hooks";
 import AddIcon from "@mui/icons-material/Add";
+import {makeApiRequest} from "../../../api/makeApiRequest";
 
 export const TicketDetailsDialog = (props: {
     open: boolean
@@ -28,40 +29,13 @@ export const TicketDetailsDialog = (props: {
 
     const fetchTicketComments = () => {
         if (props.ticket !== null) {
-            getTicketComments(props.ticket.ticketId!)
-                .then((response) => {
-                    return response.json();
-                })
-                .then((data: ApiResponse<TicketMessages[]>) => {
-                    if (data.success) {
-                        setTicketComments(data.data);
-                    } else if (!data.success && data.statusCode === 401) {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "warning",
-                            })
-                        );
-                    } else {
-                        dispatch(
-                            appStateSlice.actions.setSnackBarAlert({
-                                show: true,
-                                message: data.message,
-                                severity: "error",
-                            })
-                        );
-                    }
-                })
-                .catch(() => {
-                    dispatch(
-                        appStateSlice.actions.setSnackBarAlert({
-                            show: true,
-                            message: "An unknown error occurred",
-                            severity: "error",
-                        })
-                    );
-                })
+            makeApiRequest<TicketMessages[]>(
+                getTicketComments(props.ticket.ticketId!),
+                dispatch,
+                (data) => {
+                    setTicketComments(data);
+                }
+            )
         }
     }
 
@@ -77,47 +51,20 @@ export const TicketDetailsDialog = (props: {
                     dateCreated: new Date()
                 }
 
-                addCommentToTicket(ticketMessage)
-                    .then((response) => {
-                        return response.json();
-                    })
-                    .then((data: ApiResponse<TicketMessages>) => {
-                        if (data.success) {
-                            fetchTicketComments();
-                            dispatch(
-                                appStateSlice.actions.setSnackBarAlert({
-                                    show: true,
-                                    message: "Comment added.",
-                                    severity: "success",
-                                })
-                            );
-                        } else if (!data.success && data.statusCode === 401) {
-                            dispatch(
-                                appStateSlice.actions.setSnackBarAlert({
-                                    show: true,
-                                    message: data.message,
-                                    severity: "warning",
-                                })
-                            );
-                        } else {
-                            dispatch(
-                                appStateSlice.actions.setSnackBarAlert({
-                                    show: true,
-                                    message: data.message,
-                                    severity: "error",
-                                })
-                            );
-                        }
-                    })
-                    .catch(() => {
+                makeApiRequest<TicketMessages>(
+                    addCommentToTicket(ticketMessage),
+                    dispatch,
+                    (data) => {
+                        fetchTicketComments();
                         dispatch(
                             appStateSlice.actions.setSnackBarAlert({
                                 show: true,
-                                message: "An unknown error occurred",
-                                severity: "error",
+                                message: "Comment added.",
+                                severity: "success",
                             })
                         );
-                    })
+                    }
+                )
             }
         }
     }

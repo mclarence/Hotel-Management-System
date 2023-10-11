@@ -10,6 +10,7 @@ export * from './enums/RoomStatuses'
 export * from './enums/TicketStatuses'
 export * from './serverConfig'
 export * from './apiResponse'
+export * from './logs';
 export * from './calendarNotes'
 export * from './guest'
 export * from './reservation'
