@@ -60,11 +60,25 @@ The project utilises a monorepo structure using [Nx](https://nx.dev/). The proje
 
 Test specification files are stored in the hotel-management-system-backend folder under src -> tests.
 ```
-apps/
-├─ hotel-management-system/ -- Frontend
-├─ hotel-mangement-system-backend/ -- Backend
-libs/
-├─ models/ -- Shared models between frontend and backend
+.
+├── apps/
+│   ├── hotel-management-system/ - Frontend
+│   │   └── src/ - Source code
+│   │       ├── app/ - Main application
+│   │       │   ├── api - API calls to backend
+│   │       │   ├── pages - Page components
+│   │       │   └── redux - Redux store
+│   │       └── utils - Utility functions and components
+│   └── hotel-management-system-backend/ - Backend
+│       └── src/ - Source code
+│           ├── database - Interface to database
+│           ├── middleware - Express middleware
+│           ├── resources - API endpoints
+│           ├── tests - Test specifications
+│           ├── types - Typescript types
+│           └── util - Utility functions
+└── libs/
+    └── models - Shared models
 ```
 
 ## Team Feature Allocation
