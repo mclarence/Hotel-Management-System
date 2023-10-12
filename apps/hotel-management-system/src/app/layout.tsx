@@ -210,6 +210,8 @@ export function Layout() {
     const handlePageChange = (pageTitle: string, pageLink: string | undefined) => {
         if (pageLink !== undefined) {
             dispatch(appStateSlice.actions.setAppBarTitle(pageTitle))
+            // set the window title
+            document.title = pageTitle + ' - Hotel Management System'
         }
     }
 
@@ -230,6 +232,8 @@ export function Layout() {
                         severity: 'error'
                     }))
                 })
+        } else {
+            window.location.reload();
         }
     }
 

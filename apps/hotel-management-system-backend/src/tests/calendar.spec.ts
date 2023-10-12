@@ -49,4 +49,52 @@ describe("calendar management", () => {
 
         expect(foundNote).toBeDefined()
     })
+
+    it("should update a note in the calendar", async () => {
+        const token = await login(app);
+        const newNote = makeNewCalendarNote(dayjs.utc().startOf("day").toDate())
+
+        const note = await addNoteToCalendar(app, token, newNote)
+
+        const updatedNote = {
+            ...note,
+            note: faker.string.alphanumeric(10)
+        }
+
+        delete updatedNote.noteId
+
+        const response = await request(app)
+            .patch(`/api/calendar/${note.noteId}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send(updatedNote)
+            .expect(200)
+
+        updatedNote.noteId = note.noteId
+
+        expect(response.body.data).toEqual(updatedNote)
+    })
+
+    it("should delete a note from the calendar", async () => {
+        const token = await login(app);
+        const newNote = makeNewCalendarNote(dayjs.utc().startOf("day").toDate())
+
+        const note = await addNoteToCalendar(app, token, newNote)
+
+        await request(app)
+            .delete(`/api/calendar/${note.noteId}`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+
+        const response = await request(app)
+            .get(`/api/calendar/${dayjs.utc(newNote.date).format("YYYY-MM-DD")}`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+
+        // find the note in the response
+        const foundNote = response.body.data.find((n: CalendarNotes) => {
+            return n.noteId === note.noteId && n.date === note.date
+        })
+
+        expect(foundNote).toBeUndefined()
+    })
 })

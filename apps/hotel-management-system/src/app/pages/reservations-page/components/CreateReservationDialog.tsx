@@ -3,7 +3,7 @@ import {DialogHeader} from "../../../../util/components/DialogHeader";
 import {useEffect, useState} from "react";
 import AddIcon from "@mui/icons-material/Add";
 import {RoomAutoCompleteBox} from "../../../../util/components/RoomAutoCompleteBox";
-import {ApiResponse, Guest, Reservation, Room} from "@hotel-management-system/models";
+import {Guest, Reservation, Room, RoomStatuses} from "@hotel-management-system/models";
 import {GuestAutoCompleteBox} from "../../../../util/components/GuestAutoCompleteBox";
 import {DatePicker} from "@mui/x-date-pickers";
 import {createReservation} from "../../../api/resources/reservations";
@@ -55,6 +55,17 @@ export const CreateReservationDialog = (props: {
 
     const handleCreateReservation = () => {
         if (guest === null || room === null || startDate === null || endDate === null) {
+            return;
+        }
+
+        if (room.status !== RoomStatuses.AVAILABLE) {
+            dispatch(
+                appStateSlice.actions.setSnackBarAlert({
+                    show: true,
+                    message: "Room is not available",
+                    severity: "error",
+                })
+            );
             return;
         }
 

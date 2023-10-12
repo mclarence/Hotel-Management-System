@@ -1,4 +1,4 @@
-import {Room} from "@hotel-management-system/models";
+import {Reservation, Room} from "@hotel-management-system/models";
 import queries from "./sql/queries";
 import {IDatabase} from "pg-promise";
 import pgPromise = require("pg-promise");
@@ -26,6 +26,8 @@ export interface IRoomsDAO {
         status: string,
         count: number
     }[]>;
+
+    getReservationsByRoomId(roomId: number): Promise<Reservation[]>;
 }
 
 /**
@@ -131,6 +133,15 @@ export const makeRoomsDAO = (db: IDatabase<any, any>): IRoomsDAO => {
         return await db.any(queries.rooms.getStatusCount)
     }
 
+    /**
+     * Get reservations by room id
+     * @param roomId
+     * @returns reservations, empty array if no reservations
+     */
+    const getReservationsByRoomId = async (roomId: number): Promise<Reservation[]> => {
+        return await db.any(queries.rooms.getReservationsByRoomId, [roomId]);
+    }
+
     return {
         getRooms,
         getRoomById,
@@ -140,6 +151,7 @@ export const makeRoomsDAO = (db: IDatabase<any, any>): IRoomsDAO => {
         deleteRoom,
         checkRoomExistsByRoomCode,
         searchRoomsByRoomCode,
-        getRoomStatusCount
+        getRoomStatusCount,
+        getReservationsByRoomId
     }
 }

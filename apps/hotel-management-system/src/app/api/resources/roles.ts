@@ -1,4 +1,6 @@
 import {Role} from "@hotel-management-system/models"
+
+// gets all roles
 export const getRoles = (): Promise<Response> => {
     return fetch('/api/roles', {
         method: 'GET',
@@ -9,6 +11,7 @@ export const getRoles = (): Promise<Response> => {
     })
 }
 
+// adds a role
 export const addRole = (role: Role): Promise<Response> => {
     return fetch('/api/roles/add', {
         method: 'POST',
@@ -20,6 +23,7 @@ export const addRole = (role: Role): Promise<Response> => {
     })
 }
 
+// deletes a role
 export const deleteRole = (roleId: number): Promise<Response> => {
     return fetch(`/api/roles/${roleId}`, {
         method: 'DELETE',

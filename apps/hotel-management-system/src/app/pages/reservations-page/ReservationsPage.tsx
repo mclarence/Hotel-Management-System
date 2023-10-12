@@ -7,10 +7,12 @@ import AddIcon from '@mui/icons-material/Add';
 import {useSelector} from "react-redux";
 import {useAppDispatch} from "../../redux/hooks";
 import {RootState} from "../../redux/store";
-import {getReservations} from "../../api/resources/reservations";
+import {deleteReservation, getReservations} from "../../api/resources/reservations";
 import {CreateReservationDialog} from "./components/CreateReservationDialog";
 import {dateValueFormatter} from "../../../util/dateValueFormatter";
 import {makeApiRequest} from "../../api/makeApiRequest";
+import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
+import appStateSlice from "../../redux/slices/AppStateSlice";
 
 const ReservationsPage = () => {
 
@@ -19,6 +21,21 @@ const ReservationsPage = () => {
     const [openCreateReservationDialog, setOpenCreateReservationDialog] = useState<boolean>(false);
     const appState = useSelector((state: RootState) => state.appState);
     const dispatch = useAppDispatch();
+
+    const handleDeletingSingleRow = (reservationId: number) => {
+        makeApiRequest<null>(
+            deleteReservation(reservationId),
+            dispatch,
+            (data) => {
+                dispatch(appStateSlice.actions.setSnackBarAlert({
+                    show: true,
+                    message: "Reservation deleted successfully",
+                    severity: 'success'
+                }))
+                fetchReservations();
+            }
+        )
+    }
 
     const columns = useRef(
         [
@@ -34,6 +51,17 @@ const ReservationsPage = () => {
             {field: 'reservationStatus', headerName: 'Reservation Status', width: 150},
             {field: 'startDate', headerName: 'Start Date', valueFormatter: dateValueFormatter(appState.timeZone), width: 170},
             {field: 'endDate', headerName: 'End Date', valueFormatter: dateValueFormatter(appState.timeZone), width: 170},
+            {
+            field: "actions",
+            headerName: "Actions",
+            sortable: false,
+            filterable: false,
+            hideable: false,
+            disableReorder: true,
+            disableColumnMenu: true,
+            renderCell: (params: any) => <RowDeleteButton params={params} deleteFunction={handleDeletingSingleRow}
+                                                          idField={"reservationId"}/>,
+        },
         ] as GridColDef[]
     )
 

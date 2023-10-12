@@ -34,7 +34,7 @@ export const RoomsPage = () => {
                 dispatch(
                     appStateSlice.actions.setSnackBarAlert({
                         show: true,
-                        message: "RoomCard deleted successfully",
+                        message: "Room deleted successfully",
                         severity: "success",
                     })
                 );

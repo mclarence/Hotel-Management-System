@@ -47,173 +47,189 @@ export const makeCalendarRoute = (
      * HTTP GET /api/calendar/:date
      * Get note by date
      */
-    router.get("/:date", authentication, authorization("calendar.get"), async (req: express.Request, res: express.Response) => {
-        const date = req.params.date;
-        const parsedDate = dayjs.utc(date).toDate();
-        const note = await getNoteByDate(parsedDate);
+    router.get("/:date", authentication, authorization("calendar.get"), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const date = req.params.date;
+            const parsedDate = dayjs.utc(date).toDate();
+            const note = await getNoteByDate(parsedDate);
 
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: note,
-        });
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: note,
+            });
+        } catch (e) {
+            next(e);
+        }
     })
 
     /**
      * HTTP POST /api/calendar/add
      * Add note to date
      */
-    router.post("/add", authentication, authorization("calendar.add"), async (req: express.Request, res: express.Response) => {
-        const schema = Joi.object({
-            date: Joi.date().required(),
-            note: Joi.string().required(),
-        })
-
-        const {error} = schema.validate(req.body);
-
-        if (error) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: error.message,
-                data: null,
+    router.post("/add", authentication, authorization("calendar.add"), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const schema = Joi.object({
+                date: Joi.date().required(),
+                note: Joi.string().required(),
             })
+
+            const {error} = schema.validate(req.body);
+
+            if (error) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: error.message,
+                    data: null,
+                })
+            }
+
+            const parsedDate = dayjs.utc(req.body.date).toDate();
+
+            const newNote: CalendarNotes = {
+                date: parsedDate,
+                note: req.body.note,
+            }
+
+            const note = await addNoteToDate(newNote);
+
+            log(
+                LogEventTypes.CALENDAR_NOTE_CREATE,
+                req.userId,
+                "Created a new note for date: " + req.body.date + " with note: " + req.body.note,
+            )
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.CREATED,
+                message: strings.api.generic.success,
+                data: note,
+            })
+        } catch (e) {
+            next(e);
         }
-
-        const parsedDate = dayjs.utc(req.body.date).toDate();
-
-        const newNote: CalendarNotes = {
-            date: parsedDate,
-            note: req.body.note,
-        }
-
-        const note = await addNoteToDate(newNote);
-
-        log(
-            LogEventTypes.CALENDAR_NOTE_CREATE,
-            req.userId,
-            "Created a new note for date: " + req.body.date + " with note: " + req.body.note,
-        )
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.CREATED,
-            message: strings.api.generic.success,
-            data: note,
-        })
     })
 
     /**
      * HTTP PATCH /api/calendar/:noteId
      * Update note
      */
-    router.patch("/:noteId", authentication, authorization("calendar.edit"), async (req: express.Request, res: express.Response) => {
-        const noteId = parseInt(req.params.noteId)
+    router.patch("/:noteId", authentication, authorization("calendar.edit"), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const noteId = parseInt(req.params.noteId)
 
-        if (isNaN(noteId)) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.notes.invalidNoteId(noteId),
-                data: null,
+            if (isNaN(noteId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.notes.invalidNoteId(noteId),
+                    data: null,
+                })
+            }
+
+            // check if note exists
+            const noteExists = await checkNoteExistsById(noteId);
+
+            if (!noteExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.notes.noteNotFound(noteId),
+                    data: null,
+                })
+            }
+
+            const schema = Joi.object({
+                date: Joi.date().required(),
+                note: Joi.string().required(),
             })
-        }
 
-        // check if note exists
-        const noteExists = await checkNoteExistsById(noteId);
+            const {error} = schema.validate(req.body);
 
-        if (!noteExists) {
+            if (error) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: error.message,
+                    data: null,
+                })
+            }
+
+            const parsedDate = dayjs.utc(req.body.date).toDate();
+
+            const updatedNote: CalendarNotes = {
+                noteId: noteId,
+                date: parsedDate,
+                note: req.body.note,
+            }
+
+            const note = await updateNote(updatedNote);
+
+            log(
+                LogEventTypes.CALENDAR_NOTE_UPDATE,
+                req.userId,
+                "Updated note with id: " + noteId + " to date: " + req.body.date + " with note: " + req.body.note,
+            )
+
             return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.NOT_FOUND,
-                message: strings.api.notes.noteNotFound(noteId),
-                data: null,
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: note,
             })
+        } catch (e) {
+            next(e);
         }
-
-        const schema = Joi.object({
-            date: Joi.date().required(),
-            note: Joi.string().required(),
-        })
-
-        const {error} = schema.validate(req.body);
-
-        if (error) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: error.message,
-                data: null,
-            })
-        }
-
-        const parsedDate = dayjs.utc(req.body.date).toDate();
-
-        const updatedNote: CalendarNotes = {
-            noteId: noteId,
-            date: parsedDate,
-            note: req.body.note,
-        }
-
-        const note = await updateNote(updatedNote);
-
-        log(
-            LogEventTypes.CALENDAR_NOTE_UPDATE,
-            req.userId,
-            "Updated note with id: " + noteId + " to date: " + req.body.date + " with note: " + req.body.note,
-        )
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: note,
-        })
     })
 
     /**
      * HTTP DELETE /api/calendar/:noteId
      * Delete note
      */
-    router.delete("/:noteId", authentication, authorization("calendar.delete"), async (req: express.Request, res: express.Response) => {
-        const noteId = parseInt(req.params.noteId)
+    router.delete("/:noteId", authentication, authorization("calendar.delete"), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const noteId = parseInt(req.params.noteId)
 
-        if (isNaN(noteId)) {
+            if (isNaN(noteId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.notes.invalidNoteId(noteId),
+                    data: null,
+                })
+            }
+
+            // check if note exists
+            const noteExists = await checkNoteExistsById(noteId);
+
+            if (!noteExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.notes.noteNotFound(noteId),
+                    data: null,
+                })
+            }
+
+            await calendarDAO.deleteNote(noteId);
+
+            log(
+                LogEventTypes.CALENDAR_NOTE_DELETE,
+                req.userId,
+                "Deleted note with id: " + noteId,
+            )
+
             return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.notes.invalidNoteId(noteId),
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
                 data: null,
             })
+        } catch (e) {
+            next(e);
         }
-
-        // check if note exists
-        const noteExists = await checkNoteExistsById(noteId);
-
-        if (!noteExists) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.NOT_FOUND,
-                message: strings.api.notes.noteNotFound(noteId),
-                data: null,
-            })
-        }
-
-        await calendarDAO.deleteNote(noteId);
-
-        log(
-            LogEventTypes.CALENDAR_NOTE_DELETE,
-            req.userId,
-            "Deleted note with id: " + noteId,
-        )
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: null,
-        })
     })
 
     return {

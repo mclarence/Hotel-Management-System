@@ -2,6 +2,12 @@ import {ThunkDispatch} from "@reduxjs/toolkit";
 import appStateSlice from "../redux/slices/AppStateSlice";
 import {ApiResponse} from "@hotel-management-system/models";
 
+/**
+ * Makes an api request
+ * @param response A promise that resolves to a response
+ * @param dispatch The dispatch function from redux
+ * @param onSuccess A function that is called when the request is successful
+ */
 export const makeApiRequest = <T>(
     response: Promise<Response>,
     dispatch: ThunkDispatch<any, any, any>,

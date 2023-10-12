@@ -1,5 +1,6 @@
 import {User} from "@hotel-management-system/models";
 
+// gets all users
 export const getUsers = (): Promise<Response> => {
     return fetch('/api/users', {
         method: 'GET',
@@ -10,6 +11,7 @@ export const getUsers = (): Promise<Response> => {
     })
 }
 
+// gets user by id
 export const getUserById = (userId: number): Promise<Response> => {
     return fetch(`/api/users/${userId}`, {
         method: 'GET',
@@ -20,6 +22,7 @@ export const getUserById = (userId: number): Promise<Response> => {
     })
 }
 
+// adds a user
 export const addUser = (user: User): Promise<Response> => {
     return fetch('/api/users/add', {
         method: 'POST',
@@ -31,6 +34,7 @@ export const addUser = (user: User): Promise<Response> => {
     })
 }
 
+// updates a user
 export const updateUser = (user: User): Promise<Response> => {
     // copy the user object and remove the userId property
     const userWithoutId = {...user};
@@ -46,6 +50,7 @@ export const updateUser = (user: User): Promise<Response> => {
     })
 }
 
+// deletes a user
 export const deleteUser = (userId: number): Promise<Response> => {
     return fetch(`/api/users/${userId}`, {
         method: 'DELETE',
@@ -56,6 +61,7 @@ export const deleteUser = (userId: number): Promise<Response> => {
     })
 }
 
+// gets the current user
 export const getCurrentUser = (): Promise<Response> => {
     return fetch('/api/users/current', {
         method: 'GET',
@@ -66,6 +72,7 @@ export const getCurrentUser = (): Promise<Response> => {
     });
 };
 
+// searches for a user.
 export const searchUser = (query: string): Promise<Response> => {
     return fetch(`/api/users/search?q=${query}`,{
         method: 'GET',

@@ -1,5 +1,6 @@
 import { Guest } from '@hotel-management-system/models';
 
+// gets all guests
 export const getGuests = (): Promise<Response> => {
     return fetch('/api/guests', {
         method: 'GET',
@@ -10,6 +11,7 @@ export const getGuests = (): Promise<Response> => {
     })
 }
 
+// deletes a guest
 export const deleteGuest = (id: number): Promise<Response> => {
     return fetch(`/api/guests/${id}`, {
         method: 'DELETE',
@@ -20,6 +22,7 @@ export const deleteGuest = (id: number): Promise<Response> => {
     })
 }
 
+// adds a guest
 export const addGuest = (guest: Guest): Promise<Response> => {
     return fetch ('/api/guests/add', {
         method: 'POST',
@@ -31,6 +34,7 @@ export const addGuest = (guest: Guest): Promise<Response> => {
     })
 }
 
+// updates a guest
 export const updateGuest = (guest: Guest): Promise<Response> => {
 
     const updatedGuest = {...guest}
@@ -46,6 +50,7 @@ export const updateGuest = (guest: Guest): Promise<Response> => {
     })
 }
 
+// gets a guest by id
 export const getGuestById = (id: number): Promise<Response> => {
     return fetch(`/api/guests/${id}`, {
         method: 'GET',
@@ -56,6 +61,7 @@ export const getGuestById = (id: number): Promise<Response> => {
     })
 }
 
+// searches for guests
 export const searchGuests = (query: string): Promise<Response> => {
     return fetch(`/api/guests/search?q=${query}`, {
         method: 'GET',

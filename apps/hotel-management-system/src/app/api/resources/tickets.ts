@@ -1,5 +1,6 @@
 import {Ticket, TicketMessages} from "@hotel-management-system/models";
 
+// gets all tickets
 export const getAllTickets = (): Promise<Response> => {
     return fetch('/api/tickets', {
         method: 'GET',
@@ -10,6 +11,7 @@ export const getAllTickets = (): Promise<Response> => {
     });
 }
 
+// adds a ticket
 export const addTicket = (ticket: Ticket): Promise<Response> => {
     return fetch('/api/tickets/add', {
         method: 'POST',
@@ -21,6 +23,7 @@ export const addTicket = (ticket: Ticket): Promise<Response> => {
     })
 }
 
+// updates a ticket
 export const updateTicket = (ticket: Ticket): Promise<Response> => {
     const tempTicket = {...ticket}
     delete tempTicket.ticketId
@@ -35,6 +38,7 @@ export const updateTicket = (ticket: Ticket): Promise<Response> => {
     })
 }
 
+// deletes a ticket
 export const deleteTicket = (ticketId: number): Promise<Response> => {
     return fetch(`/api/tickets/${ticketId}`, {
         method: 'DELETE',
@@ -45,6 +49,7 @@ export const deleteTicket = (ticketId: number): Promise<Response> => {
     })
 }
 
+// adds a comment to a ticket
 export const addCommentToTicket = (ticketMessage: TicketMessages): Promise<Response> => {
     const tempTicketMessage = {...ticketMessage}
     delete tempTicketMessage.ticketId
@@ -59,6 +64,7 @@ export const addCommentToTicket = (ticketMessage: TicketMessages): Promise<Respo
     })
 }
 
+// gets a ticket comments
 export const getTicketComments = (ticketId: number): Promise<Response> => {
     return fetch(`/api/tickets/${ticketId}/comments`, {
         method: 'GET',

@@ -39,29 +39,34 @@ export const makeRoomsRoute = (
         deleteRoom,
         checkRoomExistsByRoomCode,
         searchRoomsByRoomCode,
-        getRoomStatusCount
+        getRoomStatusCount,
+        getReservationsByRoomId
     } = roomsDAO
 
     /**
      * GET /api/rooms
      * Get all rooms
      */
-    router.get('/', authentication, authorization('rooms.read'), async (req: any, res) => {
+    router.get('/', authentication, authorization('rooms.read'), async (req: any, res, next) => {
         try {
-            const rooms = await getRooms();
-            return sendResponse(res, {
-                success: true,
-                statusCode: StatusCodes.OK,
-                message: "Success",
-                data: rooms
-            })
+            try {
+                const rooms = await getRooms();
+                return sendResponse(res, {
+                    success: true,
+                    statusCode: StatusCodes.OK,
+                    message: "Success",
+                    data: rooms
+                })
+            } catch (e) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+                    message: "An unknown error has occurred, please try again later.",
+                    data: e
+                })
+            }
         } catch (e) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-                message: "An unknown error has occurred, please try again later.",
-                data: e
-            })
+            next(e);
         }
     });
 
@@ -69,247 +74,282 @@ export const makeRoomsRoute = (
      * GET /api/rooms/room-status-count
      * Get room status count
      */
-    router.get('/room-status-count', authentication, authorization('rooms.read'), async (req: any, res) => {
-        const roomStatusCount = await getRoomStatusCount();
+    router.get('/room-status-count', authentication, authorization('rooms.read'), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const roomStatusCount = await getRoomStatusCount();
 
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: roomStatusCount
-        })
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: roomStatusCount
+            })
+        } catch (e) {
+            next(e);
+        }
     })
 
     /**
      * GET /api/rooms/search?q=roomCode
      * Search rooms by roomCode
      */
-    router.get('/search', authentication, authorization('rooms.read'), async (req: any, res) => {
-        const roomCode = req.query.q;
+    router.get('/search', authentication, authorization('rooms.read'), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const roomCode = req.query.q;
 
-        // check if query is provided
-        if (!roomCode) {
+            // check if query is provided
+            if (!roomCode) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.generic.queryNotProvided,
+                    data: null
+                })
+            }
+
+            const rooms = await searchRoomsByRoomCode(roomCode as string);
+
             return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.generic.queryNotProvided,
-                data: null
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: rooms
             })
+        } catch (e) {
+            next(e);
         }
-
-        const rooms = await searchRoomsByRoomCode(roomCode);
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: rooms
-        })
     })
 
     /**
      * GET /api/rooms/:roomId
      * Get room by id
      */
-    router.get('/:roomId', authentication, authorization('rooms.read'), async (req: any, res) => {
-        const roomId = parseInt(req.params.roomId);
+    router.get('/:roomId', authentication, authorization('rooms.read'), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const roomId = parseInt(req.params.roomId);
 
-        if (isNaN(roomId)) {
+            if (isNaN(roomId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.room.invalidRoomId(roomId),
+                    data: null
+                })
+            }
+
+            const room = await getRoomById(roomId);
+
+            if (room === null) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.room.roomNotFound(roomId),
+                    data: null
+                })
+            }
+
             return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.room.invalidRoomId(roomId),
-                data: null
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: room
             })
+        } catch (e) {
+            next(e);
         }
-
-        const room = await getRoomById(roomId);
-
-        if (room === null) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.NOT_FOUND,
-                message: strings.api.room.roomNotFound(roomId),
-                data: null
-            })
-        }
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: room
-        })
     })
 
     /**
      * POST /api/rooms/add
      * Adds a new room
      */
-    router.post("/add", authentication, authorization('rooms.write'), async (req: any, res) => {
-        const schema = Joi.object({
-            roomCode: Joi.string().required(),
-            pricePerNight: Joi.number().required(),
-            description: Joi.string().required(),
-            status: Joi.string().required().valid(...Object.values(RoomStatuses))
-        })
-
-        const {error} = schema.validate(req.body);
-
-        if (error) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: error.details[0].message,
-                data: null
+    router.post("/add", authentication, authorization('rooms.write'), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const schema = Joi.object({
+                roomCode: Joi.string().required(),
+                pricePerNight: Joi.number().required(),
+                description: Joi.string().required(),
+                status: Joi.string().required().valid(...Object.values(RoomStatuses))
             })
-        }
 
-        // check if room with roomCode already exists
-        const roomCodeExists = await checkRoomExistsByRoomCode(req.body.roomCode);
+            const {error} = schema.validate(req.body);
 
-        if (roomCodeExists) {
+            if (error) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: error.details[0].message,
+                    data: null
+                })
+            }
+
+            // check if room with roomCode already exists
+            const roomCodeExists = await checkRoomExistsByRoomCode(req.body.roomCode);
+
+            if (roomCodeExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.CONFLICT,
+                    message: strings.api.room.roomCodeConflict(req.body.roomCode),
+                    data: null
+                })
+            }
+
+            const room: Room = {
+                roomCode: req.body.roomCode,
+                pricePerNight: req.body.pricePerNight,
+                description: req.body.description,
+                status: req.body.status
+            }
+
+            const newRoom = await createRoom(room);
+
+            log(
+                LogEventTypes.ROOM_CREATE,
+                req.userId,
+                "Created a new room with roomCode: " + req.body.roomCode + " and pricePerNight: " + req.body.pricePerNight,
+            )
+
             return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.CONFLICT,
-                message: strings.api.room.roomCodeConflict(req.body.roomCode),
-                data: null
+                success: true,
+                statusCode: StatusCodes.CREATED,
+                message: strings.api.generic.success,
+                data: newRoom
             })
+        } catch (e) {
+            next(e);
         }
-
-        const room: Room = {
-            roomCode: req.body.roomCode,
-            pricePerNight: req.body.pricePerNight,
-            description: req.body.description,
-            status: req.body.status
-        }
-
-        const newRoom = await createRoom(room);
-
-        log(
-            LogEventTypes.ROOM_CREATE,
-            req.userId,
-            "Created a new room with roomCode: " + req.body.roomCode + " and pricePerNight: " + req.body.pricePerNight,
-        )
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.CREATED,
-            message: strings.api.generic.success,
-            data: newRoom
-        })
     })
 
     /**
      * PATCH /api/rooms/:roomId
      * Updates a room
      */
-    router.patch("/:roomId", authentication, authorization('rooms.write'), async (req: any, res) => {
-        const roomId = parseInt(req.params.roomId);
+    router.patch("/:roomId", authentication, authorization('rooms.write'), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const roomId = parseInt(req.params.roomId);
 
-        if (isNaN(roomId)) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.room.invalidRoomId(roomId),
-                data: null
+            if (isNaN(roomId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.room.invalidRoomId(roomId),
+                    data: null
+                })
+            }
+
+            const schema = Joi.object({
+                roomCode: Joi.string().required(),
+                pricePerNight: Joi.number().required(),
+                description: Joi.string().required(),
+                status: Joi.string().required().valid(...Object.values(RoomStatuses))
             })
-        }
 
-        const schema = Joi.object({
-            roomCode: Joi.string().required(),
-            pricePerNight: Joi.number().required(),
-            description: Joi.string().required(),
-            status: Joi.string().required().valid(...Object.values(RoomStatuses))
-        })
+            const {error} = schema.validate(req.body);
 
-        const {error} = schema.validate(req.body);
+            if (error) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: error.details[0].message,
+                    data: null
+                })
+            }
 
-        if (error) {
+            const room: Room = {
+                roomId: roomId,
+                roomCode: req.body.roomCode,
+                pricePerNight: req.body.pricePerNight,
+                description: req.body.description,
+                status: req.body.status
+            }
+
+            const roomExists = await checkRoomExistsById(roomId);
+
+            if (!roomExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.room.roomNotFound(roomId),
+                    data: null
+                })
+            }
+
+            const updatedRoom = await updateRoom(room);
+
+            log(
+                LogEventTypes.ROOM_UPDATE,
+                req.userId,
+                "Updated room with id: " + roomId + " to roomCode: " + req.body.roomCode + " and pricePerNight: " + req.body.pricePerNight,
+            )
+
             return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: error.details[0].message,
-                data: null
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: updatedRoom
             })
+        } catch (e) {
+            next(e);
         }
-
-        const room: Room = {
-            roomId: roomId,
-            roomCode: req.body.roomCode,
-            pricePerNight: req.body.pricePerNight,
-            description: req.body.description,
-            status: req.body.status
-        }
-
-        const roomExists = await checkRoomExistsById(roomId);
-
-        if (!roomExists) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.NOT_FOUND,
-                message: strings.api.room.roomNotFound(roomId),
-                data: null
-            })
-        }
-
-        const updatedRoom = await updateRoom(room);
-
-        log(
-            LogEventTypes.ROOM_UPDATE,
-            req.userId,
-            "Updated room with id: " + roomId + " to roomCode: " + req.body.roomCode + " and pricePerNight: " + req.body.pricePerNight,
-        )
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: updatedRoom
-        })
     })
 
     /**
      * DELETE /api/rooms/:roomId
      * Deletes a room
      */
-    router.delete("/:roomId", authentication, authorization('rooms.write'), async (req: any, res) => {
-        const roomId = parseInt(req.params.roomId);
+    router.delete("/:roomId", authentication, authorization('rooms.write'), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const roomId = parseInt(req.params.roomId);
 
-        if (isNaN(roomId)) {
+            if (isNaN(roomId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.room.invalidRoomId(roomId),
+                    data: null
+                })
+            }
+
+            const roomExists = await checkRoomExistsById(roomId);
+
+            if (!roomExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.room.roomNotFound(roomId),
+                    data: null
+                })
+            }
+
+            const reservationsWithRoom = await getReservationsByRoomId(roomId);
+
+            if (reservationsWithRoom.length > 0) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: "Cannot delete room as it has reservations",
+                    data: null
+                })
+            }
+
+            await deleteRoom(roomId);
+
+            log(
+                LogEventTypes.ROOM_DELETE,
+                req.userId,
+                "Deleted room with id: " + roomId,
+            )
+
             return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.room.invalidRoomId(roomId),
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
                 data: null
             })
+        } catch (e) {
+            next(e);
         }
-
-        const roomExists = await checkRoomExistsById(roomId);
-
-        if (!roomExists) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.NOT_FOUND,
-                message: strings.api.room.roomNotFound(roomId),
-                data: null
-            })
-        }
-
-        await deleteRoom(roomId);
-
-        log(
-            LogEventTypes.ROOM_DELETE,
-            req.userId,
-            "Deleted room with id: " + roomId,
-        )
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: null
-        })
     })
 
     return {

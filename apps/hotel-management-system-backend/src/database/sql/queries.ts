@@ -61,7 +61,7 @@ const queries = {
                 check_out_date TIMESTAMP,
                 reservation_status VARCHAR(255) NOT NULL,
                 FOREIGN KEY (room_id) REFERENCES rooms(room_id),
-                FOREIGN KEY (guest_id) REFERENCES guests(guest_id)
+                FOREIGN KEY (guest_id) REFERENCES guests(guest_id) ON DELETE CASCADE
             );
             CREATE TABLE IF NOT EXISTS payment_methods (
                 payment_method_id SERIAL PRIMARY KEY,
@@ -72,7 +72,8 @@ const queries = {
                 card_expiration DATE,
                 card_holder_name VARCHAR(255),
                 bank_account_number VARCHAR(255),
-                bank_bsb VARCHAR(255)
+                bank_bsb VARCHAR(255),
+                FOREIGN KEY (guest_id) REFERENCES guests(guest_id) ON DELETE CASCADE
             );
             CREATE TABLE IF NOT EXISTS transaction (
                 transaction_id SERIAL PRIMARY KEY,
@@ -82,7 +83,7 @@ const queries = {
                 description VARCHAR(255) NOT NULL,
                 date TIMESTAMP NOT NULL,
                 FOREIGN KEY (payment_method_id) REFERENCES payment_methods(payment_method_id),
-                FOREIGN KEY (guest_id) REFERENCES guests(guest_id)
+                FOREIGN KEY (guest_id) REFERENCES guests(guest_id) ON DELETE CASCADE
             );
             CREATE TABLE IF NOT EXISTS tickets (
                 ticket_id SERIAL PRIMARY KEY,
@@ -91,7 +92,7 @@ const queries = {
                 description VARCHAR(255) NOT NULL,
                 status VARCHAR(255) NOT NULL,
                 date_opened TIMESTAMP NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users(user_id)
+                FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
             );
             CREATE TABLE IF NOT EXISTS ticket_messages (
                 ticket_message_id SERIAL PRIMARY KEY,
@@ -99,8 +100,8 @@ const queries = {
                 user_id INTEGER NOT NULL,
                 message VARCHAR(255) NOT NULL,
                 date_created TIMESTAMP NOT NULL,
-                FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id),
-                FOREIGN KEY (user_id) REFERENCES users(user_id)
+                FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
             );
         `,
     },
@@ -138,6 +139,10 @@ const queries = {
         `,
         checkTicketExistsById: `
             SELECT EXISTS(SELECT 1 FROM tickets WHERE ticket_id = $1)
+        `,
+        deleteTicketCommentsByTicketId: `
+            DELETE FROM ticket_messages
+            WHERE ticket_id = $1
         `,
     },
     roles: {
@@ -347,7 +352,10 @@ const queries = {
             FROM rooms
             GROUP BY status
             ORDER BY status;
-        `
+        `,
+        getReservationsByRoomId: `
+            SELECT * FROM reservations WHERE room_id = $1
+        `,
     },
     paymentMethods: {
         getPaymentMethods: `

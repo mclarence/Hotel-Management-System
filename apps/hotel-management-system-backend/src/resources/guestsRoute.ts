@@ -48,275 +48,303 @@ const makeGuestsRoute = (
      * HTTP GET /api/guests
      * Get all guests
      */
-    router.get("/", authentication, authorization("guests.read"), async (req: express.Request, res: express.Response) => {
-        const guests = await getGuests();
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: guests,
-        })
+    router.get("/", authentication, authorization("guests.read"), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const guests = await getGuests();
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: guests,
+            })
+        } catch (e) {
+            next(e)
+        }
     })
 
     /**
      * HTTP GET /api/guests/search?q=...
      * Search guests
      */
-    router.get("/search", authentication, authorization('guests.read'), async (req, res) => {
-        const query = req.query.q;
+    router.get("/search", authentication, authorization('guests.read'), async (req, res, next) => {
+        try {
+            const query = req.query.q;
 
-        if (query === undefined || query === null || query === "") {
+            if (query === undefined || query === null || query === "") {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.generic.queryNotProvided,
+                    data: null
+                })
+            }
+
+            const users = await searchGuests(query.toString());
+
             return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.generic.queryNotProvided,
-                data: null
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: users
             })
+        } catch (e) {
+            next(e)
         }
-
-        const users = await searchGuests(query.toString());
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: users
-        })
     })
 
     /**
      * HTTP GET /api/guests/:guestId/payment-methods
      * Get payment methods by guest id
      */
-    router.get("/:guestId/payment-methods", authentication, authorization("paymentMethods.read"), async (req: express.Request, res: express.Response) => {
-        const guestId = parseInt(req.params.guestId);
+    router.get("/:guestId/payment-methods", authentication, authorization("paymentMethods.read"), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const guestId = parseInt(req.params.guestId);
 
-        if (isNaN(guestId)) {
+            if (isNaN(guestId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.guest.invalidGuestId(guestId),
+                    data: null,
+                })
+            }
+
+            // check if guest exists
+            const guestExists = await checkGuestExistsById(guestId);
+
+            if (!guestExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.guest.guestNotFound(guestId),
+                    data: null,
+                })
+            }
+
+            const paymentMethods = await getPaymentMethodsByGuestId(guestId);
+
             return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.guest.invalidGuestId(guestId),
-                data: null,
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: paymentMethods,
             })
+        } catch (e) {
+            next(e)
         }
-
-        // check if guest exists
-        const guestExists = await checkGuestExistsById(guestId);
-
-        if (!guestExists) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.NOT_FOUND,
-                message: strings.api.guest.guestNotFound(guestId),
-                data: null,
-            })
-        }
-
-        const paymentMethods = await getPaymentMethodsByGuestId(guestId);
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: paymentMethods,
-        })
     })
 
     /**
      * HTTP GET /api/guests/:guestId
      * Get guest by id
      */
-    router.get("/:guestId", authentication, authorization("guests.read"), async (req: express.Request, res: express.Response) => {
-        const guestId = parseInt(req.params.guestId);
+    router.get("/:guestId", authentication, authorization("guests.read"), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const guestId = parseInt(req.params.guestId);
 
-        if (isNaN(guestId)) {
+            if (isNaN(guestId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.guest.invalidGuestId(guestId),
+                    data: null,
+                })
+            }
+            const guest = await getGuestById(guestId);
+
+            if (guest === null) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.guest.guestNotFound(guestId),
+                    data: null,
+                })
+            }
+
             return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.guest.invalidGuestId(guestId),
-                data: null,
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: guest,
             })
+        } catch (e) {
+            next(e)
         }
-        const guest = await getGuestById(guestId);
-
-        if (guest === null) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.NOT_FOUND,
-                message: strings.api.guest.guestNotFound(guestId),
-                data: null,
-            })
-        }
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: guest,
-        })
     })
 
     /**
      * HTTP POST /api/guests/add
      * Add a new guest
      */
-    router.post("/add", authentication, authorization("guests.create"), async (req: express.Request, res: express.Response) => {
-        const schema = Joi.object({
-            firstName: Joi.string().required(),
-            lastName: Joi.string().required(),
-            phoneNumber: Joi.string().optional().allow(""),
-            address: Joi.string().optional().allow(""),
-            email: Joi.string().optional().allow(""),
-        })
-
-        const {error} = schema.validate(req.body);
-
-        if (error) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.generic.invalidRequestBody,
-                data: error.message,
+    router.post("/add", authentication, authorization("guests.create"), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const schema = Joi.object({
+                firstName: Joi.string().required(),
+                lastName: Joi.string().required(),
+                phoneNumber: Joi.string().optional().allow(""),
+                address: Joi.string().optional().allow(""),
+                email: Joi.string().optional().allow(""),
             })
+
+            const {error} = schema.validate(req.body);
+
+            if (error) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.generic.invalidRequestBody,
+                    data: error.message,
+                })
+            }
+
+            const newGuest: Guest = {
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                phoneNumber: req.body.phoneNumber,
+                address: req.body.address,
+                email: req.body.email,
+            }
+
+            const guest = await addGuest(newGuest);
+
+            log(
+                LogEventTypes.GUEST_ADD,
+                req.userId,
+                "Added a new guest with id: " + guest.guestId + " and name: " + guest.firstName + " " + guest.lastName,
+            )
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.CREATED,
+                message: strings.api.generic.success,
+                data: guest,
+            })
+        } catch (e) {
+            next(e);
         }
-
-        const newGuest: Guest = {
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            phoneNumber: req.body.phoneNumber,
-            address: req.body.address,
-            email: req.body.email,
-        }
-
-        const guest = await addGuest(newGuest);
-
-        log(
-            LogEventTypes.GUEST_ADD,
-            req.userId,
-            "Added a new guest with id: " + guest.guestId + " and name: " + guest.firstName + " " + guest.lastName,
-        )
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.CREATED,
-            message: strings.api.generic.success,
-            data: guest,
-        })
     })
 
     /**
      * HTTP PATCH /api/guests/:guestId
      * Update guest by id
      */
-    router.patch("/:guestId", authentication, authorization("guests.update"), async (req: express.Request, res: express.Response) => {
-        const guestId = parseInt(req.params.guestId);
+    router.patch("/:guestId", authentication, authorization("guests.update"), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const guestId = parseInt(req.params.guestId);
 
-        if (isNaN(guestId)) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.guest.invalidGuestId(guestId),
-                data: null,
+            if (isNaN(guestId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.guest.invalidGuestId(guestId),
+                    data: null,
+                })
+            }
+            // check if guest exists
+            const guestExists = await checkGuestExistsById(guestId);
+
+            if (!guestExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.guest.guestNotFound(guestId),
+                    data: null,
+                })
+            }
+
+            const schema = Joi.object({
+                firstName: Joi.string().required(),
+                lastName: Joi.string().required(),
+                phoneNumber: Joi.string().optional().allow(""),
+                address: Joi.string().optional().allow(""),
+                email: Joi.string().optional().allow(""),
             })
-        }
-        // check if guest exists
-        const guestExists = await checkGuestExistsById(guestId);
 
-        if (!guestExists) {
+            const {error} = schema.validate(req.body);
+
+            if (error) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.generic.invalidRequestBody,
+                    data: error.message,
+                })
+            }
+
+            const updatedGuest: Guest = {
+                guestId: guestId,
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                phoneNumber: req.body.phoneNumber,
+                address: req.body.address,
+                email: req.body.email,
+            }
+
+            const guest = await updateGuest(updatedGuest);
+
+            log(
+                LogEventTypes.GUEST_UPDATE,
+                req.userId,
+                "Updated guest with id: " + guestId + " to name: " + req.body.firstName + " " + req.body.lastName,
+            )
+
             return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.NOT_FOUND,
-                message: strings.api.guest.guestNotFound(guestId),
-                data: null,
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: guest,
             })
+        } catch (e) {
+            next(e);
         }
-
-        const schema = Joi.object({
-            firstName: Joi.string().required(),
-            lastName: Joi.string().required(),
-            phoneNumber: Joi.string().optional().allow(""),
-            address: Joi.string().optional().allow(""),
-            email: Joi.string().optional().allow(""),
-        })
-
-        const {error} = schema.validate(req.body);
-
-        if (error) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.generic.invalidRequestBody,
-                data: error.message,
-            })
-        }
-
-        const updatedGuest: Guest = {
-            guestId: guestId,
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            phoneNumber: req.body.phoneNumber,
-            address: req.body.address,
-            email: req.body.email,
-        }
-
-        const guest = await updateGuest(updatedGuest);
-
-        log(
-            LogEventTypes.GUEST_UPDATE,
-            req.userId,
-            "Updated guest with id: " + guestId + " to name: " + req.body.firstName + " " + req.body.lastName,
-        )
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: guest,
-        })
     })
 
     /**
      * HTTP DELETE /api/guests/:guestId
      * Delete guest by id
      */
-    router.delete("/:guestId", authentication, authorization("guests.delete"), async (req: express.Request, res: express.Response) => {
-        const guestId = parseInt(req.params.guestId);
+    router.delete("/:guestId", authentication, authorization("guests.delete"), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const guestId = parseInt(req.params.guestId);
 
-        if (isNaN(guestId)) {
+            if (isNaN(guestId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.guest.invalidGuestId(guestId),
+                    data: null,
+                })
+            }
+
+            // check if guest exists
+            const guestExists = await checkGuestExistsById(guestId);
+
+            if (!guestExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.guest.guestNotFound(guestId),
+                    data: null,
+                })
+            }
+
+            const guest = await deleteGuest(guestId);
+
+            log(
+                LogEventTypes.GUEST_DELETE,
+                req.userId,
+                "Deleted guest with id: " + guestId,
+            )
+
             return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.BAD_REQUEST,
-                message: strings.api.guest.invalidGuestId(guestId),
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
                 data: null,
             })
+        } catch (e) {
+            next(e);
         }
-
-        // check if guest exists
-        const guestExists = await checkGuestExistsById(guestId);
-
-        if (!guestExists) {
-            return sendResponse(res, {
-                success: false,
-                statusCode: StatusCodes.NOT_FOUND,
-                message: strings.api.guest.guestNotFound(guestId),
-                data: null,
-            })
-        }
-
-        const guest = await deleteGuest(guestId);
-
-        log(
-            LogEventTypes.GUEST_DELETE,
-            req.userId,
-            "Deleted guest with id: " + guestId,
-        )
-
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: null,
-        })
     })
 
 

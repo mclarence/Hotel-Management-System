@@ -1,3 +1,4 @@
+// gets all logs
 export const getLogs = (): Promise<Response> => {
     return fetch('/api/logs', {
         method: 'GET',

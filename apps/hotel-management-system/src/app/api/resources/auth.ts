@@ -3,6 +3,7 @@ import {ThunkDispatch} from "@reduxjs/toolkit";
 import appStateSlice from "../../redux/slices/AppStateSlice";
 import {NavigateFunction} from "react-router-dom";
 
+// login the user
 export const login = (username: string, password: string): Promise<Response> => {
     return fetch('/api/users/login', {
         method: 'POST',
@@ -13,6 +14,7 @@ export const login = (username: string, password: string): Promise<Response> => 
     })
 }
 
+// gets the currently signed in user
 export const getCurrentUser = (): Promise<Response> => {
     return fetch('/api/users/me', {
         method: 'GET',
@@ -23,6 +25,7 @@ export const getCurrentUser = (): Promise<Response> => {
     })
 }
 
+// logs out the user
 export const logout = (): Promise<Response> => {
     return fetch('/api/users/logout', {
         method: 'POST',
@@ -33,6 +36,7 @@ export const logout = (): Promise<Response> => {
     })
 }
 
+// checks the login status of the user
 export const verifyLogin = (dispatch: ThunkDispatch<any, any, any>, navigate: NavigateFunction) => {
     // set the previous page so that we can redirect the user back to it after login
     const previousPage = window.location.pathname;

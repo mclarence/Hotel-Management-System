@@ -4,7 +4,7 @@ import {Paper, SpeedDial} from "@mui/material";
 import React, {useEffect, useRef, useState} from "react";
 import {Ticket} from "@hotel-management-system/models";
 import AddIcon from "@mui/icons-material/Add";
-import {getAllTickets} from "../../api/resources/tickets";
+import {deleteTicket, getAllTickets} from "../../api/resources/tickets";
 import {CreateTicketDialog} from "./components/CreateTicketDialog";
 import IconButton from "@mui/material/IconButton";
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -14,6 +14,8 @@ import {makeApiRequest} from "../../api/makeApiRequest";
 import {dateValueFormatter} from "../../../util/dateValueFormatter";
 import {useSelector} from "react-redux";
 import {RootState} from "../../redux/store";
+import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
+import appStateSlice from "../../redux/slices/AppStateSlice";
 
 export const TicketsPage = () => {
     const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -26,6 +28,25 @@ export const TicketsPage = () => {
     const handleViewTicket = (ticket: Ticket) => {
         setSelectedTicket(ticket);
         setOpenViewTicketDialog(true);
+    }
+
+    const handleDeleteTicket = (id: number) => {
+        if (!window.confirm("Are you sure you want to delete this ticket?")) {
+            return;
+        }
+
+        makeApiRequest<null>(
+            deleteTicket(id),
+            dispatch,
+            () => {
+                dispatch(appStateSlice.actions.setSnackBarAlert({
+                    show: true,
+                    message: "Ticket deleted successfully",
+                    severity: 'success'
+                }))
+                fetchTickets();
+            }
+        )
     }
 
     const columns = useRef([
@@ -52,6 +73,7 @@ export const TicketsPage = () => {
                     <IconButton size={"small"} onClick={() => handleViewTicket(params.row)}>
                         <VisibilityIcon fontSize={"inherit"}/>
                     </IconButton>
+                    <RowDeleteButton params={params} deleteFunction={handleDeleteTicket} idField={"ticketId"}/>
                 </>
             )
         },

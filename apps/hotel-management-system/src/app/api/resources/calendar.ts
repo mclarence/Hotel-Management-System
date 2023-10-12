@@ -1,5 +1,6 @@
 import {CalendarNotes} from "@hotel-management-system/models"
 
+// gets a note by id
 export const getNoteById = (date : Date): Promise<Response> => {
     const day = String(date.getDate()).padStart(2, '0'); // Get day and pad with leading zero if needed
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Get month (months are 0-based) and pad with leading zero if needed
@@ -16,6 +17,7 @@ export const getNoteById = (date : Date): Promise<Response> => {
     })
 }
 
+// creates a note
 export const createNote = (note: CalendarNotes): Promise<Response> => {
     return fetch(`/api/calendar/add`, {
         method: 'POST',
@@ -27,6 +29,7 @@ export const createNote = (note: CalendarNotes): Promise<Response> => {
     })
 }
 
+// deletes a note
 export const deleteNote = (noteId: number): Promise<Response> => {
     return fetch(`/api/calendar/${noteId}`, {
         method: 'DELETE',
@@ -37,6 +40,7 @@ export const deleteNote = (noteId: number): Promise<Response> => {
     })
 }
 
+// updates a note
 export const updateNote = (note: CalendarNotes): Promise<Response> => {
     const tempNote = {...note}
     delete tempNote.noteId;

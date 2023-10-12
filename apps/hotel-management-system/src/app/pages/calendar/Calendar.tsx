@@ -22,6 +22,7 @@ export function Calendar() {
     const [currentNote, setCurrentNote] = useState<CalendarNotes[]>([]);
     const appState = useSelector((state: RootState) => state.appState);
 
+    // fetch a note by date
     function fetchNote(date: Date) {
         makeApiRequest<CalendarNotes[]>(
             getNoteById(date),
@@ -32,6 +33,7 @@ export function Calendar() {
         )
     }
 
+    // add note to date button handler.
     const handleButtonClick = () => {
         const text = prompt('Add a note');
 
@@ -58,6 +60,7 @@ export function Calendar() {
         }
     }
 
+    // delete note button handler.
     const handleDeleteNote = (noteId: number) => {
         makeApiRequest<null>(
             deleteNote(noteId),
@@ -76,6 +79,7 @@ export function Calendar() {
 
     }
 
+    // edit note button handler.
     const handleEditNote = (noteObj: CalendarNotes) => {
         const text = prompt('Update a note', noteObj.note);
 
@@ -103,6 +107,7 @@ export function Calendar() {
         }
     }
 
+    // fetch note on date change.
     useEffect(() => {
         if (selectedDate != null) {
             fetchNote(selectedDate.toDate());

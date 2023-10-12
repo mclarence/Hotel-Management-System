@@ -44,6 +44,10 @@ export function App() {
         }))
     }
 
+    useEffect(() => {
+        document.title = 'Hotel Management System'
+    }, []);
+
     return (
         <ThemeProvider theme={theme}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>

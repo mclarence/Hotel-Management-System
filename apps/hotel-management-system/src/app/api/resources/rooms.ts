@@ -1,5 +1,6 @@
 import { Room } from "@hotel-management-system/models";
 
+// gets all rooms
 export const getRooms= (): Promise<Response> => {
     return fetch('/api/rooms', {
         method: "GET",
@@ -10,6 +11,7 @@ export const getRooms= (): Promise<Response> => {
     })
 }
 
+// adds a room
 export const addRoom = (room: Room): Promise<Response> => {
     return fetch('/api/rooms/add', {
         method: 'POST',
@@ -21,6 +23,7 @@ export const addRoom = (room: Room): Promise<Response> => {
     })
 }
 
+// deletes a room
 export const deleteRoom = (roomId: number): Promise<Response> => {
     return fetch(`/api/rooms/${roomId}`, {
         method: 'DELETE',
@@ -31,6 +34,7 @@ export const deleteRoom = (roomId: number): Promise<Response> => {
     })
 }
 
+// updates a room
 export const updateRoom = (room: Room): Promise<Response> => {
     const updatedRoom = {...room}
     delete updatedRoom.roomId
@@ -45,6 +49,7 @@ export const updateRoom = (room: Room): Promise<Response> => {
     })
 }
 
+// searches for rooms
 export const searchRoom = (roomCode: string): Promise<Response> => {
     return fetch(`/api/rooms/search?q=${roomCode}`, {
         method: 'GET',
@@ -55,6 +60,7 @@ export const searchRoom = (roomCode: string): Promise<Response> => {
     })
 }
 
+// gets a room by id
 export const getRoomById = (roomId: number): Promise<Response> => {
     return fetch(`/api/rooms/${roomId}`, {
         method: 'GET',
@@ -65,6 +71,7 @@ export const getRoomById = (roomId: number): Promise<Response> => {
     })
 }
 
+// gets all room statuses
 export const getRoomStatusCount = (): Promise<Response> => {
     return fetch(`/api/rooms/room-status-count`, {
         method: 'GET',

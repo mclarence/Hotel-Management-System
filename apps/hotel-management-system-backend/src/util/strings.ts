@@ -53,7 +53,7 @@ const strings = {
             cannotDeleteRoleAsOtherUsersHaveIt: `Cannot delete role as other users have it`,
         },
         transactions: {
-            invalidTransactionId: (transactionId: number) => `Invalid transaction id: ${transactionId}`,
+            invalidTransactionId: (transactionId: number | string) => `Invalid transaction id: ${transactionId}`,
             transactionNotFound: (transactionId: number) => `Transaction with id ${transactionId} not found`,
         },
     }

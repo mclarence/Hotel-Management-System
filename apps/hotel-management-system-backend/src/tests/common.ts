@@ -264,3 +264,12 @@ export const addUser = async (app: Express, token: string, user: User): Promise<
         .expect(201)
     return response.body.data;
 }
+
+export const getUsers = async (app: Express, token: string): Promise<User[]> => {
+    const response = await request(app)
+        .get("/api/users")
+        .set("Authorization", `Bearer ${token}`)
+        .expect((res) => (res.status != 200 ? console.log(res.body) : 0))
+        .expect(200)
+    return response.body.data;
+}

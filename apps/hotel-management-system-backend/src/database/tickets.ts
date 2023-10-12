@@ -19,6 +19,8 @@ export interface ITicketsDAO {
     checkTicketExistsById(id: number): Promise<boolean>;
 
     getTicketComments(ticketId: number): Promise<TicketMessages[]>;
+
+    deleteTicketCommentsByTicketId(ticketId: number): Promise<void>;
 }
 
 /**
@@ -34,7 +36,7 @@ export const makeTicketsDAO = (db: IDatabase<any, any>): ITicketsDAO => {
      */
     const getTicketById = async (id: number): Promise<Ticket | null> => {
         try {
-            return await db.one(queries.tickets.addTicket, [id]);
+            return await db.one(queries.tickets.getTicketById, [id]);
         } catch (error) {
             if (error instanceof QueryResultError && error.code === pgPromise.errors.queryResultErrorCode.noData) {
                 return null;
@@ -106,6 +108,15 @@ export const makeTicketsDAO = (db: IDatabase<any, any>): ITicketsDAO => {
         return await db.any(queries.tickets.fetchTicketComments, [ticketId]);
     }
 
+    /**
+     * Delete ticket comments by ticket id
+     * @param ticketId
+     * @returns void
+     */
+    const deleteTicketCommentsByTicketId = async (ticketId: number): Promise<void> => {
+        await db.none(queries.tickets.deleteTicketCommentsByTicketId, [ticketId]);
+    }
+
     return {
         getTicketById,
         addTicket,
@@ -114,7 +125,8 @@ export const makeTicketsDAO = (db: IDatabase<any, any>): ITicketsDAO => {
         getAllTickets,
         addCommentToTicket,
         checkTicketExistsById,
-        getTicketComments
+        getTicketComments,
+        deleteTicketCommentsByTicketId
     }
 
 }

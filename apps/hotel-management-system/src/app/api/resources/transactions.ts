@@ -1,5 +1,6 @@
 import {Transaction} from "@hotel-management-system/models";
 
+// creates a transaction
 export const createTransaction = (transaction: Transaction): Promise<Response> => {
     return fetch('/api/transactions/add', {
         method: 'POST',
@@ -11,6 +12,7 @@ export const createTransaction = (transaction: Transaction): Promise<Response> =
     })
 }
 
+// gets all transactions
 export const getTransactions = (): Promise<Response> => {
     return fetch('/api/transactions', {
         method: "GET",
@@ -21,6 +23,7 @@ export const getTransactions = (): Promise<Response> => {
     })
 }
 
+// deletes a transaction
 export const deleteTransaction = (transactionId: number): Promise<Response> => {
     return fetch(`/api/transactions/${transactionId}`, {
         method: 'DELETE',
@@ -31,6 +34,7 @@ export const deleteTransaction = (transactionId: number): Promise<Response> => {
     })
 }
 
+// updates a transaction
 export const updateTransaction = (transaction: Transaction): Promise<Response> => {
     const tempTransaction = {...transaction}
     delete tempTransaction.transactionId

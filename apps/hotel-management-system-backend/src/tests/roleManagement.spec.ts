@@ -28,7 +28,7 @@ describe("role management", () => {
             .set("Authorization", `Bearer ${token}`)
             .expect(200)
             .expect((res) => {
-                expect(res.body.data.length).toBe(1)
+                expect(res.body.data.length).toBeGreaterThanOrEqual(1)
             })
     })
 

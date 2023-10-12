@@ -1,6 +1,7 @@
 import {Reservation} from "@hotel-management-system/models"
 import {Dayjs} from "dayjs";
 
+// gets all reservations
 export const getReservations = async (): Promise<Response> => {
     return fetch('/api/reservations', {
         method: 'GET',
@@ -11,6 +12,18 @@ export const getReservations = async (): Promise<Response> => {
     })
 }
 
+// delete reservation
+export const deleteReservation = async (reservationId: number): Promise<Response> => {
+    return fetch(`/api/reservations/${reservationId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+        }
+    })
+}
+
+// creates a reservation
 export const createReservation = async (reservation: Reservation): Promise<Response> => {
     return fetch('/api/reservations/add', {
         method: 'POST',
@@ -22,6 +35,7 @@ export const createReservation = async (reservation: Reservation): Promise<Respo
     })
 }
 
+// updates a reservation
 export const updateReservation = async (reservation: Reservation): Promise<Response> => {
     const temp = {...reservation}
     delete temp.reservationId
@@ -35,6 +49,8 @@ export const updateReservation = async (reservation: Reservation): Promise<Respo
     })
 }
 
+
+// searches for reservations
 export const searchReservations = async (searchQueries: {
     startDate?: Date,
     endDate?: Date,

@@ -31,15 +31,19 @@ const makeLogsRoute = (
      * HTTP GET /api/logs
      * Get all logs
      */
-    router.get("/", authentication, authorization("logs.read"), async (req: express.Request, res: express.Response) => {
-        const logs = await getAllLogs();
+    router.get("/", authentication, authorization("logs.read"), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const logs = await getAllLogs();
 
-        return sendResponse(res, {
-            success: true,
-            statusCode: StatusCodes.OK,
-            message: strings.api.generic.success,
-            data: logs
-        })
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: logs
+            })
+        } catch (e) {
+            next(e);
+        }
     })
     return {
         router
