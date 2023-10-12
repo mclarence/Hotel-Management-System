@@ -102,6 +102,9 @@ export const AddUserDialog = (props: AddUserDialogProps) => {
                         severity: "success",
                     })
                 );
+            },
+            () => {
+                setIsSubmitting(false);
             }
         )
     };

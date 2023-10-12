@@ -106,6 +106,9 @@ export const EditUserDialog = (props: EditUserDialog) => {
                         severity: "success",
                     })
                 );
+            },
+            () => {
+                setIsSubmitting(false);
             }
         )
     };
