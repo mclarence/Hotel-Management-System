@@ -57,6 +57,8 @@ npx nx run-many --targets=serve --projects=hotel-management-system,hotel-managem
 
 ## Project Structure
 The project utilises a monorepo structure using [Nx](https://nx.dev/). The project is split into two main applications, the frontend and the backend. The frontend is a React application and the backend is a ExpressJS application. The project also contains a shared library that contains shared models between the frontend and backend.
+
+Test specification files are stored in the hotel-management-system-backend folder under src -> tests.
 ```
 apps/
 ├─ hotel-management-system/ -- Frontend
