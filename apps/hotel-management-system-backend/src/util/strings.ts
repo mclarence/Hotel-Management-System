@@ -51,6 +51,7 @@ const strings = {
             invalidRoleId: (roleId: number | string) => `Invalid role id: ${roleId}`,
             roleNotFound: (roleId: number) => `Role with id ${roleId} not found`,
             cannotDeleteRoleAsOtherUsersHaveIt: `Cannot delete role as other users have it`,
+            roleAlreadyExists: (roleName: string) => `Role with name ${roleName} already exists`,
         },
         transactions: {
             invalidTransactionId: (transactionId: number | string) => `Invalid transaction id: ${transactionId}`,

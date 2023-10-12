@@ -14,26 +14,37 @@ import {DialogHeader} from "../../../../util/components/DialogHeader";
 import {useEffect, useState} from "react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {addRole} from "../../../api/resources/roles";
+import {addRole, updateRole} from "../../../api/resources/roles";
 import {Role} from "@hotel-management-system/models";
 import {useAppDispatch} from "../../../redux/hooks";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {makeApiRequest} from "../../../api/makeApiRequest";
+import EditIcon from "@mui/icons-material/Edit";
 import {PermissionEditor} from "./PermissionEditor";
+import {Simulate} from "react-dom/test-utils";
+import error = Simulate.error;
 
 interface IAddRoleDialogProps {
+    role: Role | null;
     open: boolean;
     setOpen: (open: boolean) => void;
     refreshRoles: () => void;
 }
 
-export const AddRoleDialog = (props: IAddRoleDialogProps) => {
+export const EditRoleDialog = (props: IAddRoleDialogProps) => {
     const [hasChangedSomething, setHasChangedSomething] = useState(false);
     const [roleName, setRoleName] = useState("");
     const [permissions, setPermissions] = useState([] as string[]);
     const [saveButtonDisabled, setSaveButtonDisabled] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        if (props.role != null) {
+            setRoleName(props.role.name);
+            setPermissions(props.role.permissionData);
+        }
+    }, [props.open, props.role]);
 
     useEffect(() => {
         if (roleName.length > 0 && permissions.length > 0) {
@@ -54,12 +65,13 @@ export const AddRoleDialog = (props: IAddRoleDialogProps) => {
     const handleSubmit = () => {
         setIsSubmitting(true);
         const newRole: Role = {
+            roleId: props.role?.roleId || 0,
             name: roleName,
             permissionData: permissions,
         };
 
         makeApiRequest<Role>(
-            addRole(newRole),
+            updateRole(newRole),
             dispatch,
             (data) => {
                 props.setOpen(false);
@@ -68,10 +80,13 @@ export const AddRoleDialog = (props: IAddRoleDialogProps) => {
                 dispatch(
                     appStateSlice.actions.setSnackBarAlert({
                         show: true,
-                        message: "Role added successfully",
+                        message: "Role updated successfully",
                         severity: "success",
                     })
                 );
+            },
+            () => {
+                setIsSubmitting(false);
             }
         )
     };
@@ -91,7 +106,7 @@ export const AddRoleDialog = (props: IAddRoleDialogProps) => {
 
     return (
         <Dialog open={props.open}>
-            <DialogHeader title="Add Role" onClose={handleClose}/>
+            <DialogHeader title={`Editing Role: ${props.role?.name}`} onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
                     <Typography variant={"body1"}>
@@ -104,16 +119,16 @@ export const AddRoleDialog = (props: IAddRoleDialogProps) => {
                         value={roleName}
                         onChange={(e) => setRoleName(e.target.value)}
                     />
-
                     <PermissionEditor permissions={permissions} setPermissions={setPermissions}/>
+
                     <Button
                         variant={"contained"}
                         color={"primary"}
-                        startIcon={<AddIcon/>}
+                        startIcon={<EditIcon/>}
                         disabled={saveButtonDisabled || isSubmitting}
                         onClick={handleSubmit}
                     >
-                        {isSubmitting ? "Adding role..." : "Add Role"}
+                        {isSubmitting ? "Updating role..." : "Edit Role"}
                     </Button>
                 </Stack>
             </DialogContent>

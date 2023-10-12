@@ -146,6 +146,9 @@ const queries = {
         `,
     },
     roles: {
+        checkRoleExistsByName: `
+            SELECT EXISTS(SELECT 1 FROM roles WHERE name = $1)
+        `,
         getRoleById: `
             SELECT * FROM roles WHERE role_id = $1
         `,

@@ -12,6 +12,7 @@ export interface IRolesDAO {
     getAllRoles: () => Promise<Role[]>,
     deleteRole: (roleId: number) => Promise<void>,
     getUsersWithRoles: (roleId: number) => Promise<User[]>
+    checkRoleExistsByName: (roleName: string) => Promise<boolean>
 }
 
 /**
@@ -44,6 +45,11 @@ export const makeRolesDAO = (db: IDatabase<any, any>): IRolesDAO => {
      */
     const checkRoleExists = async (roleId: number): Promise<boolean> => {
         const result: any = await db.one(queries.roles.checkRoleExists, [roleId]);
+        return result.exists;
+    }
+
+    const checkRoleExistsByName = async (roleName: string): Promise<boolean> => {
+        const result: any = await db.one(queries.roles.checkRoleExistsByName, [roleName]);
         return result.exists;
     }
 
@@ -100,7 +106,8 @@ export const makeRolesDAO = (db: IDatabase<any, any>): IRolesDAO => {
         updateRole,
         getAllRoles,
         deleteRole,
-        getUsersWithRoles
+        getUsersWithRoles,
+        checkRoleExistsByName
     }
 
 

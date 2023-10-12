@@ -13,11 +13,15 @@ import {AddRoleDialog} from "./components/AddRoleDialog";
 import {useNavigate} from "react-router-dom";
 import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
 import {makeApiRequest} from "../../api/makeApiRequest";
+import {EditRoleDialog} from "./components/EditRoleDialog";
+import {RowEditButton} from "../../../util/components/RowEditButton";
 
 export const RolesPage = () => {
     const [roles, setRoles] = useState([] as Role[]);
+    const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<Role | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [openAddRoleDialog, setOpenAddRoleDialog] = useState(false);
+    const [openEditRoleDialog, setOpenEditRoleDialog] = useState<boolean>(false);
     const appState = useSelector((state: RootState) => state.appState);
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -57,6 +61,11 @@ export const RolesPage = () => {
         )
     }
 
+    const handleEditRole = (role: Role) => () => {
+        setSelectedRoleForEdit(role);
+        setOpenEditRoleDialog(true);
+    }
+
     const columns = useRef([
         {field: "roleId", headerName: "Role ID"},
         {field: "name", headerName: "Role Name", width: 200},
@@ -68,8 +77,11 @@ export const RolesPage = () => {
             hideable: false,
             disableReorder: true,
             disableColumnMenu: true,
-            renderCell: (params: any) => <RowDeleteButton params={params} deleteFunction={handleDeletingSingleRow}
-                                                          idField={"roleId"}/>,
+            renderCell: (params: any) => <>
+                <RowDeleteButton params={params} deleteFunction={handleDeletingSingleRow}
+                                 idField={"roleId"}/>
+                <RowEditButton onClick={handleEditRole(params.row)}/>
+            </>
         },
     ] as GridColDef[]);
 
@@ -77,6 +89,8 @@ export const RolesPage = () => {
         <>
             <Paper sx={{padding: 2}}>
                 <AddRoleDialog setOpen={setOpenAddRoleDialog} open={openAddRoleDialog} refreshRoles={fetchRoles}/>
+                <EditRoleDialog role={selectedRoleForEdit} open={openEditRoleDialog} setOpen={setOpenEditRoleDialog}
+                                refreshRoles={fetchRoles}/>
                 <DataGrid
                     density={"compact"}
                     disableRowSelectionOnClick={true}

@@ -7,11 +7,13 @@ import {ApiResponse} from "@hotel-management-system/models";
  * @param response A promise that resolves to a response
  * @param dispatch The dispatch function from redux
  * @param onSuccess A function that is called when the request is successful
+ * @param onFinally A function that is called when the request is finished
  */
 export const makeApiRequest = <T>(
     response: Promise<Response>,
     dispatch: ThunkDispatch<any, any, any>,
     onSuccess: (data: T) => void,
+    onFinally?: () => void,
 ) => {
     response
     .then((response) => {
@@ -38,7 +40,7 @@ export const makeApiRequest = <T>(
           );
         }
       })
-      .catch(() => {
+      .catch((error) => {
         dispatch(
           appStateSlice.actions.setSnackBarAlert({
             show: true,
@@ -46,5 +48,9 @@ export const makeApiRequest = <T>(
             severity: "error",
           })
         );
-      })
+      }).finally(() => {
+        if (onFinally) {
+            onFinally();
+        }
+    })
 }

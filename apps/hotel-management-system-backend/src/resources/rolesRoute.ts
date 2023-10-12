@@ -33,7 +33,9 @@ const makeRolesRoute = (
         deleteRole,
         checkRoleExists,
         getUsersWithRoles,
-        getRoleById
+        getRoleById,
+        updateRole,
+        checkRoleExistsByName
     } = rolesDAO
 
     const router = express.Router();
@@ -78,8 +80,17 @@ const makeRolesRoute = (
                 })
             }
 
-            // TODO: validate if permissions are valid
-            // TODO: check if a role with the same name already exists
+            // check if role exists
+            const roleExists = await checkRoleExistsByName(req.body.name);
+
+            if (roleExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.roles.roleAlreadyExists(req.body.name),
+                    data: null,
+                })
+            }
 
             const newRole: Role = {
                 name: req.body.name,
@@ -177,6 +188,79 @@ const makeRolesRoute = (
             }
 
             const role = await getRoleById(roleId);
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: role,
+            })
+        } catch (e) {
+            next(e);
+        }
+    })
+
+    /**
+     * HTTP PATCH /api/roles/:roleId
+     * Update a role
+     */
+    router.patch("/:roleId", authentication, authorization("roles.update"), async (req: express.Request, res: express.Response, next) => {
+        try {
+            const roleId = parseInt(req.params.roleId);
+
+            // check if role exists
+            const roleExists = await checkRoleExists(roleId);
+
+            if (!roleExists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.roles.roleNotFound(roleId),
+                    data: null,
+                })
+            }
+
+            const schema = Joi.object({
+                name: Joi.string().required(),
+                permissionData: Joi.array().items(Joi.string()).required()
+            })
+
+            const {error} = schema.validate(req.body);
+
+            if (error) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.generic.invalidRequestBody,
+                    data: error.message,
+                })
+            }
+
+            // check if role exists
+            const roleExistsByName = await checkRoleExistsByName(req.body.name);
+
+            if (roleExistsByName) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.roles.roleAlreadyExists(req.body.name),
+                    data: null,
+                })
+            }
+
+            const updatedRole: Role = {
+                roleId: roleId,
+                name: req.body.name,
+                permissionData: req.body.permissionData
+            }
+
+            const role = await updateRole(updatedRole);
+
+            log(
+                LogEventTypes.ROLE_UPDATE,
+                req.userId,
+                "Updated role with id: " + roleId,
+            )
 
             return sendResponse(res, {
                 success: true,

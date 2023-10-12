@@ -33,3 +33,17 @@ export const deleteRole = (roleId: number): Promise<Response> => {
         }
     })
 }
+
+// updates a role
+export const updateRole = (role: Role): Promise<Response> => {
+    const tempRole = {...role}
+    delete tempRole.roleId
+    return fetch(`/api/roles/${role.roleId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+        },
+        body: JSON.stringify(tempRole)
+    })
+}
