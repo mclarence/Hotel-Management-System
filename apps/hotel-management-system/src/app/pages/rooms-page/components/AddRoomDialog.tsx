@@ -66,10 +66,13 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
                 dispatch(
                     appStateSlice.actions.setSnackBarAlert({
                         show: true,
-                        message: "RoomCard added successfully",
+                        message: "Room added successfully",
                         severity: "success",
                     })
                 );
+            },
+            () => {
+                setIsSubmitting(false);
             }
         )
     };

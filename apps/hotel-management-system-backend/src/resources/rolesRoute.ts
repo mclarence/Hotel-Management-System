@@ -209,9 +209,9 @@ const makeRolesRoute = (
             const roleId = parseInt(req.params.roleId);
 
             // check if role exists
-            const roleExists = await checkRoleExists(roleId);
+            const roleExists = await getRoleById(roleId);
 
-            if (!roleExists) {
+            if (roleExists === null) {
                 return sendResponse(res, {
                     success: false,
                     statusCode: StatusCodes.NOT_FOUND,
@@ -239,7 +239,7 @@ const makeRolesRoute = (
             // check if role exists
             const roleExistsByName = await checkRoleExistsByName(req.body.name);
 
-            if (roleExistsByName) {
+            if (roleExistsByName && roleExists.name !== req.body.name) {
                 return sendResponse(res, {
                     success: false,
                     statusCode: StatusCodes.BAD_REQUEST,

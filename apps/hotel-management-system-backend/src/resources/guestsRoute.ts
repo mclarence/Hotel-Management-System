@@ -9,6 +9,7 @@ import Joi from "joi";
 import strings from "../util/strings";
 import {IEventLogger} from "../util/logEvent";
 import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes";
+import {IReservationDAO} from "../database/reservations";
 
 /**
  * Guest Route
@@ -27,6 +28,7 @@ export interface IGuestRoute {
  */
 const makeGuestsRoute = (
     guestsDAO: IGuestDAO,
+    reservationsDAO: IReservationDAO,
     log: IEventLogger,
     authentication: IAuthenticationMiddleware,
     authorization: IAuthorizationMiddleware,
@@ -41,6 +43,10 @@ const makeGuestsRoute = (
         searchGuests,
         getPaymentMethodsByGuestId
     } = guestsDAO
+
+    const {
+        getReservationsByGuestId
+    } = reservationsDAO
 
     const router = express.Router();
 
@@ -183,7 +189,7 @@ const makeGuestsRoute = (
                 lastName: Joi.string().required(),
                 phoneNumber: Joi.string().optional().allow(""),
                 address: Joi.string().optional().allow(""),
-                email: Joi.string().optional().allow(""),
+                email: Joi.string().email().optional().allow(""),
             })
 
             const {error} = schema.validate(req.body);
@@ -192,7 +198,7 @@ const makeGuestsRoute = (
                 return sendResponse(res, {
                     success: false,
                     statusCode: StatusCodes.BAD_REQUEST,
-                    message: strings.api.generic.invalidRequestBody,
+                    message: error.message,
                     data: error.message,
                 })
             }
@@ -257,7 +263,7 @@ const makeGuestsRoute = (
                 lastName: Joi.string().required(),
                 phoneNumber: Joi.string().optional().allow(""),
                 address: Joi.string().optional().allow(""),
-                email: Joi.string().optional().allow(""),
+                email: Joi.string().email().optional().allow(""),
             })
 
             const {error} = schema.validate(req.body);
@@ -266,7 +272,7 @@ const makeGuestsRoute = (
                 return sendResponse(res, {
                     success: false,
                     statusCode: StatusCodes.BAD_REQUEST,
-                    message: strings.api.generic.invalidRequestBody,
+                    message: error.message,
                     data: error.message,
                 })
             }
@@ -327,6 +333,19 @@ const makeGuestsRoute = (
                     data: null,
                 })
             }
+
+
+            const guestReservations = await getReservationsByGuestId(guestId);
+
+            if (guestReservations.length > 0) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.guest.cannotDeleteGuestAsTheyHaveReservations,
+                    data: null,
+                })
+            }
+
 
             const guest = await deleteGuest(guestId);
 

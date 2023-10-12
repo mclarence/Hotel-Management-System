@@ -272,14 +272,17 @@ export const makeReservationsRoute = (
                 })
             }
 
-            const startDateParsed = dayjs.utc(req.body.startDate).toDate()
-            const endDateParsed = dayjs.utc(req.body.endDate).toDate()
+            const startDateParsed = dayjs.utc(req.body.startDate)
+            const endDateParsed = dayjs.utc(req.body.endDate)
+
+            // check if the end
+
             const reservation: Reservation = {
                 reservationId: req.body.reservationId,
                 roomId: req.body.roomId,
                 guestId: req.body.guestId,
-                startDate: startDateParsed,
-                endDate: endDateParsed,
+                startDate: startDateParsed.toDate(),
+                endDate: endDateParsed.toDate(),
                 checkInDate: req.body.checkInDate,
                 checkOutDate: req.body.checkOutDate,
                 reservationStatus: req.body.reservationStatus

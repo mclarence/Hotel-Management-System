@@ -77,10 +77,13 @@ const EditRoomDialog = (props: EditRoomDialogProps) => {
                 dispatch(
                     appStateSlice.actions.setSnackBarAlert({
                         show: true,
-                        message: "RoomCard updated successfully",
+                        message: "Room updated successfully",
                         severity: "success",
                     })
                 );
+            },
+            () => {
+                setIsSubmitting(false);
             }
         )
     }
@@ -100,7 +103,7 @@ const EditRoomDialog = (props: EditRoomDialogProps) => {
 
     return (
         <Dialog open={props.open} fullWidth>
-            <DialogHeader title={"Add RoomCard"} onClose={handleClose}/>
+            <DialogHeader title={"Edit Room"} onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
                     <Typography variant={"body1"}>Update room details below.</Typography>
@@ -138,7 +141,7 @@ const EditRoomDialog = (props: EditRoomDialogProps) => {
                         disabled={saveButtonDisabled || isSubmitting}
                         onClick={handleEditRoom}
                     >
-                        {isSubmitting ? "Updating RoomCard..." : "Update RoomCard"}
+                        {isSubmitting ? "Updating Room..." : "Update Room"}
                     </Button>
                 </Stack>
             </DialogContent>

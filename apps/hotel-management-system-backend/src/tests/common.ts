@@ -85,6 +85,7 @@ export const addPaymentMethod = async (app: Express, token: string, paymentMetho
         .post('/api/payment-methods/add')
         .set('Authorization', `Bearer ${token}`)
         .send(paymentMethod)
+        .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
         .expect(201)
 
     return response.body.data;
@@ -100,10 +101,14 @@ export const getPaymentMethodsByGuestId = async (app: Express, token: string, gu
 }
 
 export const makePaymentMethod = (guestId: number): PaymentMethod => {
+    let cardNumber = faker.finance.creditCardNumber({issuer: "visa"})
+    // remove the - from the card number
+    cardNumber = cardNumber.replace(/-/g, "")
+
     return {
         guestId: guestId,
         type: PaymentMethodTypes.CREDIT_CARD,
-        cardNumber: faker.finance.creditCardNumber(),
+        cardNumber: cardNumber,
         cardCVV: faker.finance.creditCardCVV(),
         cardExpiration: faker.date.future()
     }

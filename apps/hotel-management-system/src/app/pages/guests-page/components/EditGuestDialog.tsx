@@ -102,6 +102,9 @@ const EditGuestDialog = (props: EditGuestDialogProps) => {
                         severity: "success",
                     })
                 );
+            },
+            () => {
+                setIsSubmitting(false);
             }
         )
 

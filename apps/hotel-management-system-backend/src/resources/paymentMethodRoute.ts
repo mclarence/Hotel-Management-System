@@ -73,7 +73,7 @@ export const makePaymentMethodRoute = (
             const schema = Joi.object({
                 guestId: Joi.number().required(),
                 type: Joi.string().required().valid(...Object.values(PaymentMethodTypes)),
-                cardNumber: Joi.string().optional().allow("", null),
+                cardNumber: Joi.string().creditCard().optional().allow("", null),
                 cardCVV: Joi.string().optional().allow("", null),
                 cardExpiration: Joi.date().optional().allow("", null),
                 cardHolderName: Joi.string().optional().allow("", null),
@@ -89,6 +89,15 @@ export const makePaymentMethodRoute = (
                     success: false,
                     statusCode: StatusCodes.BAD_REQUEST,
                     message: error.message,
+                    data: null,
+                })
+            }
+
+            if (req.body.cardCVV && req.body.cardCVV.length !== 3) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.paymentMethods.invalidCardCVV,
                     data: null,
                 })
             }
@@ -134,7 +143,7 @@ export const makePaymentMethodRoute = (
                 paymentMethodId: Joi.number().required(),
                 guestId: Joi.number().required(),
                 type: Joi.string().required().valid({...Object.values(PaymentMethodTypes)}),
-                cardNumber: Joi.string().optional().allow("", null),
+                cardNumber: Joi.string().creditCard().optional().allow("", null),
                 cardCVV: Joi.string().optional().allow("", null),
                 cardExpiration: Joi.date().optional().allow("", null),
                 cardHolderName: Joi.string().optional().allow("", null),

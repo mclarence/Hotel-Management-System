@@ -11,6 +11,9 @@ import {CreateTransactionDialog} from "./components/CreateTransactionDialog";
 import {RowDeleteButton} from "../../../util/components/RowDeleteButton";
 import {RowEditButton} from "../../../util/components/RowEditButton";
 import {makeApiRequest} from "../../api/makeApiRequest";
+import {dateValueFormatter} from "../../../util/dateValueFormatter";
+import {useSelector} from "react-redux";
+import {RootState} from "../../redux/store";
 
 export const TransactionsPage = () => {
 
@@ -18,6 +21,7 @@ export const TransactionsPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [openAddTransactionDialog, setOpenAddTransactionDialog] = useState(false);
     const dispatch = useAppDispatch();
+    const appState = useSelector((state: RootState) => state.appState);
 
     const fetchTransactions = () => {
         setIsLoading(true)
@@ -61,7 +65,7 @@ export const TransactionsPage = () => {
         },
         {field: 'amount', headerName: 'Amount', width: 200},
         {field: 'description', headerName: 'Description', width: 200},
-        {field: 'date', headerName: 'Date', width: 200},
+        {field: 'date', headerName: 'Date', width: 200, valueFormatter: dateValueFormatter(appState.timeZone)},
         {
             field: 'actions',
             headerName: 'Actions',
@@ -74,7 +78,6 @@ export const TransactionsPage = () => {
                 <>
                     <RowDeleteButton params={params} deleteFunction={handleDeleteSingleTransaction}
                                      idField="transactionId"/>
-                    {/*<RowEditButton onClick={() => handleEditClick(params.row)}/>*/}
                 </>
             )
         },

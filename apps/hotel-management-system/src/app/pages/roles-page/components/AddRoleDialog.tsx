@@ -72,6 +72,9 @@ export const AddRoleDialog = (props: IAddRoleDialogProps) => {
                         severity: "success",
                     })
                 );
+            },
+            () => {
+                setIsSubmitting(false);
             }
         )
     };

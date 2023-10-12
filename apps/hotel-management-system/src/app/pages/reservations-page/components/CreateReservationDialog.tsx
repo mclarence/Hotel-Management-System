@@ -25,7 +25,7 @@ export const CreateReservationDialog = (props: {
     const [guest, setGuest] = useState<Guest | null>(null);
     const [room, setRoom] = useState<Room | null>(null);
     const [startDate, setStartDate] = useState<Dayjs | null>(dayjs.utc());
-    const [endDate, setEndDate] = useState<Dayjs | null>(dayjs.utc());
+    const [endDate, setEndDate] = useState<Dayjs | null>(dayjs.utc().add(1, "day"));
     const [numberOfNights, setNumberOfNights] = useState<number | null>(null); // State variable to hold the number of nights
     const [hasChangedSomething, setHasChangedSomething] = useState(false);
     const appState = useSelector((state: RootState) => state.appState);
@@ -48,8 +48,8 @@ export const CreateReservationDialog = (props: {
     const resetState = () => {
         setGuest(null);
         setRoom(null);
-        setStartDate(null);
-        setEndDate(null);
+        setStartDate(dayjs.utc());
+        setEndDate(dayjs.utc().add(1, "day"));
         setNumberOfNights(null);
     }
 
@@ -93,6 +93,9 @@ export const CreateReservationDialog = (props: {
                         severity: "success",
                     })
                 );
+            },
+            () => {
+                setIsSubmitting(false);
             }
         )
 

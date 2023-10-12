@@ -23,6 +23,10 @@ const ReservationsPage = () => {
     const dispatch = useAppDispatch();
 
     const handleDeletingSingleRow = (reservationId: number) => {
+        if (!window.confirm('Are you sure you want to delete this reservation?')) {
+            return;
+        }
+
         makeApiRequest<null>(
             deleteReservation(reservationId),
             dispatch,

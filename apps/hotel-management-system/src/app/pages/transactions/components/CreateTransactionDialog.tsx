@@ -10,6 +10,7 @@ import {DateTimePicker} from "@mui/x-date-pickers";
 import {createTransaction} from "../../../api/resources/transactions";
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {makeApiRequest} from "../../../api/makeApiRequest";
+import dayjs, {Dayjs} from "dayjs";
 
 export const CreateTransactionDialog = (props: {
     open: boolean,
@@ -22,7 +23,7 @@ export const CreateTransactionDialog = (props: {
     const [description, setDescription] = useState<string | null>(null);
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
     const [saveButtonDisabled, setSaveButtonDisabled] = useState<boolean>(true);
-    const [transactionDate, setTransactionDate] = useState<Date | null>(null);
+    const [transactionDate, setTransactionDate] = useState<Dayjs | null>(dayjs.utc());
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     useEffect(() => {
         if (
@@ -43,7 +44,7 @@ export const CreateTransactionDialog = (props: {
         setAmount(null);
         setDescription(null);
         setPaymentMethod(null);
-        setTransactionDate(null);
+        setTransactionDate(dayjs.utc());
     }
 
     const handleSubmit = () => {
@@ -59,7 +60,7 @@ export const CreateTransactionDialog = (props: {
                 guestId: selectedGuest.guestId!,
                 amount: amount,
                 description: description,
-                date: transactionDate!
+                date: transactionDate.toDate()!
             }
             setIsSubmitting(true)
             makeApiRequest<Transaction>(
@@ -76,6 +77,9 @@ export const CreateTransactionDialog = (props: {
                             severity: "success",
                         })
                     );
+                },
+                () => {
+                    setIsSubmitting(false);
                 }
             )
         }
@@ -113,8 +117,8 @@ export const CreateTransactionDialog = (props: {
                                 setTransactionDate(newValue);
                             }}
                         />
-                        <Button variant={"contained"} disabled={saveButtonDisabled} onClick={handleSubmit}>
-                            Add Transaction
+                        <Button variant={"contained"} disabled={saveButtonDisabled || isSubmitting} onClick={handleSubmit}>
+                            {isSubmitting ? "Submitting..." : "Add Transaction"}
                         </Button>
                     </Stack>
                 </DialogContent>

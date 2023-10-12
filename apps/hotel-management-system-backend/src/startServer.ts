@@ -166,6 +166,7 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
 
     const guestsRoute = makeGuestsRoute(
         guestsDAO,
+        reservationsDAO,
         eventLogger,
         authenticationMiddleware,
         authorizationMiddleware

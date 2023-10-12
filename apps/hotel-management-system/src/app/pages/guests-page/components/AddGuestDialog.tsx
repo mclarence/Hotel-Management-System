@@ -79,6 +79,9 @@ const AddGuestDialog = (props: AddGuestDialogProps) => {
               severity: "success",
             })
           );
+        },
+        () => {
+            setIsSubmitting(false);
         }
     )
   };

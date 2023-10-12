@@ -29,7 +29,8 @@ const queries = {
                 event_type VARCHAR(255) NOT NULL, 
                 timestamp TIMESTAMP NOT NULL DEFAULT current_timestamp,
                 user_id INTEGER NOT NULL,
-                description TEXT
+                description TEXT,
+                FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
             );
             CREATE TABLE IF NOT EXISTS calendar_notes(
                 note_id SERIAL PRIMARY KEY,
@@ -316,7 +317,10 @@ const queries = {
             SELECT * FROM reservations WHERE guest_id = $1        
         `,
         checkIfReservationIsAvailable: `
-            SELECT EXISTS(SELECT 1 FROM reservations WHERE room_id = $1 AND start_date <= $2 AND end_date >= $3)
+            SELECT EXISTS(
+                SELECT 1 FROM reservations
+                WHERE room_id = $1
+                AND (start_date, end_date) OVERLAPS ($2, $3))
         `,
     },
     rooms: {

@@ -1,4 +1,4 @@
-import {Dialog, DialogContent, SpeedDial} from "@mui/material";
+import {Dialog, DialogContent, Paper, SpeedDial} from "@mui/material";
 import {DialogHeader} from "../../../../util/components/DialogHeader";
 import {Guest, PaymentMethod} from "@hotel-management-system/models";
 import {useEffect, useRef, useState} from "react";
@@ -10,6 +10,9 @@ import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../../redux/hooks";
 import {makeApiRequest} from "../../../api/makeApiRequest";
 import {RowDeleteButton} from "../../../../util/components/RowDeleteButton";
+import {useSelector} from "react-redux";
+import {RootState} from "../../../redux/store";
+import dayjs from "dayjs";
 
 export const PaymentMethodsDialog = (props: {
     open: boolean,
@@ -20,16 +23,10 @@ export const PaymentMethodsDialog = (props: {
     const [openAddPaymentMethodDialog, setOpenAddPaymentMethodDialog] = useState<boolean>(false);
     const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
     const [tableLoading, setTableLoading] = useState(false);
+    const appState = useSelector((state: RootState) => state.appState);
 
-    // This is a hack to force the table to refresh when a payment method is deleted.
-    // For some reason the getPaymentMethods() function is not working when called from the delete function.
-    const [test, setTest] = useState(false);
-
-    useEffect(() => {
-        getPaymentMethods();
-    }, [props.guest, props.open, test]);
-
-    const getPaymentMethods = () => {
+    const [refresh, setRefresh] = useState(false);
+    const getGuestPaymentMethods = () => {
         if (props.guest != null) {
             setTableLoading(true)
             makeApiRequest<PaymentMethod[]>(
@@ -44,35 +41,73 @@ export const PaymentMethodsDialog = (props: {
         }
     }
 
+    useEffect(() => {
+        if (props.guest != null) {
+            getGuestPaymentMethods();
+        }
+
+        if (!props.open) {
+            setPaymentMethods([]);
+        }
+    }, [props.guest, props.open]);
+
+    useEffect(() => {
+            getGuestPaymentMethods();
+    }, [refresh]);
+
     const handleDeletePaymentMethod = (id: number) => {
         if (!window.confirm("Are you sure you want to delete this payment method?")) {
             return;
+        } else {
+            makeApiRequest<null>(
+                deletePaymentMethod(id),
+                dispatch,
+                (data) => {
+                    setRefresh(!refresh)
+                    dispatch(appStateSlice.actions.setSnackBarAlert({
+                        show: true,
+                        message: "Payment method deleted successfully",
+                        severity: "success"
+                    }))
+                }
+            )
         }
+    }
 
-        makeApiRequest<null>(
-            deletePaymentMethod(id),
-            dispatch,
-            () => {
-                dispatch(appStateSlice.actions.setSnackBarAlert({
-                    show: true,
-                    message: "Payment method deleted successfully",
-                    severity: "success"
-                }))
-                setTest(!test)
-
-            }
-        )
+    const notApplicableValueFormatter = (params: any) => {
+        if (params.value) {
+            return params.value
+        } else {
+            return "N/A"
+        }
     }
 
     const columns = useRef([
         {field: "paymentMethodId", headerName: "ID", width: 100},
         {field: "type", headerName: "Type", width: 200},
-        {field: "cardNumber", headerName: "Card Number", width: 200},
-        {field: "cardCvv", headerName: "Card CVV", width: 200},
-        {field: "cardExpiration", headerName: "Card Expiration Date", width: 200},
-        {field: "cardHolderName", headerName: "Card Holder Name", width: 200},
-        {field: "bankAccountNumber", headerName: "Bank Account Number", width: 200},
-        {field: "bankBsb", headerName: "BSB", width: 200},
+        {
+            field: "cardNumber", headerName: "Card Number", width: 200, valueFormatter: (params: any) => {
+                if (params.value) {
+                    return params.value.replace(/\d(?=\d{4})/g, "*")
+                } else {
+                    return "N/A"
+                }
+            }
+        },
+        {field: "cardCvv", headerName: "Card CVV", width: 200, valueFormatter: notApplicableValueFormatter},
+        {
+            field: "cardExpiration", headerName: "Card Expiration Date", width: 200, valueFormatter: (params: any) => {
+                if (params.value) {
+                    return dayjs.utc(params.value).format("MM/YYYY")
+                } else {
+                    return "N/A"
+                }
+
+            }
+        },
+        {field: "cardHolderName", headerName: "Card Holder Name", width: 200, valueFormatter: notApplicableValueFormatter},
+        {field: "bankAccountNumber", headerName: "Bank Account Number", width: 200, valueFormatter: notApplicableValueFormatter},
+        {field: "bankBsb", headerName: "BSB", width: 200, valueFormatter: notApplicableValueFormatter},
         {
             field: "actions",
             headerName: "Actions",
@@ -82,13 +117,11 @@ export const PaymentMethodsDialog = (props: {
             disableReorder: true,
             disableColumnMenu: true,
             renderCell: (params: any) => (
-                <>
-                    <RowDeleteButton
-                        params={params}
-                        idField="paymentMethodId"
-                        deleteFunction={handleDeletePaymentMethod}
-                    />
-                </>
+                <RowDeleteButton
+                    params={params}
+                    idField="paymentMethodId"
+                    deleteFunction={handleDeletePaymentMethod}
+                />
             ),
         },
     ])
@@ -99,17 +132,20 @@ export const PaymentMethodsDialog = (props: {
                 open={openAddPaymentMethodDialog}
                 setOpen={setOpenAddPaymentMethodDialog}
                 guest={props.guest}
-                fetchPaymentMethods={getPaymentMethods}
+                fetchPaymentMethods={getGuestPaymentMethods}
             />
             <Dialog open={props.open} fullWidth fullScreen>
                 <DialogHeader title={`Viewing payment methods for: ${props.guest?.firstName} ${props.guest?.lastName}`}
                               onClose={() => props.setOpen(false)}/>
                 <DialogContent sx={{padding: 2}}>
-                    <DataGrid columns={columns.current}
-                              rows={paymentMethods}
-                              loading={tableLoading}
-                              getRowId={(row) => row.paymentMethodId!}
-                    />
+                    <Paper sx={{height: '100%'}}>
+                        <DataGrid columns={columns.current}
+                                  rows={paymentMethods}
+                                  loading={tableLoading}
+                                  getRowId={(row) => row.paymentMethodId!}
+                                  sx={{height: '100%'}}
+                        />
+                    </Paper>
                 </DialogContent>
                 <SpeedDial
                     ariaLabel="SpeedDial basic example"

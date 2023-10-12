@@ -15,10 +15,12 @@ const strings = {
         guest: {
             invalidGuestId: (guestId: number) => `Invalid guest id: ${guestId}`,
             guestNotFound: (guestId: number) => `Guest with id ${guestId} not found`,
+            cannotDeleteGuestAsTheyHaveReservations: `Cannot delete guest as they have reservations`,
         },
         paymentMethods: {
             paymentMethodNotFound: (paymentMethodId: number) => `Payment method with id ${paymentMethodId} not found`,
             invalidPaymentMethodId: (paymentMethodId: number) => `Invalid payment method id: ${paymentMethodId}`,
+            invalidCardCVV: `Invalid card CVV`,
         },
         reservations: {
             invalidReservationId: (reservationId: number) => `Invalid reservation id: ${reservationId}`,
