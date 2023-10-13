@@ -142,7 +142,7 @@ const sidebarItems = [
         isHeader: true,
     },
     {
-        text: 'Guest Services',
+        text: 'Guest Services', //feature for services
         icon: <RoomServiceIcon/>,
         to: '/additional-service',
     },
