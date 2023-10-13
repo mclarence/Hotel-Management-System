@@ -36,7 +36,7 @@ import EventSeatIcon from '@mui/icons-material/EventSeat';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ListIcon from '@mui/icons-material/List';
-
+import RoomServiceIcon from '@mui/icons-material/RoomService';
 const drawerWidth = 240;
 
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -140,6 +140,11 @@ const sidebarItems = [
     {
         text: 'Guest Management',
         isHeader: true,
+    },
+    {
+        text: 'Guest Services',
+        icon: <RoomServiceIcon/>,
+        to: '/additional-service',
     },
     {
         text: 'Guests',
