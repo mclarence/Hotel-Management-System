@@ -59,6 +59,17 @@ const strings = {
             invalidTransactionId: (transactionId: number | string) => `Invalid transaction id: ${transactionId}`,
             transactionNotFound: (transactionId: number) => `Transaction with id ${transactionId} not found`,
         },
+        guestService: {
+            invalidServiceId: (serviceId: number | string) => `Invalid service ID: ${serviceId}`,
+            serviceNotFound: (serviceId: number | string) => `Guest service with ID ${serviceId} not found`,
+        },
+        guestServiceOrder: {
+            invalidOrderId: (orderId: number | string) => `Invalid order ID: ${orderId}`,
+            orderNotFound: (orderId: number | string) => `Guest service order with ID ${orderId} not found`,
+            reservationOrServiceNotFound: "The specified reservation or service does not exist",
+            serviceNotEnoughQuantity: "The specified service does not have enough quantity",
+        }
+
     }
 }
 

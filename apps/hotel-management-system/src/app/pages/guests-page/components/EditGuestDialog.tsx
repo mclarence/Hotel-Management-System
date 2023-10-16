@@ -129,11 +129,11 @@ const EditGuestDialog = (props: EditGuestDialogProps) => {
                           onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
-                    <Typography variant={"body1"}>
+                    <Typography component={'span'} variant={"body1"}>
                         Enter guest details below. The first and last name fields are
                         required.
                     </Typography>
-                    <Typography variant={"subtitle2"}>User Details</Typography>
+                    <Typography component={'span'} variant={"subtitle2"}>User Details</Typography>
                     <Stack direction={"row"} gap={"inherit"}>
                         <TextField
                             fullWidth

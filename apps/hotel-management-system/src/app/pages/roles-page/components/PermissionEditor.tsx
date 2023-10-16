@@ -52,7 +52,7 @@ export const PermissionEditor = ({permissions, setPermissions}: PermissionEditor
 
             <Paper sx={{overflowY: "scroll", maxHeight: "200px"}}>
                 {permissions.length === 0 ? (
-                    <Typography variant="body1" sx={{padding: 2}}>
+                    <Typography component={'span'} variant="body1" sx={{padding: 2}}>
                         No permissions selected
                     </Typography>
                 ) : (

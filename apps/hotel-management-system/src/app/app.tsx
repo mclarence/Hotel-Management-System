@@ -24,6 +24,7 @@ import timezone from "dayjs/plugin/timezone";
 import LogsComponent from './pages/logs-page/LogsPage';
 import dayjs from "dayjs";
 import {useEffect} from "react";
+import AdditionalServices from "./pages/additional-service-page/additionalServices";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -66,6 +67,7 @@ export function App() {
                             <Route path="reservations" element={<ReservationsPage/>}/>
                             <Route path="transactions" element={<TransactionsPage/>}/>
                             <Route path="logs" element={<LogsComponent/>}/>
+                            <Route path="guest-services" element={<AdditionalServices/>}/>
                         </Route>
                         <Route path="login" element={<LoginPage/>}/>
                     </Routes>

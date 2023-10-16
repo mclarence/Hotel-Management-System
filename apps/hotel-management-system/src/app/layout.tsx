@@ -36,6 +36,7 @@ import EventSeatIcon from '@mui/icons-material/EventSeat';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ListIcon from '@mui/icons-material/List';
+import RoomServiceIcon from '@mui/icons-material/RoomService';
 
 const drawerWidth = 240;
 
@@ -144,7 +145,7 @@ const sidebarItems = [
     {
         text: 'Guest Services', //feature for services
         icon: <RoomServiceIcon/>,
-        to: '/additional-service',
+        to: '/guest-services',
     },
     {
         text: 'Guests',

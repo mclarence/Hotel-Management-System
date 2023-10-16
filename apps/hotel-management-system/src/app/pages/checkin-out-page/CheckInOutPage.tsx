@@ -122,7 +122,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
                             alignItems={"center"}
                             justifyContent={"center"}
                         >
-                            <Typography variant={"body1"} sx={{width: "150px"}}>
+                            <Typography component={'span'} variant={"body1"} sx={{width: "150px"}}>
                                 Enter Guest Name:
                             </Typography>
                             <GuestAutoCompleteBox value={setSelectedGuest}/>
@@ -132,46 +132,46 @@ const CheckInOutPage = (props: CheckInPageProps) => {
                 <Grid item xs={4}>
                     <Paper sx={{padding: 2}}>
                         <Stack direction={"column"} gap={2}>
-                            <Typography variant={"h5"}>Guest Details</Typography>
+                            <Typography component={'span'} variant={"h5"}>Guest Details</Typography>
                             <Divider/>
                             <Grid container>
                                 <Grid item xs={6}>
-                                    <Typography variant={"body1"}>First Name:</Typography>
+                                    <Typography component={'span'} variant={"body1"}>First Name:</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant={"body1"}>
+                                    <Typography component={'span'} variant={"body1"}>
                                         {selectedGuest === null ? "..." : selectedGuest.firstName}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant={"body1"}>Last Name:</Typography>
+                                    <Typography component={'span'} variant={"body1"}>Last Name:</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant={"body1"}>
+                                    <Typography component={'span'} variant={"body1"}>
                                         {selectedGuest === null ? "..." : selectedGuest.lastName}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant={"body1"}>Email:</Typography>
+                                    <Typography component={'span'} variant={"body1"}>Email:</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant={"body1"}>
+                                    <Typography component={'span'} variant={"body1"}>
                                         {selectedGuest === null ? "..." : selectedGuest.email}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant={"body1"}>Phone Number:</Typography>
+                                    <Typography component={'span'} variant={"body1"}>Phone Number:</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant={"body1"}>
+                                    <Typography component={'span'} variant={"body1"}>
                                         {selectedGuest === null ? "..." : selectedGuest.phoneNumber}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant={"body1"}>Address:</Typography>
+                                    <Typography component={'span'} variant={"body1"}>Address:</Typography>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    <Typography variant={"body1"}>
+                                    <Typography component={'span'} variant={"body1"}>
                                         {selectedGuest === null ? "..." : selectedGuest.address}
                                     </Typography>
                                 </Grid>
@@ -182,7 +182,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
                 <Grid item xs={8}>
                     <Paper sx={{padding: 2}}>
                         <Stack direction={"column"} gap={2}>
-                            <Typography variant={"h5"}>Reservations</Typography>
+                            <Typography component={'span'} variant={"h5"}>Reservations</Typography>
                             <Divider/>
                             {/* create a datagrid listing the guests current reservations */}
                             <DataGrid

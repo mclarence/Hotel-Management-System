@@ -154,11 +154,11 @@ export const AddUserDialog = (props: AddUserDialogProps) => {
             <DialogHeader title={"Add User"} onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
-                    <Typography variant={"body1"}>
+                    <Typography component={'span'} variant={"body1"}>
                         Enter user details below. The first name, last name, username,
                         password and role fields are required.
                     </Typography>
-                    <Typography variant={"subtitle2"}>User Details</Typography>
+                    <Typography component={'span'} variant={"subtitle2"}>User Details</Typography>
                     <Stack direction={"row"} gap={"inherit"}>
                         <TextField
                             fullWidth
@@ -195,7 +195,7 @@ export const AddUserDialog = (props: AddUserDialogProps) => {
                     />
 
                     <Divider/>
-                    <Typography variant={"subtitle2"}>Account Details</Typography>
+                    <Typography component={'span'} variant={"subtitle2"}>Account Details</Typography>
                     <TextField
                         fullWidth
                         required

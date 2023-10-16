@@ -109,7 +109,7 @@ export const EditRoleDialog = (props: IAddRoleDialogProps) => {
             <DialogHeader title={`Editing Role: ${props.role?.name}`} onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
-                    <Typography variant={"body1"}>
+                    <Typography component={'span'} variant={"body1"}>
                         Set role name and permissions below.
                     </Typography>
                     <TextField

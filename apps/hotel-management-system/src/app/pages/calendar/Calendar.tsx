@@ -125,11 +125,11 @@ export function Calendar() {
                 <Grid item xs={8}>
                     <Paper sx={{padding: 2}}>
                         <Stack gap={2}>
-                            <Typography variant={"h3"}>{selectedDate?.format("DD/MM/YYYY")}</Typography>
+                            <Typography component={'span'} variant={"h3"}>{selectedDate?.format("DD/MM/YYYY")}</Typography>
                             <Divider/>
                             {currentNote.length > 0 ? currentNote.map((note, index) => (
                                 <Stack key={index} direction={"row"} gap={1} alignItems={"center"}>
-                                    <Typography>{note.note}</Typography>
+                                    <Typography component={'span'}>{note.note}</Typography>
                                     <IconButton onClick={() => handleDeleteNote(note.noteId!)}>
                                         <DeleteIcon fontSize={"small"}/>
                                     </IconButton>
@@ -137,7 +137,7 @@ export function Calendar() {
                                         <EditIcon fontSize={"small"}/>
                                     </IconButton>
                                 </Stack>
-                            )) : <Typography>No notes</Typography>}
+                            )) : <Typography component={'span'}>No notes</Typography>}
                         </Stack>
                     </Paper>
                 </Grid>

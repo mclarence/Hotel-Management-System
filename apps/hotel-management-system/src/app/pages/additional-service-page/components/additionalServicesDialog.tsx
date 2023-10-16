@@ -1,7 +1,5 @@
-import { Button, Dialog, DialogContent, Stack, Typography } from '@mui/material';
-import { DialogHeader } from '../../../../util/components/DialogHeader';
-import { useEffect, useState } from 'react';
-import AddIcon from '@mui/icons-material/Add';
+import {Dialog, DialogContent, Stack, Typography} from '@mui/material';
+import {DialogHeader} from "../../../../util/components/DialogHeader";
 
 export const CreateReservationDialog = (props: {
   open: boolean;
@@ -16,8 +14,8 @@ export const CreateReservationDialog = (props: {
       <DialogHeader title={'Create Reservation'} onClose={handleClose} />
       <DialogContent>
         <Stack gap={2}>
-          <Typography variant={'body1'}>Enter reservation details below.</Typography>
-          <Typography variant={'subtitle2'}>Reservation Details</Typography>
+          <Typography component={'span'} variant={'body1'}>Enter reservation details below.</Typography>
+          <Typography component={'span'} variant={'subtitle2'}>Reservation Details</Typography>
         </Stack>
       </DialogContent>
     </Dialog>
