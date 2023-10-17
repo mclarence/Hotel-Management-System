@@ -18,7 +18,7 @@ import {RootState} from "../../redux/store";
 
 export function Calendar() {
     const dispatch = useAppDispatch();
-    const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs.utc());
+    const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs.utc().local());
     const [currentNote, setCurrentNote] = useState<CalendarNotes[]>([]);
     const appState = useSelector((state: RootState) => state.appState);
 
