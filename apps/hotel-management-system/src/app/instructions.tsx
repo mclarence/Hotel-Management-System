@@ -3,6 +3,11 @@ import {RootState} from "./redux/store";
 import {useAppDispatch} from "./redux/hooks";
 
 const PageInstructions: any = {
+    "/": () => {
+        return (
+            "Dash Board Page"
+        )
+    },
     "/rooms": () => {
         return (
             "Rooms Page"
@@ -11,6 +16,51 @@ const PageInstructions: any = {
     "/tickets": () => {
         return (
             "Tickets Page"
+        )
+    },
+    "/calendar": () => {
+        return (
+            "Calendar Page"
+        )
+    },
+    "/guests": () => {
+        return (
+            "Guests Page"
+        )
+    },
+    "/guest-services": () => {
+        return (
+            "Guest-Services Page"
+        )
+    },
+    "/reservations": () => {
+        return (
+            "Reservation Page"
+        )
+    },
+    "/transactions": () => {
+        return (
+            "Transaction Page"
+        )
+    },
+    "/check-in-out": () => {
+        return (
+            "Check-in-out Page"
+        )
+    },
+    "/users": () => {
+        return (
+            "Users Page"
+        )
+    },
+    "/roles": () => {
+        return (
+            "Roles Page"
+        )
+    },
+    "/logs": () => {
+        return (
+            "Logs Page"
         )
     }
 }
