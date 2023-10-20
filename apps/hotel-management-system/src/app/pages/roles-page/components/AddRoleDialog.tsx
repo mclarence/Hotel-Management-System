@@ -97,7 +97,7 @@ export const AddRoleDialog = (props: IAddRoleDialogProps) => {
             <DialogHeader title="Add Role" onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
-                    <Typography variant={"body1"}>
+                    <Typography component={'span'} variant={"body1"}>
                         Set role name and permissions below.
                     </Typography>
                     <TextField

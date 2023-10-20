@@ -26,6 +26,10 @@ export const RoomsPage = () => {
     const dispatch = useAppDispatch();
 
     const handleDeleteButtonClicked = (roomId: number) => {
+        if (!window.confirm("Are you sure you want to delete this room?")) {
+            return;
+        }
+
         makeApiRequest<null>(
             deleteRoom(roomId),
             dispatch,

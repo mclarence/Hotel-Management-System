@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Paper, SpeedDial} from "@mui/material";
-import {DataGrid} from "@mui/x-data-grid";
+import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay";
 import AddIcon from "@mui/icons-material/Add";
 import {ApiResponse, Transaction} from "@hotel-management-system/models";
@@ -81,7 +81,7 @@ export const TransactionsPage = () => {
                 </>
             )
         },
-    ])
+    ] as GridColDef[])
 
     useEffect(() => {
         fetchTransactions()

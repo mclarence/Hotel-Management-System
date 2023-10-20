@@ -21,7 +21,7 @@ import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-import {Avatar, Paper, Stack} from '@mui/material';
+import {Avatar, Grid, Paper, Stack} from '@mui/material';
 import {useSelector} from 'react-redux';
 import {RootState} from './redux/store';
 import {useAppDispatch} from './redux/hooks';
@@ -37,6 +37,10 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ListIcon from '@mui/icons-material/List';
 import RoomServiceIcon from '@mui/icons-material/RoomService';
+import InboxIcon from "@mui/icons-material/MoveToInbox";
+import MailIcon from "@mui/icons-material/Mail";
+import {Instructions} from "./instructions";
+
 const drawerWidth = 240;
 
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -144,7 +148,7 @@ const sidebarItems = [
     {
         text: 'Guest Services', //feature for services
         icon: <RoomServiceIcon/>,
-        to: '/additional-service',
+        to: '/guest-services',
     },
     {
         text: 'Guests',
@@ -213,8 +217,10 @@ export function Layout() {
     };
 
     const handlePageChange = (pageTitle: string, pageLink: string | undefined) => {
+        console.log(pageLink)
         if (pageLink !== undefined) {
             dispatch(appStateSlice.actions.setAppBarTitle(pageTitle))
+            dispatch(appStateSlice.actions.setLastPageVisited(pageLink))
             // set the window title
             document.title = pageTitle + ' - Hotel Management System'
         }
@@ -328,7 +334,17 @@ export function Layout() {
             </Drawer>
             <Box component="main" sx={{flexGrow: 1, p: 3}}>
                 <DrawerHeader/>
-                <Outlet/>
+                <Grid container spacing={2}>
+                    <Grid item xs={9}>
+                        <Outlet/>
+                    </Grid>
+                    <Grid item xs={3}>
+                        <Paper sx={{padding: 2}}>
+                            <Instructions/>
+                        </Paper>
+                    </Grid>
+                </Grid>
+
             </Box>
         </Box>
     );

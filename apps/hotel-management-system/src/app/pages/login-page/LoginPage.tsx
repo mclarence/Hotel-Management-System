@@ -93,8 +93,8 @@ export const LoginPage = () => {
             padding={20}
         >
             <Grid item xs={7}>
-                <Typography variant="h2">Login</Typography>
-                <Typography variant="h6">
+                <Typography component={'span'} variant="h2">Login</Typography>
+                <Typography component={'span'} variant="h6">
                     Please enter your username and password to login.
                 </Typography>
             </Grid>
