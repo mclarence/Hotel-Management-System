@@ -1,6 +1,8 @@
 import {useSelector} from "react-redux";
 import {RootState} from "./redux/store";
 import {useAppDispatch} from "./redux/hooks";
+import {useEffect} from "react";
+import appStateSlice from "./redux/slices/AppStateSlice";
 
 const PageInstructions: any = {
     "/": () => {
@@ -68,6 +70,7 @@ const PageInstructions: any = {
 export const Instructions = () => {
     const appState = useSelector((state: RootState) => state.appState);
     const dispatch = useAppDispatch();
+
 
     const pageInstruction = PageInstructions[appState.lastPageVisited];
 
