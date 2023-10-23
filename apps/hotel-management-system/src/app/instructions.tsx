@@ -22,7 +22,14 @@ const PageInstructions: any = {
     },
     "/calendar": () => {
         return (
-            "Calendar Page"
+            <>
+                <h5>
+                    Calendar Page
+                </h5>
+                The calendar page allows you to select a date and add a note to it. 
+                To add a note, click on a specific date and then the plus button. 
+                The edit and remove button will also appear next to the note.
+            </>
         )
     },
     "/guests": () => {
