@@ -54,6 +54,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
         {
             field: "reservationStatus",
             headerName: "Reservation Status",
+            flex: 1
         },
         {
             field: "actions",
@@ -63,7 +64,7 @@ const CheckInOutPage = (props: CheckInPageProps) => {
             hideable: false,
             disableReorder: true,
             disableColumnMenu: true,
-            flex: 2,
+            flex: 1,
             renderCell: (params: any) => (
                 <Stack direction={"row"} gap={2}>
                     <Button color="success" variant="contained" disabled={params.row.checkInDate !== null}

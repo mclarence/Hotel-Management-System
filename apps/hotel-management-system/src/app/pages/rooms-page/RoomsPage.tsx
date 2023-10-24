@@ -53,13 +53,14 @@ export const RoomsPage = () => {
 
     const columns = useRef(
         [
-            {field: 'roomId', headerName: 'Room ID'},
-            {field: 'roomCode', headerName: 'Room Code'},
-            {field: 'pricePerNight', headerName: 'Price Per Night'},
-            {field: 'description', headerName: 'Description'},
-            {field: 'status', headerName: 'Status'},
+            {field: 'roomId', headerName: 'Room ID', flex: 1},
+            {field: 'roomCode', headerName: 'Room Code', flex: 1},
+            {field: 'pricePerNight', headerName: 'Price Per Night', flex: 1},
+            {field: 'description', headerName: 'Description', flex: 1},
+            {field: 'status', headerName: 'Status', flex: 1},
             {
                 field: "actions",
+                flex: 1,
                 headerName: "",
                 sortable: false,
                 filterable: false,

@@ -25,10 +25,10 @@ export const GuestServicesPane = () => {
     const dispatch = useAppDispatch();
 
     const columns = useRef([
-        {field: 'serviceId', headerName: 'Service ID', width: 150},
-        {field: 'serviceDescription', headerName: 'Service Description', width: 150},
+        {field: 'serviceId', headerName: 'Service ID', width: 150, flex: 1},
+        {field: 'serviceDescription', headerName: 'Service Description', width: 150, flex: 1},
         {
-            field: 'servicePrice', headerName: 'Service Price', width: 150, renderCell: (params) => {
+            field: 'servicePrice', headerName: 'Service Price', width: 150,flex: 1, renderCell: (params) => {
                 if (params.row.servicePrice === 0) {
                     return "Free"
                 } else {
@@ -37,7 +37,7 @@ export const GuestServicesPane = () => {
             }
         },
         {
-            field: 'serviceQuantity', headerName: 'Quantity', width: 150, renderCell: (params) => {
+            field: 'serviceQuantity', headerName: 'Quantity', width: 150,flex: 1, renderCell: (params) => {
                 if (params.row.serviceQuantity === -1) {
                     return "Unlimited"
                 } else {
@@ -49,6 +49,7 @@ export const GuestServicesPane = () => {
             field: "actions",
             headerName: "",
             sortable: false,
+            flex: 1,
             filterable: false,
             hideable: false,
             disableReorder: true,

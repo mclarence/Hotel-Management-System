@@ -1,6 +1,6 @@
 import {Link, Outlet, useNavigate} from 'react-router-dom';
 import * as React from 'react';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {CSSObject, styled, Theme, useTheme} from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
@@ -21,7 +21,7 @@ import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-import {Avatar, Grid, Paper, Stack} from '@mui/material';
+import {Avatar, Button, Grid, Paper, Stack} from '@mui/material';
 import {useSelector} from 'react-redux';
 import {RootState} from './redux/store';
 import {useAppDispatch} from './redux/hooks';
@@ -37,8 +37,7 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ListIcon from '@mui/icons-material/List';
 import RoomServiceIcon from '@mui/icons-material/RoomService';
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
+import InfoIcon from '@mui/icons-material/Info';
 import {Instructions} from "./instructions";
 
 const drawerWidth = 240;
@@ -192,12 +191,17 @@ const sidebarItems = [
         text: 'Logs',
         icon: <ListIcon/>,
         to: '/logs',
+    },
+    {
+        text: 'About',
+        icon: <InfoIcon/>,
+        to: '/about',
     }
 ];
 
 export function Layout() {
     const theme = useTheme();
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = React.useState(true);
     const appState = useSelector((state: RootState) => state.appState);
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -219,6 +223,12 @@ export function Layout() {
     const handlePageChange = (pageTitle: string, pageLink: string | undefined) => {
         console.log(pageLink)
         if (pageLink !== undefined) {
+            if (pageLink === "/about") {
+                dispatch(appStateSlice.actions.setShowInstructions(false));
+                dispatch(appStateSlice.actions.setHideToggleInstructionButton(true));
+            } else {
+                dispatch(appStateSlice.actions.setHideToggleInstructionButton(false));
+            }
             dispatch(appStateSlice.actions.setAppBarTitle(pageTitle))
             dispatch(appStateSlice.actions.setLastPageVisited(pageLink))
             // set the window title
@@ -249,7 +259,7 @@ export function Layout() {
     }
 
     return (
-        <Box sx={{display: 'flex'}}>
+        <Box sx={{display: 'flex', minHeight: '100vh'}}>
             <CssBaseline/>
             <AppBar position="fixed" open={open}>
                 <Toolbar>
@@ -268,24 +278,35 @@ export function Layout() {
                     <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
                         {appState.appBarTitle}
                     </Typography>
-                    <Paper sx={{padding: 1}}>
-                        <Stack direction={"row"} alignItems={"center"} gap={1}>
-                            <Avatar sx={{width: 30, height: 30}}>
-                                {appState.currentlyLoggedInUser?.firstName?.charAt(0)}
-                            </Avatar>
-                            <>
-                                {appState.currentlyLoggedInUser?.firstName} {appState.currentlyLoggedInUser?.lastName}
-                            </>
-                            <IconButton aria-label="delete" color="error" size={"small"} onClick={handleLogoutButton}>
-                                <LogoutIcon/>
-                            </IconButton>
-                        </Stack>
+                    <Stack direction={"row"} gap={1}>
+                        {!appState.hideToggleInstructionButton ? <Button
+                            onClick={() => dispatch(appStateSlice.actions.setShowInstructions(!appState.showInstructions))}>
+                            {appState.showInstructions ? 'Hide' : 'Show'} Instructions
+                        </Button> : <></>}
 
-                    </Paper>
+                        <Paper sx={{padding: 1}}>
+                            <Stack direction={"row"} alignItems={"center"} gap={1}>
+                                <Avatar sx={{width: 30, height: 30}}>
+                                    {appState.currentlyLoggedInUser?.firstName?.charAt(0)}
+                                </Avatar>
+                                <>
+                                    {appState.currentlyLoggedInUser?.firstName} {appState.currentlyLoggedInUser?.lastName}
+                                </>
+                                <IconButton aria-label="delete" color="error" size={"small"}
+                                            onClick={handleLogoutButton}>
+                                    <LogoutIcon/>
+                                </IconButton>
+                            </Stack>
+
+                        </Paper>
+                    </Stack>
                 </Toolbar>
             </AppBar>
             <Drawer variant="permanent" open={open}>
                 <DrawerHeader>
+                    <div style={{textAlign: "center", marginRight: 12}}>
+                        Hotel Management<br/>System
+                    </div>
                     <IconButton onClick={handleDrawerClose}>
                         {theme.direction === 'rtl' ? (
                             <ChevronRightIcon/>
@@ -332,19 +353,23 @@ export function Layout() {
                 </List>
                 <Divider/>
             </Drawer>
-            <Box component="main" sx={{flexGrow: 1, p: 3}}>
+            <Box component="main" sx={{display: "flex", flexDirection: "column", p: 3, width: "100%"}}>
                 <DrawerHeader/>
-                <Grid container spacing={2}>
-                    <Grid item xs={9}>
+                <Grid container spacing={2} sx={{flexGrow: 1}}>
+                    <Grid item xs={appState.showInstructions ? 9 : 12}>
                         <Outlet/>
                     </Grid>
-                    <Grid item xs={3}>
-                        <Paper sx={{padding: 2}}>
-                            <Instructions/>
-                        </Paper>
-                    </Grid>
+                    {appState.showInstructions && (
+                        <Grid item xs={3}>
+                            <Paper sx={{padding: 2}}>
+                                {appState.showInstructions && <Instructions/>}
+                            </Paper>
+                        </Grid>
+                    )}
                 </Grid>
-
+                <Typography variant="body2" color="textSecondary" align="center">
+                    &copy; {new Date().getFullYear()} UTS 41026 Advanced Software Development - Group 6
+                </Typography>
             </Box>
         </Box>
     );

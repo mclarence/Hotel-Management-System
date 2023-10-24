@@ -43,29 +43,45 @@ const ReservationsPage = () => {
 
     const columns = useRef(
         [
-            {field: 'reservationId', headerName: 'ID', width: 50},
-            {field: 'roomCode', headerName: 'Room', width: 100},
+            {field: 'reservationId', headerName: 'ID', flex: 1},
+            {field: 'roomCode', headerName: 'Room', flex: 1},
             {
-                field: 'guestName', headerName: 'Guest', renderCell: (params: any) => {
+                field: 'guestName', headerName: 'Guest', flex: 1, renderCell: (params: any) => {
                     return params.row.guestFirstName + " " + params.row.guestLastName;
                 }
             },
-            {field: 'checkInDate', headerName: 'Check In Date', valueFormatter: dateValueFormatter(appState.timeZone), width: 170},
-            {field: 'checkOutDate', headerName: 'Check Out Date', valueFormatter: dateValueFormatter(appState.timeZone), width: 170},
-            {field: 'reservationStatus', headerName: 'Reservation Status', width: 150},
-            {field: 'startDate', headerName: 'Start Date', valueFormatter: dateValueFormatter(appState.timeZone), width: 170},
-            {field: 'endDate', headerName: 'End Date', valueFormatter: dateValueFormatter(appState.timeZone), width: 170},
             {
-            field: "actions",
-            headerName: "Actions",
-            sortable: false,
-            filterable: false,
-            hideable: false,
-            disableReorder: true,
-            disableColumnMenu: true,
-            renderCell: (params: any) => <RowDeleteButton params={params} deleteFunction={handleDeletingSingleRow}
-                                                          idField={"reservationId"}/>,
-        },
+                field: 'checkInDate',
+                headerName: 'Check In Date',
+                valueFormatter: dateValueFormatter(appState.timeZone),
+                flex: 1
+            },
+            {
+                field: 'checkOutDate',
+                headerName: 'Check Out Date',
+                valueFormatter: dateValueFormatter(appState.timeZone),
+                flex: 1
+            },
+            {field: 'reservationStatus', headerName: 'Reservation Status', width: 150, flex: 1},
+            {
+                field: 'startDate',
+                headerName: 'Start Date',
+                valueFormatter: dateValueFormatter(appState.timeZone),
+                flex: 1
+            },
+            {field: 'endDate', headerName: 'End Date', valueFormatter: dateValueFormatter(appState.timeZone), flex: 1},
+            {
+                field: "actions",
+                headerName: "Actions",
+                sortable: false,
+                filterable: false,
+                hideable: false,
+                flex: 1,
+                disableReorder: true,
+                disableColumnMenu: true,
+                renderCell: (params: any) => <RowDeleteButton params={params} deleteFunction={handleDeletingSingleRow}
+                                                              idField={"reservationId"}/>,
+            },
         ] as GridColDef[]
     )
 

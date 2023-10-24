@@ -50,19 +50,20 @@ export const TicketsPage = () => {
     }
 
     const columns = useRef([
-        {field: 'ticketId', headerName: 'ID', width: 100},
+        {field: 'ticketId', headerName: 'ID', width: 100, flex: 1},
         {
-            field: 'userId', headerName: 'User', width: 150, renderCell: (params: any) => {
+            field: 'userId', headerName: 'User', width: 150, flex: 1, renderCell: (params: any) => {
                 return params.row.userFirstName + " " + params.row.userLastName;
             }
         },
-        {field: 'title', headerName: 'Title', width: 150},
-        {field: 'description', headerName: 'Description', width: 150},
-        {field: 'status', headerName: 'Status', width: 150},
-        {field: 'dateOpened', headerName: 'Date Opened', width: 150, valueFormatter: dateValueFormatter(appState.timeZone)},
+        {field: 'title', headerName: 'Title', width: 150, flex: 1},
+        {field: 'description', headerName: 'Description', width: 150, flex: 1},
+        {field: 'status', headerName: 'Status', width: 150, flex: 1},
+        {field: 'dateOpened', headerName: 'Date Opened', width: 150, valueFormatter: dateValueFormatter(appState.timeZone), flex: 1},
         {
             field: 'actions',
             headerName: 'Actions',
+            flex: 1,
             sortable: false,
             filterable: false,
             hideable: false,

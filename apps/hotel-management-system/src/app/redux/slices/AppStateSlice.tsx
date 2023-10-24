@@ -20,6 +20,8 @@ interface AppStateSlice {
     logs: Logs[];
     isFetchingLogs: boolean;
     timeZone: string;
+    showInstructions: boolean;
+    hideToggleInstructionButton: boolean;
 }
 
 const initialState: AppStateSlice = {
@@ -34,7 +36,9 @@ const initialState: AppStateSlice = {
     isFetchingUserList: false,
     logs: [],
     isFetchingLogs: false,
-    timeZone: 'Australia/Sydney'
+    timeZone: 'Australia/Sydney',
+    showInstructions: true,
+    hideToggleInstructionButton: false
 };
 
 export const fetchUserDetails = createAsyncThunk(
@@ -74,6 +78,12 @@ const appStateSlice = createSlice({
         },
         setLastPageVisited: (state, action: PayloadAction<string>) => {
             state.lastPageVisited = action.payload;
+        },
+        setShowInstructions: (state, action: PayloadAction<boolean>) => {
+            state.showInstructions = action.payload;
+        },
+        setHideToggleInstructionButton: (state, action: PayloadAction<boolean>) => {
+            state.hideToggleInstructionButton = action.payload;
         }
     },
     extraReducers: (builder) => {

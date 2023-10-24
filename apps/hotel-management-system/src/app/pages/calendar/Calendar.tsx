@@ -15,7 +15,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import {makeApiRequest} from "../../api/makeApiRequest";
 import {useSelector} from "react-redux";
 import {RootState} from "../../redux/store";
-
 export function Calendar() {
     const dispatch = useAppDispatch();
     const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs.utc().local());

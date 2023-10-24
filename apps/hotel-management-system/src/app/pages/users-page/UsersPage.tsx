@@ -80,18 +80,19 @@ export const UsersPage = () => {
 
     const columns = useRef(
         [
-            {field: 'userId', headerName: 'User ID'},
-            {field: 'firstName', headerName: 'First Name'},
-            {field: 'lastName', headerName: 'Last Name'},
-            {field: 'username', headerName: 'Username'},
-            {field: 'email', headerName: 'Email'},
-            {field: 'roleName', headerName: 'Role'},
+            {field: 'userId', headerName: 'User ID', flex: 1},
+            {field: 'firstName', headerName: 'First Name', flex: 1},
+            {field: 'lastName', headerName: 'Last Name', flex: 1},
+            {field: 'username', headerName: 'Username', flex: 1},
+            {field: 'email', headerName: 'Email', flex: 1},
+            {field: 'roleName', headerName: 'Role', flex: 1},
             {
                 field: 'actions',
                 headerName: 'Actions',
                 sortable: false,
                 filterable: false,
                 hideable: false,
+                flex : 1,
                 disableReorder: true,
                 disableColumnMenu: true,
                 renderCell: (params: any) => (

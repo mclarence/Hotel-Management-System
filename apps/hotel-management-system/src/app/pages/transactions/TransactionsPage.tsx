@@ -52,26 +52,27 @@ export const TransactionsPage = () => {
     }
 
     const columns = useRef([
-        {field: 'transactionId', headerName: 'Transaction ID', width: 200},
+        {field: 'transactionId', headerName: 'Transaction ID', flex: 1},
         {
-            field: 'payementMethodId', headerName: 'Payment Method', width: 200, renderCell: (params: any) => {
+            field: 'payementMethodId', headerName: 'Payment Method', flex: 1, renderCell: (params: any) => {
                 return params.row.paymentMethodType
             }
         },
         {
-            field: 'guestId', headerName: 'Guest', width: 200, renderCell: (params: any) => {
+            field: 'guestId', headerName: 'Guest', flex: 1, renderCell: (params: any) => {
                 return params.row.guestFirstName + " " + params.row.guestLastName
             }
         },
-        {field: 'amount', headerName: 'Amount', width: 200},
-        {field: 'description', headerName: 'Description', width: 200},
-        {field: 'date', headerName: 'Date', width: 200, valueFormatter: dateValueFormatter(appState.timeZone)},
+        {field: 'amount', headerName: 'Amount', flex: 1},
+        {field: 'description', headerName: 'Description', flex: 1},
+        {field: 'date', headerName: 'Date', flex: 1, valueFormatter: dateValueFormatter(appState.timeZone)},
         {
             field: 'actions',
             headerName: 'Actions',
             sortable: false,
             filterable: false,
             hideable: false,
+            flex: 1,
             disableReorder: true,
             disableColumnMenu: true,
             renderCell: (params: any) => (

@@ -24,14 +24,14 @@ export const GuestServiceOrdersPane = () => {
     const dispatch = useAppDispatch();
 
     const columns = useRef([
-        {field: 'orderId', headerName: 'Order ID', width: 150},
-        {field: 'reservationId', headerName: 'Reservation ID', width: 150},
-        {field: 'serviceId', headerName: 'Service ID', width: 150},
-        {field: 'orderTime', headerName: 'Order Time', width: 150, valueFormatter: dateValueFormatter(appState.timeZone)},
-        {field: 'orderStatus', headerName: 'Order Status', width: 150},
-        {field: 'orderPrice', headerName: 'Order Price', width: 150},
-        {field: 'orderQuantity', headerName: 'Order Quantity', width: 150},
-        {field: 'orderDescription', headerName: 'Order Description', width: 150},
+        {field: 'orderId', headerName: 'Order ID', width: 150, flex: 1},
+        {field: 'reservationId', headerName: 'Reservation ID', width: 150, flex: 1},
+        {field: 'serviceId', headerName: 'Service ID', width: 150, flex: 1},
+        {field: 'orderTime', headerName: 'Order Time', width: 150, valueFormatter: dateValueFormatter(appState.timeZone), flex: 1},
+        {field: 'orderStatus', headerName: 'Order Status', width: 150, flex: 1},
+        {field: 'orderPrice', headerName: 'Order Price', width: 150, flex: 1},
+        {field: 'orderQuantity', headerName: 'Order Quantity', width: 150, flex: 1},
+        {field: 'orderDescription', headerName: 'Order Description', width: 150, flex: 1},
         {
             field: "actions",
             headerName: "",
@@ -40,6 +40,7 @@ export const GuestServiceOrdersPane = () => {
             hideable: false,
             disableReorder: true,
             disableColumnMenu: true,
+            flex: 1,
             renderCell: (params: any) => (
                 <>
                     <RowDeleteButton

@@ -67,14 +67,15 @@ export const RolesPage = () => {
     }
 
     const columns = useRef([
-        {field: "roleId", headerName: "Role ID"},
-        {field: "name", headerName: "Role Name", width: 200},
+        {field: "roleId", headerName: "Role ID", flex: 1},
+        {field: "name", headerName: "Role Name", flex: 1},
         {
             field: "actions",
             headerName: "Actions",
             sortable: false,
             filterable: false,
             hideable: false,
+            flex: 1,
             disableReorder: true,
             disableColumnMenu: true,
             renderCell: (params: any) => <>
