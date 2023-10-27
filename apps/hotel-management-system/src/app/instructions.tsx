@@ -14,21 +14,21 @@ const PageInstructions: any = {
         return (
             <>
                 <Stack direction={"column"} gap={2}>
-                    <Typography variant={"h4"}>DashBoard</Typography>
+                    <Typography variant={"h4"}>Dashboard</Typography>
                     <Typography variant={"body1"}>
-                    This page allows the manager to have a basic understanding of the status of the hotel room and customer stay
+                    This page provides an overview of the status of the hotel room and customer occupancy.
                     </Typography>
                     <Typography variant={"h5"}>Room display</Typography>
                     <Typography variant={"body1"}>
-                    Different colors show different states of the room.The pie chart shows how many parts of the room are in different states
+                    Different colors show different states of the room. The pie chart shows how many parts of the room are in different states.
                     </Typography>
                     <Typography variant={"h5"}>Customer status</Typography>
                     <Typography variant={"body1"}>
-                    The number of customers in different states is displayed in numerical form
+                    The number of customers in different states is displayed in numerical form.
                     </Typography>
                     <Typography variant={"h5"}>Filter</Typography>
                     <Typography variant={"body1"}>
-                    You can select different room states to filter rooms or enter specific room numbers to filter rooms
+                    You can select different room states to filter rooms or enter specific room numbers to filter rooms.
                     </Typography>
                 </Stack>
             </>
@@ -163,17 +163,17 @@ const PageInstructions: any = {
         return (
             <>
             <Stack direction={"column"} gap={2}>
-                <Typography variant={"h4"}>Logs Page</Typography>
+                <Typography variant={"h4"}>Logs</Typography>
                 <Typography variant={"body1"}>
-                This page allows administrators to track all user actions
+                This page allows system administrators to track all user actions.
                 </Typography>
-                <Typography variant={"h5"}>Sorter</Typography>
+                <Typography variant={"h5"}>Sort</Typography>
                 <Typography variant={"body1"}>
-                It can be sorted in ascending or descending order by number or letter
+                It can be sorted in ascending or descending order by number or letter.
                 </Typography>
-                <Typography variant={"h5"}>Fliter</Typography>
+                <Typography variant={"h5"}>Filter</Typography>
                 <Typography variant={"body1"}>
-                You can filter and search by category or enter specific characters
+                You can filter and search by category or enter specific characters.
                 </Typography>
             </Stack>
         </>
