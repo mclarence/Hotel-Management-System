@@ -170,7 +170,7 @@ export const TicketDetailsDialog = (props: {
                     <Grid item xs={4}>
                         <Paper sx={{padding: 2}}>
                             <Stack direction={"column"} gap={2}>
-                                <Typography variant={"h6"}>Ticket Details</Typography>
+                                <Typography component={'span'} variant={"h6"}>Ticket Details</Typography>
                                 <Divider/>
                                 <UserAutoCompleteBox value={setUser} currentValue={user}/>
                                 <TextField
@@ -195,7 +195,7 @@ export const TicketDetailsDialog = (props: {
                     <Grid item xs={8}>
                         <Paper sx={{padding: 2}}>
                             <Stack direction={"column"} gap={2}>
-                                <Typography variant={"h6"}>Ticket Comments</Typography>
+                                <Typography component={'span'} variant={"h6"}>Ticket Comments</Typography>
                                 <Divider/>
                                 {ticketComments.map((comment) => {
 
@@ -204,8 +204,8 @@ export const TicketDetailsDialog = (props: {
                                     return (
                                         <Paper sx={{padding: 2}}>
                                             <Stack direction={"column"} gap={1}>
-                                                <Typography variant={"body1"}>{comment.message}</Typography>
-                                                <Typography
+                                                <Typography component={'span'} variant={"body1"}>{comment.message}</Typography>
+                                                <Typography component={'span'}
                                                     variant={"caption"}>
                                                     {formattedTime} - {comment.userFirstName} {comment.userLastName}
                                                 </Typography>

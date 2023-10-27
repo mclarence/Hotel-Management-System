@@ -1,6 +1,6 @@
 import { Guest } from '@hotel-management-system/models';
 
-// gets all guests
+// gets all guests 1
 export const getGuests = (): Promise<Response> => {
     return fetch('/api/guests', {
         method: 'GET',

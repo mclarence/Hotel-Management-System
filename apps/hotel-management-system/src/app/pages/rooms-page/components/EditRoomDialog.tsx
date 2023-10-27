@@ -106,8 +106,8 @@ const EditRoomDialog = (props: EditRoomDialogProps) => {
             <DialogHeader title={"Edit Room"} onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
-                    <Typography variant={"body1"}>Update room details below.</Typography>
-                    <Typography variant={"subtitle2"}>RoomCard Details</Typography>
+                    <Typography component={'span'} variant={"body1"}>Update room details below.</Typography>
+                    <Typography component={'span'} variant={"subtitle2"}>RoomCard Details</Typography>
                     <TextField
                         fullWidth
                         required

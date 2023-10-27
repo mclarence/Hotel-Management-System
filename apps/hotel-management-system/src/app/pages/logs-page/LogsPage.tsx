@@ -26,11 +26,11 @@ const LogsComponent = () => {
 
 
     const columns = useRef([
-        {field: 'logId', headerName: 'Log ID', width: 130},
-        {field: 'eventType', headerName: 'Event Type', width: 180},
-        {field: 'timestamp', headerName: 'Timestamp', width: 250},
-        {field: 'userId', headerName: 'User', width: 180},
-        {field: 'description', headerName: 'Description', width: 250},
+        {field: 'logId', headerName: 'Log ID', flex: 1},
+        {field: 'eventType', headerName: 'Event Type', flex: 1},
+        {field: 'timestamp', headerName: 'Timestamp', flex: 1},
+        {field: 'userId', headerName: 'User', flex: 1},
+        {field: 'description', headerName: 'Description', flex: 1},
     ])
 
     return (

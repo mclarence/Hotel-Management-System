@@ -102,8 +102,8 @@ export const AddRoomDialog = (props: AddRoomDialogProps) => {
             <DialogHeader title={"Add Room"} onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
-                    <Typography variant={"body1"}>Enter room details below.</Typography>
-                    <Typography variant={"subtitle2"}>Room Details</Typography>
+                    <Typography component={'span'} variant={"body1"}>Enter room details below.</Typography>
+                    <Typography component={'span'} variant={"subtitle2"}>Room Details</Typography>
                     <TextField
                         fullWidth
                         required

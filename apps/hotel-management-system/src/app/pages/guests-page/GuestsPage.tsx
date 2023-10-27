@@ -77,11 +77,11 @@ const GuestsPage = () => {
     }
 
     const columns = useRef([
-        {field: "guestId", headerName: "Guest ID"},
-        {field: "firstName", headerName: "First Name", width: 200},
-        {field: "lastName", headerName: "Last Name", width: 200},
-        {field: "email", headerName: "Email", width: 200},
-        {field: "phoneNumber", headerName: "Phone Number", width: 200},
+        {field: "guestId", headerName: "Guest ID", flex: 1},
+        {field: "firstName", headerName: "First Name", width: 200, flex: 1},
+        {field: "lastName", headerName: "Last Name", width: 200, flex: 1},
+        {field: "email", headerName: "Email", width: 200, flex: 1},
+        {field: "phoneNumber", headerName: "Phone Number", width: 200, flex: 1},
         {
             field: "actions",
             headerName: "",
@@ -100,7 +100,8 @@ const GuestsPage = () => {
                     <RowEditButton onClick={handleEditButtonClicked(params.row)}/>
                     <PaymentMethodsRowButton setOpen={handlePaymentMethodsButtonClicked(params.row)}/>
                 </>
-            ),
+            )
+            , flex: 1
         },
     ] as GridColDef[]);
 

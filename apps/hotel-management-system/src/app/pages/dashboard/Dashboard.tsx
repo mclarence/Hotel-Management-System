@@ -115,7 +115,7 @@ export function Dashboard() {
                 <Stack gap={2} padding={1}>
                     <Card>
                         <Stack margin={2}>
-                            <Typography variant='h5'>Room Status Overview</Typography>
+                            <Typography component={'span'} variant='h5'>Room Status Overview</Typography>
                             <PieChart width={300} height={300}>
                                 <Pie
                                     data={pieChartData}
@@ -135,9 +135,9 @@ export function Dashboard() {
                     </Card>
                     <Card>
                         <Stack margin={2}>
-                            <Typography variant='h5'>Today's check-ins and check-outs</Typography>
-                            <Typography variant='body1'>Arrivals: {checkInsToday}</Typography>
-                            <Typography variant='body1'>Departures: {checkOutsToday}</Typography>
+                            <Typography component={'span'} variant='h5'>Today's check-ins and check-outs</Typography>
+                            <Typography component={'span'} variant='body1'>Arrivals: {checkInsToday}</Typography>
+                            <Typography component={'span'} variant='body1'>Departures: {checkOutsToday}</Typography>
                         </Stack>
                     </Card>
                 </Stack>

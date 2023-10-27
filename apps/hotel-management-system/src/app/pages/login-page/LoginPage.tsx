@@ -89,10 +89,13 @@ export const LoginPage = () => {
             direction="row"
             alignItems="center"
             justifyContent="center"
-            sx={{minHeight: '100vh'}}
+            sx={{minHeight: '100%'}}
             padding={20}
         >
-            <Grid item xs={7}>
+            <Grid item xs={16} sx={{textAlign: 'center'}}>
+                 <Typography variant="h1">Hotel Management System</Typography>
+            </Grid>
+            <Grid item xs={8}>
                 <Typography variant="h2">Login</Typography>
                 <Typography variant="h6">
                     Please enter your username and password to login.

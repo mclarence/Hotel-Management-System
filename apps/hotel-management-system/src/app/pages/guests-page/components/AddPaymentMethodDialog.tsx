@@ -1,11 +1,9 @@
 import {Button, Dialog, DialogContent, Stack, Tab, Tabs, TextField} from "@mui/material";
-import {ApiResponse, Guest, PaymentMethod} from "@hotel-management-system/models";
+import {Guest, PaymentMethod} from "@hotel-management-system/models";
 import {DialogHeader} from "../../../../util/components/DialogHeader";
 import React, {SyntheticEvent, useEffect, useState} from "react";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
-import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
+import {DatePicker} from "@mui/x-date-pickers";
 import AddCardIcon from '@mui/icons-material/AddCard';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import dayjs from "dayjs";
@@ -14,39 +12,7 @@ import {PaymentMethodTypes} from "../../../../../../../libs/models/src/lib/enums
 import appStateSlice from "../../../redux/slices/AppStateSlice";
 import {useAppDispatch} from "../../../redux/hooks";
 import {makeApiRequest} from "../../../api/makeApiRequest";
-
-interface TabPanelProps {
-    children?: React.ReactNode;
-    index: number;
-    value: number;
-}
-
-function CustomTabPanel(props: TabPanelProps) {
-    const {children, value, index, ...other} = props;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
-            {...other}
-        >
-            {value === index && (
-                <Box sx={{p: 3}}>
-                    <Typography>{children}</Typography>
-                </Box>
-            )}
-        </div>
-    );
-}
-
-function a11yProps(index: number) {
-    return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
-    };
-}
+import {a11yProps, CustomTabPanel} from "../../../../util/components/CustomTabPanel";
 
 export const AddPaymentMethodDialog = (props: {
     open: boolean,

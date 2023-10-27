@@ -2,7 +2,7 @@ import request from "supertest";
 import {Express} from "express";
 import {
     CalendarNotes,
-    Guest,
+    Guest, GuestService, GuestServiceOrder,
     PaymentMethod,
     Reservation,
     Role,
@@ -13,6 +13,7 @@ import {faker} from "@faker-js/faker";
 import {PaymentMethodTypes} from "../../../../libs/models/src/lib/enums/PaymentMethodTypes";
 import {ReservationStatuses} from "../../../../libs/models/src/lib/enums/ReservationStatuses";
 import dayjs from "dayjs";
+import {GuestServiceOrderStatuses} from "../../../../libs/models/src/lib/enums/GuestServiceOrderStatuses";
 
 export const login = async (app: Express): Promise<string> => {
     const token = await request(app)
@@ -276,5 +277,45 @@ export const getUsers = async (app: Express, token: string): Promise<User[]> => 
         .set("Authorization", `Bearer ${token}`)
         .expect((res) => (res.status != 200 ? console.log(res.body) : 0))
         .expect(200)
+    return response.body.data;
+}
+
+export const makeGuestService = (quantity: number): GuestService => {
+    return {
+        serviceDescription: faker.string.alphanumeric(10),
+        servicePrice: faker.number.float(100),
+        serviceQuantity: quantity,
+    }
+}
+
+export const addGuestService = async (app: Express, token: string, guestService: GuestService): Promise<GuestService> => {
+    const response = await request(app)
+        .post("/api/guest-services/add")
+        .set("Authorization", `Bearer ${token}`)
+        .send(guestService)
+        .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
+        .expect(201)
+    return response.body.data;
+}
+
+export const makeGuestServiceOrder = (reservationId: number, guestServiceId: number, quantity: number): GuestServiceOrder => {
+    return {
+        reservationId: reservationId,
+        serviceId: guestServiceId,
+        orderQuantity: quantity,
+        orderTime: dayjs.utc().toDate(),
+        orderStatus: GuestServiceOrderStatuses.PENDING,
+        orderPrice: faker.number.float(100),
+        description: faker.string.alphanumeric(10)
+    }
+}
+
+export const addGuestServiceOrder = async (app: Express, token: string, guestServiceOrder: GuestServiceOrder): Promise<GuestServiceOrder> => {
+    const response = await request(app)
+        .post("/api/guest-service-orders/add")
+        .set("Authorization", `Bearer ${token}`)
+        .send(guestServiceOrder)
+        .expect((res) => (res.status != 201 ? console.log(res.body) : 0))
+        .expect(201)
     return response.body.data;
 }

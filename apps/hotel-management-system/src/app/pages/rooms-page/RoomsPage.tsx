@@ -26,6 +26,10 @@ export const RoomsPage = () => {
     const dispatch = useAppDispatch();
 
     const handleDeleteButtonClicked = (roomId: number) => {
+        if (!window.confirm("Are you sure you want to delete this room?")) {
+            return;
+        }
+
         makeApiRequest<null>(
             deleteRoom(roomId),
             dispatch,
@@ -49,13 +53,14 @@ export const RoomsPage = () => {
 
     const columns = useRef(
         [
-            {field: 'roomId', headerName: 'Room ID'},
-            {field: 'roomCode', headerName: 'Room Code'},
-            {field: 'pricePerNight', headerName: 'Price Per Night'},
-            {field: 'description', headerName: 'Description'},
-            {field: 'status', headerName: 'Status'},
+            {field: 'roomId', headerName: 'Room ID', flex: 1},
+            {field: 'roomCode', headerName: 'Room Code', flex: 1},
+            {field: 'pricePerNight', headerName: 'Price Per Night', flex: 1},
+            {field: 'description', headerName: 'Description', flex: 1},
+            {field: 'status', headerName: 'Status', flex: 1},
             {
                 field: "actions",
+                flex: 1,
                 headerName: "",
                 sortable: false,
                 filterable: false,

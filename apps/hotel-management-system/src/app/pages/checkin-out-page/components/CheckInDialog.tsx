@@ -110,7 +110,7 @@ export const CheckInDialog = (props: {
             <DialogHeader title={"Check In"} onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
-                    <Typography variant={"body1"}>
+                    <Typography component={'span'} variant={"body1"}>
                         Enter check in/out date and time.
                     </Typography>
                     <DateTimePicker

@@ -33,6 +33,10 @@ import {makeTicketsRoute} from "./resources/ticketsRoute";
 import {makeEventLogger} from "./util/logEvent";
 import sendResponse from "./util/sendResponse";
 import strings from "./util/strings";
+import {makeGuestServiceOrderDAO} from "./database/guestServiceOrders";
+import {makeGuestServiceDAO} from "./database/guestService";
+import makeGuestServicesRoute from "./resources/guestServiceRoute";
+import makeGuestServiceOrdersRoute from "./resources/guestServiceOrderRoute";
 
 const createDefaultRoleAndAdmin = async (
     rolesDAO: IRolesDAO,
@@ -105,8 +109,10 @@ interface IServer {
 const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
     logger.info("Starting server");
 
+    // Create the database
     const db = createDatabase(serverOptions);
 
+    // Test the connection
     await db
         .testConnection()
         .then(() => {
@@ -118,12 +124,12 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
             process.exit(1);
         });
 
+    /**
+     * Initialize DAOs
+     */
     const usersDAO = makeUsersDAO(db.db)
     const rolesDAO = makeRolesDAO(db.db)
-
     const logsDAO = makeLogsDAO(db.db)
-    const eventLogger = makeEventLogger(logsDAO)
-
     const tokenRevocationListDAO = makeTokenRevocationListDAO(db.db)
     const calendarDAO = makeNotesDAO(db.db)
     const guestsDAO = makeGuestDAO(db.db);
@@ -132,9 +138,14 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
     const paymentMethodsDAO = makePaymentMethodsDAO(db.db)
     const transactionsDAO = makeTransactionsDAO(db.db)
     const ticketsDAO = makeTicketsDAO(db.db)
-
+    const guestServiceOrdersDAO = makeGuestServiceOrderDAO(db.db)
+    const guestServicesDAO = makeGuestServiceDAO(db.db)
+    const eventLogger = makeEventLogger(logsDAO)
     await createDefaultRoleAndAdmin(rolesDAO, usersDAO);
 
+    /**
+     * Initialize middleware
+     */
     const authenticationMiddleware = makeAuthenticationMiddleware(
         serverOptions.jwt.secret,
         tokenRevocationListDAO
@@ -147,6 +158,9 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
     app.use(express.json());
     app.use(expressLogger);
 
+    /**
+     * Initialize routes
+     */
     const usersRoute = makeUsersRoute(
         usersDAO,
         rolesDAO,
@@ -225,6 +239,25 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
         authorizationMiddleware
     )
 
+    const guestServicesRoute = makeGuestServicesRoute(
+        guestServicesDAO,
+        eventLogger,
+        authenticationMiddleware,
+        authorizationMiddleware
+    )
+
+    const gestServicesOrderRoute = makeGuestServiceOrdersRoute(
+        guestServiceOrdersDAO,
+        reservationsDAO,
+        guestServicesDAO,
+        eventLogger,
+        authenticationMiddleware,
+        authorizationMiddleware
+    )
+
+    /**
+     * Initialize routes
+     */
     app.use("/api/users", usersRoute.router);
     app.use("/api/roles", rolesRoute.router);
     app.use("/api/rooms", roomsRoute.router);
@@ -236,6 +269,8 @@ const startServer = async (serverOptions: ServerConfig): Promise<IServer> => {
     app.use("/api/payment-methods", paymentMethodsRoute.router);
     app.use("/api/transactions", transactionsRoute.router);
     app.use("/api/tickets", ticketsRoute.router);
+    app.use("/api/guest-services", guestServicesRoute.router);
+    app.use("/api/guest-service-orders", gestServicesOrderRoute.router);
     app.use(express.static(path.join(__dirname, "assets")));
 
     // catch all errors

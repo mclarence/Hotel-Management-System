@@ -140,10 +140,10 @@ export const CreateReservationDialog = (props: {
             <DialogHeader title={"Create Reservation"} onClose={handleClose}/>
             <DialogContent>
                 <Stack gap={2}>
-                    <Typography variant={"body1"}>
+                    <Typography component={'span'} variant={"body1"}>
                         Enter reservation details below.
                     </Typography>
-                    <Typography variant={"subtitle2"}>Reservation Details</Typography>
+                    <Typography component={'span'} variant={"subtitle2"}>Reservation Details</Typography>
                     <GuestAutoCompleteBox value={setGuest}/>
                     <RoomAutoCompleteBox value={setRoom}/>
                     <DatePicker
@@ -160,7 +160,7 @@ export const CreateReservationDialog = (props: {
                         onChange={setEndDate}
                         timezone={appState.timeZone}
                     />
-                    <Typography variant={"body1"}>
+                    <Typography component={'span'} variant={"body1"}>
                         Nights: {numberOfNights === null ? "..." : numberOfNights}
                         <br/>
                         Price:

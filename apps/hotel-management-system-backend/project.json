@@ -88,7 +88,8 @@
       "options": {
         "jestConfig": "apps/hotel-management-system-backend/jest.config.ts",
         "passWithNoTests": true,
-        "runInBand": true
+        "runInBand": true,
+        "verbose": true
       },
       "configurations": {
         "ci": {

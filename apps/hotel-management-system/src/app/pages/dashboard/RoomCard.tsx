@@ -45,13 +45,13 @@ function RoomCard({roomNumber, roomInfo, roomStatus}: RoomProps) {
     return (
         <Paper className="room" style={{backgroundColor: roomColor}} elevation={3}>
             <Stack width={'100%'}>
-                <Typography variant='h6'>
+                <Typography component={'span'} variant='h6'>
                     {roomNumber}
                 </Typography>
-                <Typography variant='subtitle1' noWrap={true}>
+                <Typography component={'span'} variant='subtitle1' noWrap={true}>
                     {centerDisplay}
                 </Typography>
-                <Typography variant="caption">
+                <Typography component={'span'} variant="caption">
                     {roomInfo}
                 </Typography>
             </Stack>

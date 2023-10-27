@@ -104,7 +104,80 @@ const queries = {
                 FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id) ON DELETE CASCADE,
                 FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
             );
+            CREATE TABLE IF NOT EXISTS guest_service (
+                service_id SERIAL PRIMARY KEY,
+                service_description VARCHAR(255) NOT NULL,
+                service_price FLOAT NOT NULL,
+                service_quantity INTEGER NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS guest_service_order (
+                order_id SERIAL PRIMARY KEY,
+                reservation_id INTEGER NOT NULL,
+                service_id INTEGER NOT NULL,
+                order_time TIMESTAMP NOT NULL,
+                order_status VARCHAR(255) NOT NULL,
+                order_quantity INTEGER NOT NULL,
+                order_price FLOAT NOT NULL,
+                description TEXT NOT NULL,
+                FOREIGN KEY (reservation_id) REFERENCES reservations(reservation_id) ON DELETE CASCADE,
+                FOREIGN KEY (service_id) REFERENCES guest_service(service_id) ON DELETE CASCADE
+            );
         `,
+    },
+    guestService: {
+        getGuestServices: `
+            SELECT * FROM guest_service
+        `,
+        getGuestServiceById: `
+            SELECT * FROM guest_service WHERE service_id = $1
+        `,
+        addGuestService: `
+            INSERT INTO guest_service (service_description, service_price, service_quantity)
+            VALUES ($1, $2, $3)
+            RETURNING *
+        `,
+        updateGuestService: `
+            UPDATE guest_service
+            SET service_description = $1, service_price = $2, service_quantity = $3
+            WHERE service_id = $4
+            RETURNING *
+        `,
+        deleteGuestService: `
+            DELETE FROM guest_service
+            WHERE service_id = $1
+        `,
+        checkGuestServiceExistsById: `
+            SELECT EXISTS(SELECT 1 FROM guest_service WHERE service_id = $1)
+        `,
+        searchGuestService: `
+            SELECT * FROM guest_service WHERE service_description ILIKE '%$1#%'
+        `
+    },
+    guestServiceOrder: {
+        getGuestServices: `
+            SELECT * FROM guest_service_order
+        `,
+        getGuestServiceById: `
+            SELECT * FROM guest_service_order WHERE order_id = $1
+        `,
+        addGuestService: `
+            INSERT INTO guest_service_order (reservation_id, service_id, order_time, order_status, order_price, description, order_quantity)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING *
+        `,
+        updateGuestService: `
+            UPDATE guest_service_order
+            SET reservation_id = $1, service_id = $2, order_time = $3, order_status = $4, order_price = $5, description = $6, order_quantity = $7
+            WHERE order_id = $8
+            RETURNING *
+        `,
+        deleteGuestService: `
+            DELETE FROM guest_service_order
+            WHERE order_id = $1
+        `,
+        checkGuestServiceExistsById: `
+            SELECT EXISTS(SELECT 1 FROM guest_service_order WHERE order_id = $1)
+        `
     },
     tickets: {
         getTicketById: `

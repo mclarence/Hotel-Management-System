@@ -61,6 +61,9 @@ export const verifyLogin = (dispatch: ThunkDispatch<any, any, any>, navigate: Na
                         severity: 'warning'
                     }))
                 } else {
+                    if (previousPage !== '/login') {
+                        dispatch(appStateSlice.actions.setLastPageVisited(previousPage));
+                    }
                     return response.json();
                 }
             })
