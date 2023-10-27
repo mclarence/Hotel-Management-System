@@ -133,34 +133,38 @@ const db_1 = tslib_1.__importDefault(__webpack_require__(10));
 const express_1 = tslib_1.__importDefault(__webpack_require__(14));
 const usersRoute_1 = tslib_1.__importDefault(__webpack_require__(15));
 const roomsRoute_1 = __webpack_require__(24);
-const path_1 = tslib_1.__importDefault(__webpack_require__(43));
-const users_1 = tslib_1.__importDefault(__webpack_require__(44));
-const roles_1 = tslib_1.__importDefault(__webpack_require__(45));
-const tokens_1 = tslib_1.__importDefault(__webpack_require__(46));
-const authentication_1 = tslib_1.__importDefault(__webpack_require__(47));
-const authorization_1 = tslib_1.__importDefault(__webpack_require__(48));
-const process = tslib_1.__importStar(__webpack_require__(50));
+const path_1 = tslib_1.__importDefault(__webpack_require__(45));
+const users_1 = tslib_1.__importDefault(__webpack_require__(46));
+const roles_1 = tslib_1.__importDefault(__webpack_require__(47));
+const tokens_1 = tslib_1.__importDefault(__webpack_require__(48));
+const authentication_1 = tslib_1.__importDefault(__webpack_require__(49));
+const authorization_1 = tslib_1.__importDefault(__webpack_require__(50));
+const process = tslib_1.__importStar(__webpack_require__(52));
 // hash the password
 const hashPassword_1 = tslib_1.__importDefault(__webpack_require__(17));
-const rolesRoute_1 = tslib_1.__importDefault(__webpack_require__(51));
-const logsRoute_1 = tslib_1.__importDefault(__webpack_require__(52));
-const logs_1 = tslib_1.__importDefault(__webpack_require__(53));
-const guests_1 = tslib_1.__importDefault(__webpack_require__(54));
-const guestsRoute_1 = tslib_1.__importDefault(__webpack_require__(55));
-const reservations_1 = __webpack_require__(56);
-const reservationsRoute_1 = __webpack_require__(57);
-const rooms_1 = __webpack_require__(61);
-const paymentMethods_1 = __webpack_require__(62);
-const paymentMethodRoute_1 = __webpack_require__(63);
-const transaction_1 = __webpack_require__(65);
-const transactionsRoute_1 = __webpack_require__(66);
-const calendar_1 = __webpack_require__(67);
-const calendarRoute_1 = __webpack_require__(68);
-const tickets_1 = __webpack_require__(69);
-const ticketsRoute_1 = __webpack_require__(70);
-const logEvent_1 = __webpack_require__(71);
+const rolesRoute_1 = tslib_1.__importDefault(__webpack_require__(53));
+const logsRoute_1 = tslib_1.__importDefault(__webpack_require__(54));
+const logs_1 = tslib_1.__importDefault(__webpack_require__(55));
+const guests_1 = tslib_1.__importDefault(__webpack_require__(56));
+const guestsRoute_1 = tslib_1.__importDefault(__webpack_require__(57));
+const reservations_1 = __webpack_require__(58);
+const reservationsRoute_1 = __webpack_require__(59);
+const rooms_1 = __webpack_require__(63);
+const paymentMethods_1 = __webpack_require__(64);
+const paymentMethodRoute_1 = __webpack_require__(65);
+const transaction_1 = __webpack_require__(67);
+const transactionsRoute_1 = __webpack_require__(68);
+const calendar_1 = __webpack_require__(69);
+const calendarRoute_1 = __webpack_require__(70);
+const tickets_1 = __webpack_require__(71);
+const ticketsRoute_1 = __webpack_require__(72);
+const logEvent_1 = __webpack_require__(73);
 const sendResponse_1 = tslib_1.__importDefault(__webpack_require__(20));
 const strings_1 = tslib_1.__importDefault(__webpack_require__(16));
+const guestServiceOrders_1 = __webpack_require__(74);
+const guestService_1 = __webpack_require__(75);
+const guestServiceRoute_1 = tslib_1.__importDefault(__webpack_require__(76));
+const guestServiceOrderRoute_1 = tslib_1.__importDefault(__webpack_require__(77));
 const createDefaultRoleAndAdmin = (rolesDAO, usersDAO) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     const DEFAULT_ROLE_ID = 1;
     const DEFAULT_UID = 1;
@@ -215,7 +219,9 @@ const createDefaultRoleAndAdmin = (rolesDAO, usersDAO) => tslib_1.__awaiter(void
 });
 const startServer = (serverOptions) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
     logger_1.logger.info("Starting server");
+    // Create the database
     const db = (0, db_1.default)(serverOptions);
+    // Test the connection
     yield db
         .testConnection()
         .then(() => {
@@ -226,10 +232,12 @@ const startServer = (serverOptions) => tslib_1.__awaiter(void 0, void 0, void 0,
         logger_1.logger.fatal(err);
         process.exit(1);
     });
+    /**
+     * Initialize DAOs
+     */
     const usersDAO = (0, users_1.default)(db.db);
     const rolesDAO = (0, roles_1.default)(db.db);
     const logsDAO = (0, logs_1.default)(db.db);
-    const eventLogger = (0, logEvent_1.makeEventLogger)(logsDAO);
     const tokenRevocationListDAO = (0, tokens_1.default)(db.db);
     const calendarDAO = (0, calendar_1.makeNotesDAO)(db.db);
     const guestsDAO = (0, guests_1.default)(db.db);
@@ -238,12 +246,21 @@ const startServer = (serverOptions) => tslib_1.__awaiter(void 0, void 0, void 0,
     const paymentMethodsDAO = (0, paymentMethods_1.makePaymentMethodsDAO)(db.db);
     const transactionsDAO = (0, transaction_1.makeTransactionsDAO)(db.db);
     const ticketsDAO = (0, tickets_1.makeTicketsDAO)(db.db);
+    const guestServiceOrdersDAO = (0, guestServiceOrders_1.makeGuestServiceOrderDAO)(db.db);
+    const guestServicesDAO = (0, guestService_1.makeGuestServiceDAO)(db.db);
+    const eventLogger = (0, logEvent_1.makeEventLogger)(logsDAO);
     yield createDefaultRoleAndAdmin(rolesDAO, usersDAO);
+    /**
+     * Initialize middleware
+     */
     const authenticationMiddleware = (0, authentication_1.default)(serverOptions.jwt.secret, tokenRevocationListDAO);
     const authorizationMiddleware = (0, authorization_1.default)(rolesDAO);
     const app = (0, express_1.default)();
     app.use(express_1.default.json());
     app.use(logger_1.expressLogger);
+    /**
+     * Initialize routes
+     */
     const usersRoute = (0, usersRoute_1.default)(usersDAO, rolesDAO, tokenRevocationListDAO, authenticationMiddleware, authorizationMiddleware, eventLogger, serverOptions.jwt.secret);
     const rolesRoute = (0, rolesRoute_1.default)(rolesDAO, eventLogger, authenticationMiddleware, authorizationMiddleware);
     const guestsRoute = (0, guestsRoute_1.default)(guestsDAO, reservationsDAO, eventLogger, authenticationMiddleware, authorizationMiddleware);
@@ -254,6 +271,11 @@ const startServer = (serverOptions) => tslib_1.__awaiter(void 0, void 0, void 0,
     const calendarRoute = (0, calendarRoute_1.makeCalendarRoute)(calendarDAO, eventLogger, authenticationMiddleware, authorizationMiddleware);
     const transactionsRoute = (0, transactionsRoute_1.makeTransactionsRoute)(transactionsDAO, guestsDAO, eventLogger, authenticationMiddleware, authorizationMiddleware);
     const ticketsRoute = (0, ticketsRoute_1.makeTicketsRoute)(ticketsDAO, usersDAO, eventLogger, authenticationMiddleware, authorizationMiddleware);
+    const guestServicesRoute = (0, guestServiceRoute_1.default)(guestServicesDAO, eventLogger, authenticationMiddleware, authorizationMiddleware);
+    const gestServicesOrderRoute = (0, guestServiceOrderRoute_1.default)(guestServiceOrdersDAO, reservationsDAO, guestServicesDAO, eventLogger, authenticationMiddleware, authorizationMiddleware);
+    /**
+     * Initialize routes
+     */
     app.use("/api/users", usersRoute.router);
     app.use("/api/roles", rolesRoute.router);
     app.use("/api/rooms", roomsRoute.router);
@@ -265,6 +287,8 @@ const startServer = (serverOptions) => tslib_1.__awaiter(void 0, void 0, void 0,
     app.use("/api/payment-methods", paymentMethodsRoute.router);
     app.use("/api/transactions", transactionsRoute.router);
     app.use("/api/tickets", ticketsRoute.router);
+    app.use("/api/guest-services", guestServicesRoute.router);
+    app.use("/api/guest-service-orders", gestServicesOrderRoute.router);
     app.use(express_1.default.static(path_1.default.join(__dirname, "assets")));
     // catch all errors
     app.use((err, req, res, next) => {
@@ -537,7 +561,80 @@ const queries = {
                 FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id) ON DELETE CASCADE,
                 FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
             );
+            CREATE TABLE IF NOT EXISTS guest_service (
+                service_id SERIAL PRIMARY KEY,
+                service_description VARCHAR(255) NOT NULL,
+                service_price FLOAT NOT NULL,
+                service_quantity INTEGER NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS guest_service_order (
+                order_id SERIAL PRIMARY KEY,
+                reservation_id INTEGER NOT NULL,
+                service_id INTEGER NOT NULL,
+                order_time TIMESTAMP NOT NULL,
+                order_status VARCHAR(255) NOT NULL,
+                order_quantity INTEGER NOT NULL,
+                order_price FLOAT NOT NULL,
+                description TEXT NOT NULL,
+                FOREIGN KEY (reservation_id) REFERENCES reservations(reservation_id) ON DELETE CASCADE,
+                FOREIGN KEY (service_id) REFERENCES guest_service(service_id) ON DELETE CASCADE
+            );
         `,
+    },
+    guestService: {
+        getGuestServices: `
+            SELECT * FROM guest_service
+        `,
+        getGuestServiceById: `
+            SELECT * FROM guest_service WHERE service_id = $1
+        `,
+        addGuestService: `
+            INSERT INTO guest_service (service_description, service_price, service_quantity)
+            VALUES ($1, $2, $3)
+            RETURNING *
+        `,
+        updateGuestService: `
+            UPDATE guest_service
+            SET service_description = $1, service_price = $2, service_quantity = $3
+            WHERE service_id = $4
+            RETURNING *
+        `,
+        deleteGuestService: `
+            DELETE FROM guest_service
+            WHERE service_id = $1
+        `,
+        checkGuestServiceExistsById: `
+            SELECT EXISTS(SELECT 1 FROM guest_service WHERE service_id = $1)
+        `,
+        searchGuestService: `
+            SELECT * FROM guest_service WHERE service_description ILIKE '%$1#%'
+        `
+    },
+    guestServiceOrder: {
+        getGuestServices: `
+            SELECT * FROM guest_service_order
+        `,
+        getGuestServiceById: `
+            SELECT * FROM guest_service_order WHERE order_id = $1
+        `,
+        addGuestService: `
+            INSERT INTO guest_service_order (reservation_id, service_id, order_time, order_status, order_price, description, order_quantity)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING *
+        `,
+        updateGuestService: `
+            UPDATE guest_service_order
+            SET reservation_id = $1, service_id = $2, order_time = $3, order_status = $4, order_price = $5, description = $6, order_quantity = $7
+            WHERE order_id = $8
+            RETURNING *
+        `,
+        deleteGuestService: `
+            DELETE FROM guest_service_order
+            WHERE order_id = $1
+        `,
+        checkGuestServiceExistsById: `
+            SELECT EXISTS(SELECT 1 FROM guest_service_order WHERE order_id = $1)
+        `
     },
     tickets: {
         getTicketById: `
@@ -1407,6 +1504,16 @@ const strings = {
             invalidTransactionId: (transactionId) => `Invalid transaction id: ${transactionId}`,
             transactionNotFound: (transactionId) => `Transaction with id ${transactionId} not found`,
         },
+        guestService: {
+            invalidServiceId: (serviceId) => `Invalid service ID: ${serviceId}`,
+            serviceNotFound: (serviceId) => `Guest service with ID ${serviceId} not found`,
+        },
+        guestServiceOrder: {
+            invalidOrderId: (orderId) => `Invalid order ID: ${orderId}`,
+            orderNotFound: (orderId) => `Guest service order with ID ${orderId} not found`,
+            reservationOrServiceNotFound: "The specified reservation or service does not exist",
+            serviceNotEnoughQuantity: "The specified service does not have enough quantity",
+        }
     }
 };
 exports["default"] = strings;
@@ -1518,6 +1625,12 @@ var LogEventTypes;
     LogEventTypes["TICKET_UPDATE"] = "TICKET_UPDATE";
     LogEventTypes["TICKET_DELETE"] = "TICKET_DELETE";
     LogEventTypes["TICKET_COMMENT_CREATE"] = "TICKET_COMMENT_CREATE";
+    LogEventTypes["GUEST_SERVICE_ADD"] = "GUEST_SERVICE_ADD";
+    LogEventTypes["GUEST_SERVICE_UPDATE"] = "GUEST_SERVICE_UPDATE";
+    LogEventTypes["GUEST_SERVICE_DELETE"] = "GUEST_SERVICE_DELETE";
+    LogEventTypes["GUEST_SERVICE_ORDER_ADD"] = "GUEST_SERVICE_ORDER_ADD";
+    LogEventTypes["GUEST_SERVICE_ORDER_UPDATE"] = "GUEST_SERVICE_ORDER_UPDATE";
+    LogEventTypes["GUEST_SERVICE_ORDER_DELETE"] = "GUEST_SERVICE_ORDER_DELETE";
 })(LogEventTypes || (exports.LogEventTypes = LogEventTypes = {}));
 
 
@@ -1855,6 +1968,8 @@ tslib_1.__exportStar(__webpack_require__(39), exports);
 tslib_1.__exportStar(__webpack_require__(40), exports);
 tslib_1.__exportStar(__webpack_require__(41), exports);
 tslib_1.__exportStar(__webpack_require__(42), exports);
+tslib_1.__exportStar(__webpack_require__(43), exports);
+tslib_1.__exportStar(__webpack_require__(44), exports);
 
 
 /***/ }),
@@ -2012,12 +2127,28 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 /***/ }),
 /* 43 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+/* 44 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+/* 45 */
 /***/ ((module) => {
 
 module.exports = require("path");
 
 /***/ }),
-/* 44 */
+/* 46 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2194,7 +2325,7 @@ exports["default"] = makeUsersDAO;
 
 
 /***/ }),
-/* 45 */
+/* 47 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2299,7 +2430,7 @@ exports["default"] = exports.makeRolesDAO;
 
 
 /***/ }),
-/* 46 */
+/* 48 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2334,7 +2465,7 @@ exports["default"] = makeTokenRevocationListDAO;
 
 
 /***/ }),
-/* 47 */
+/* 49 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2394,14 +2525,14 @@ exports["default"] = makeAuthenticationMiddleware;
 
 
 /***/ }),
-/* 48 */
+/* 50 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(1);
 const strings_1 = tslib_1.__importDefault(__webpack_require__(16));
-const checkPermissions_1 = tslib_1.__importDefault(__webpack_require__(49));
+const checkPermissions_1 = tslib_1.__importDefault(__webpack_require__(51));
 /**
  * Authorization middleware, handles authorization, checks if the user has the required permission.
  * @param rolesDAO
@@ -2441,7 +2572,7 @@ exports["default"] = makeAuthorizationMiddleware;
 
 
 /***/ }),
-/* 49 */
+/* 51 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -2476,13 +2607,13 @@ exports["default"] = makePermissionChecker;
 
 
 /***/ }),
-/* 50 */
+/* 52 */
 /***/ ((module) => {
 
 module.exports = require("process");
 
 /***/ }),
-/* 51 */
+/* 53 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2703,7 +2834,7 @@ exports["default"] = makeRolesRoute;
 
 
 /***/ }),
-/* 52 */
+/* 54 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2748,7 +2879,7 @@ exports["default"] = makeLogsRoute;
 
 
 /***/ }),
-/* 53 */
+/* 55 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2802,7 +2933,7 @@ exports["default"] = makeLogsDAO;
 
 
 /***/ }),
-/* 54 */
+/* 56 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -2951,7 +3082,7 @@ exports["default"] = makeGuestDAO;
 
 
 /***/ }),
-/* 55 */
+/* 57 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -3250,7 +3381,7 @@ exports["default"] = makeGuestsRoute;
 
 
 /***/ }),
-/* 56 */
+/* 58 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -3392,7 +3523,7 @@ exports.makeReservationDAO = makeReservationDAO;
 
 
 /***/ }),
-/* 57 */
+/* 59 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -3403,11 +3534,11 @@ const express_1 = tslib_1.__importDefault(__webpack_require__(14));
 const sendResponse_1 = tslib_1.__importDefault(__webpack_require__(20));
 const http_status_codes_1 = __webpack_require__(21);
 const joi_1 = tslib_1.__importDefault(__webpack_require__(22));
-const ReservationStatuses_1 = __webpack_require__(58);
+const ReservationStatuses_1 = __webpack_require__(60);
 const LogEventTypes_1 = __webpack_require__(23);
 const strings_1 = tslib_1.__importDefault(__webpack_require__(16));
-const dayjs = __webpack_require__(59);
-const utc = __webpack_require__(60);
+const dayjs = __webpack_require__(61);
+const utc = __webpack_require__(62);
 dayjs.extend(utc);
 /**
  * Reservations Route
@@ -3763,7 +3894,7 @@ exports.makeReservationsRoute = makeReservationsRoute;
 
 
 /***/ }),
-/* 58 */
+/* 60 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -3780,19 +3911,19 @@ var ReservationStatuses;
 
 
 /***/ }),
-/* 59 */
+/* 61 */
 /***/ ((module) => {
 
 module.exports = require("dayjs");
 
 /***/ }),
-/* 60 */
+/* 62 */
 /***/ ((module) => {
 
 module.exports = require("dayjs/plugin/utc");
 
 /***/ }),
-/* 61 */
+/* 63 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -3925,7 +4056,7 @@ exports.makeRoomsDAO = makeRoomsDAO;
 
 
 /***/ }),
-/* 62 */
+/* 64 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -4008,7 +4139,7 @@ exports.makePaymentMethodsDAO = makePaymentMethodsDAO;
 
 
 /***/ }),
-/* 63 */
+/* 65 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -4019,7 +4150,7 @@ const express_1 = tslib_1.__importDefault(__webpack_require__(14));
 const sendResponse_1 = tslib_1.__importDefault(__webpack_require__(20));
 const http_status_codes_1 = __webpack_require__(21);
 const joi_1 = tslib_1.__importDefault(__webpack_require__(22));
-const PaymentMethodTypes_1 = __webpack_require__(64);
+const PaymentMethodTypes_1 = __webpack_require__(66);
 const LogEventTypes_1 = __webpack_require__(23);
 const strings_1 = tslib_1.__importDefault(__webpack_require__(16));
 /**
@@ -4212,7 +4343,7 @@ exports.makePaymentMethodRoute = makePaymentMethodRoute;
 
 
 /***/ }),
-/* 64 */
+/* 66 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -4226,7 +4357,7 @@ var PaymentMethodTypes;
 
 
 /***/ }),
-/* 65 */
+/* 67 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -4310,7 +4441,7 @@ exports.makeTransactionsDAO = makeTransactionsDAO;
 
 
 /***/ }),
-/* 66 */
+/* 68 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -4323,7 +4454,7 @@ const http_status_codes_1 = __webpack_require__(21);
 const strings_1 = tslib_1.__importDefault(__webpack_require__(16));
 const joi_1 = tslib_1.__importDefault(__webpack_require__(22));
 const LogEventTypes_1 = __webpack_require__(23);
-const dayjs_1 = tslib_1.__importDefault(__webpack_require__(59));
+const dayjs_1 = tslib_1.__importDefault(__webpack_require__(61));
 /**
  * Transaction Route
  * @param transactionsDAO - transactions DAO
@@ -4571,7 +4702,7 @@ exports.makeTransactionsRoute = makeTransactionsRoute;
 
 
 /***/ }),
-/* 67 */
+/* 69 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -4638,7 +4769,7 @@ exports.makeNotesDAO = makeNotesDAO;
 
 
 /***/ }),
-/* 68 */
+/* 70 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -4651,8 +4782,8 @@ const http_status_codes_1 = __webpack_require__(21);
 const strings_1 = tslib_1.__importDefault(__webpack_require__(16));
 const joi_1 = tslib_1.__importDefault(__webpack_require__(22));
 const LogEventTypes_1 = __webpack_require__(23);
-const dayjs_1 = tslib_1.__importDefault(__webpack_require__(59));
-__webpack_require__(60);
+const dayjs_1 = tslib_1.__importDefault(__webpack_require__(61));
+__webpack_require__(62);
 /**
  * Calendar Route
  * @param calendarDAO - calendar DAO
@@ -4823,7 +4954,7 @@ exports.makeCalendarRoute = makeCalendarRoute;
 
 
 /***/ }),
-/* 69 */
+/* 71 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -4934,7 +5065,7 @@ exports.makeTicketsDAO = makeTicketsDAO;
 
 
 /***/ }),
-/* 70 */
+/* 72 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -4947,7 +5078,7 @@ const http_status_codes_1 = __webpack_require__(21);
 const joi_1 = tslib_1.__importDefault(__webpack_require__(22));
 const models_1 = __webpack_require__(25);
 const LogEventTypes_1 = __webpack_require__(23);
-const dayjs_1 = tslib_1.__importDefault(__webpack_require__(59));
+const dayjs_1 = tslib_1.__importDefault(__webpack_require__(61));
 const strings_1 = tslib_1.__importDefault(__webpack_require__(16));
 const makeTicketsRoute = (ticketsDAO, usersDAO, log, authentication, authorization) => {
     const router = express_1.default.Router();
@@ -5267,7 +5398,7 @@ exports.makeTicketsRoute = makeTicketsRoute;
 
 
 /***/ }),
-/* 71 */
+/* 73 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -5303,7 +5434,612 @@ exports.makeEventLogger = makeEventLogger;
 
 
 /***/ }),
-/* 72 */
+/* 74 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.makeGuestServiceOrderDAO = void 0;
+const tslib_1 = __webpack_require__(1);
+const pg_promise_1 = tslib_1.__importDefault(__webpack_require__(13));
+const queries_1 = tslib_1.__importDefault(__webpack_require__(11));
+var QueryResultError = pg_promise_1.default.errors.QueryResultError;
+const makeGuestServiceOrderDAO = (db) => {
+    const getGuestServiceOrders = () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        return yield db.any(queries_1.default.guestServiceOrder.getGuestServices);
+    });
+    const getGuestServiceOrderById = (id) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        try {
+            return yield db.one(queries_1.default.guestServiceOrder.getGuestServiceById, [id]);
+        }
+        catch (e) {
+            if (e instanceof QueryResultError && e.code === pg_promise_1.default.errors.queryResultErrorCode.noData) {
+                return null;
+            }
+            else {
+                throw e;
+            }
+        }
+    });
+    const addGuestServiceOrder = (guestServiceOrder) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        return yield db.one(queries_1.default.guestServiceOrder.addGuestService, [
+            guestServiceOrder.reservationId,
+            guestServiceOrder.serviceId,
+            guestServiceOrder.orderTime,
+            guestServiceOrder.orderStatus,
+            guestServiceOrder.orderPrice,
+            guestServiceOrder.description,
+            guestServiceOrder.orderQuantity
+        ]);
+    });
+    const updateGuestServiceOrder = (guestServiceOrder) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        return yield db.one(queries_1.default.guestServiceOrder.updateGuestService, [
+            guestServiceOrder.reservationId,
+            guestServiceOrder.serviceId,
+            guestServiceOrder.orderTime,
+            guestServiceOrder.orderStatus,
+            guestServiceOrder.orderPrice,
+            guestServiceOrder.orderQuantity,
+            guestServiceOrder.description
+        ]);
+    });
+    const deleteGuestServiceOrder = (guestServiceId) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        return yield db.none(queries_1.default.guestServiceOrder.deleteGuestService, [guestServiceId]);
+    });
+    const checkGuestServiceOrderExistsById = (id) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        const guestService = yield db.one(queries_1.default.guestServiceOrder.checkGuestServiceExistsById, [id]);
+        return guestService.exists;
+    });
+    return {
+        getGuestServiceOrders,
+        getGuestServiceOrderById,
+        addGuestServiceOrder,
+        updateGuestServiceOrder,
+        deleteGuestServiceOrder,
+        checkGuestServiceOrderExistsById
+    };
+};
+exports.makeGuestServiceOrderDAO = makeGuestServiceOrderDAO;
+
+
+/***/ }),
+/* 75 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.makeGuestServiceDAO = void 0;
+const tslib_1 = __webpack_require__(1);
+const pg_promise_1 = tslib_1.__importDefault(__webpack_require__(13));
+const queries_1 = tslib_1.__importDefault(__webpack_require__(11));
+var QueryResultError = pg_promise_1.default.errors.QueryResultError;
+const makeGuestServiceDAO = (db) => {
+    const getGuestServices = () => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        return yield db.any(queries_1.default.guestService.getGuestServices);
+    });
+    const getGuestServiceById = (id) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        try {
+            return yield db.one(queries_1.default.guestService.getGuestServiceById, [id]);
+        }
+        catch (e) {
+            if (e instanceof QueryResultError && e.code === pg_promise_1.default.errors.queryResultErrorCode.noData) {
+                return null;
+            }
+            else {
+                throw e;
+            }
+        }
+    });
+    const addGuestService = (guestService) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        return yield db.one(queries_1.default.guestService.addGuestService, [
+            guestService.serviceDescription,
+            guestService.servicePrice,
+            guestService.serviceQuantity,
+        ]);
+    });
+    const updateGuestService = (guestService) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        return yield db.one(queries_1.default.guestService.updateGuestService, [
+            guestService.serviceDescription,
+            guestService.servicePrice,
+            guestService.serviceQuantity,
+            guestService.serviceId,
+        ]);
+    });
+    const deleteGuestService = (serviceId) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        yield db.none(queries_1.default.guestService.deleteGuestService, [serviceId]);
+    });
+    const checkGuestServiceExistsById = (id) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        const guestService = yield db.one(queries_1.default.guestService.checkGuestServiceExistsById, [id]);
+        return guestService.exists;
+    });
+    const searchGuestServices = (query) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        return yield db.any(queries_1.default.guestService.searchGuestService, [query]);
+    });
+    return {
+        getGuestServices,
+        getGuestServiceById,
+        addGuestService,
+        updateGuestService,
+        deleteGuestService,
+        checkGuestServiceExistsById,
+        searchGuestServices,
+    };
+};
+exports.makeGuestServiceDAO = makeGuestServiceDAO;
+
+
+/***/ }),
+/* 76 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.makeGuestServicesRoute = void 0;
+const tslib_1 = __webpack_require__(1);
+const express_1 = tslib_1.__importDefault(__webpack_require__(14));
+const sendResponse_1 = tslib_1.__importDefault(__webpack_require__(20));
+const http_status_codes_1 = __webpack_require__(21);
+const joi_1 = tslib_1.__importDefault(__webpack_require__(22));
+const strings_1 = tslib_1.__importDefault(__webpack_require__(16));
+const LogEventTypes_1 = __webpack_require__(23);
+const makeGuestServicesRoute = (guestServiceDAO, log, authentication, authorization) => {
+    const { getGuestServices, getGuestServiceById, addGuestService, updateGuestService, deleteGuestService, checkGuestServiceExistsById, searchGuestServices, } = guestServiceDAO;
+    const router = express_1.default.Router();
+    router.get("/", authentication, authorization("guestServices.read"), (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const guestServices = yield getGuestServices();
+            return (0, sendResponse_1.default)(res, {
+                success: true,
+                statusCode: http_status_codes_1.StatusCodes.OK,
+                message: strings_1.default.api.generic.success,
+                data: guestServices,
+            });
+        }
+        catch (e) {
+            next(e);
+        }
+    }));
+    // Function to search guest services by service description
+    router.get("/search", authentication, authorization('guestServices.read'), (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const query = req.query.q;
+            if (query === undefined || query === null || query === "") {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+                    message: strings_1.default.api.generic.queryNotProvided,
+                    data: null
+                });
+            }
+            const services = yield searchGuestServices(query.toString());
+            return (0, sendResponse_1.default)(res, {
+                success: true,
+                statusCode: http_status_codes_1.StatusCodes.OK,
+                message: strings_1.default.api.generic.success,
+                data: services
+            });
+        }
+        catch (e) {
+            next(e);
+        }
+    }));
+    router.get("/:serviceId", authentication, authorization("guestServices.read"), (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const serviceId = parseInt(req.params.serviceId);
+            if (isNaN(serviceId)) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+                    message: strings_1.default.api.guestService.invalidServiceId(serviceId),
+                    data: null,
+                });
+            }
+            const guestService = yield getGuestServiceById(serviceId);
+            if (!guestService) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.NOT_FOUND,
+                    message: strings_1.default.api.guestService.serviceNotFound(serviceId),
+                    data: null,
+                });
+            }
+            return (0, sendResponse_1.default)(res, {
+                success: true,
+                statusCode: http_status_codes_1.StatusCodes.OK,
+                message: strings_1.default.api.generic.success,
+                data: guestService,
+            });
+        }
+        catch (e) {
+            next(e);
+        }
+    }));
+    router.post("/add", authentication, authorization("guestServices.create"), (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const schema = joi_1.default.object({
+                serviceDescription: joi_1.default.string().required(),
+                servicePrice: joi_1.default.number().required().min(0),
+                serviceQuantity: joi_1.default.number().required().min(-1),
+            });
+            const { error } = schema.validate(req.body);
+            if (error) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+                    message: error.message,
+                    data: error.message,
+                });
+            }
+            const newGuestService = {
+                serviceDescription: req.body.serviceDescription,
+                servicePrice: req.body.servicePrice,
+                serviceQuantity: req.body.serviceQuantity,
+            };
+            const guestService = yield addGuestService(newGuestService);
+            log(LogEventTypes_1.LogEventTypes.GUEST_SERVICE_ADD, req.userId, "Added a new guest service with id: " + guestService.serviceId);
+            return (0, sendResponse_1.default)(res, {
+                success: true,
+                statusCode: http_status_codes_1.StatusCodes.CREATED,
+                message: strings_1.default.api.generic.success,
+                data: guestService,
+            });
+        }
+        catch (e) {
+            next(e);
+        }
+    }));
+    router.patch("/:serviceId", authentication, authorization("guestServices.update"), (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const serviceId = parseInt(req.params.serviceId);
+            if (isNaN(serviceId)) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+                    message: strings_1.default.api.guestService.invalidServiceId(serviceId),
+                    data: null,
+                });
+            }
+            const exists = yield checkGuestServiceExistsById(serviceId);
+            if (!exists) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.NOT_FOUND,
+                    message: strings_1.default.api.guestService.serviceNotFound(serviceId),
+                    data: null,
+                });
+            }
+            const schema = joi_1.default.object({
+                serviceDescription: joi_1.default.string().required(),
+                servicePrice: joi_1.default.number().required().min(0),
+                serviceQuantity: joi_1.default.number().required().min(-1),
+            });
+            const { error } = schema.validate(req.body);
+            if (error) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+                    message: error.message,
+                    data: error.message,
+                });
+            }
+            const updatedGuestService = {
+                serviceId: serviceId,
+                serviceDescription: req.body.serviceDescription,
+                servicePrice: req.body.servicePrice,
+                serviceQuantity: req.body.serviceQuantity,
+            };
+            const guestService = yield updateGuestService(updatedGuestService);
+            log(LogEventTypes_1.LogEventTypes.GUEST_SERVICE_UPDATE, req.userId, "Updated guest service with id: " + serviceId);
+            return (0, sendResponse_1.default)(res, {
+                success: true,
+                statusCode: http_status_codes_1.StatusCodes.OK,
+                message: strings_1.default.api.generic.success,
+                data: guestService,
+            });
+        }
+        catch (e) {
+            next(e);
+        }
+    }));
+    router.delete("/:serviceId", authentication, authorization("guestServices.delete"), (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const serviceId = parseInt(req.params.serviceId);
+            if (isNaN(serviceId)) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+                    message: strings_1.default.api.guestService.invalidServiceId(serviceId),
+                    data: null,
+                });
+            }
+            const exists = yield checkGuestServiceExistsById(serviceId);
+            if (!exists) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.NOT_FOUND,
+                    message: strings_1.default.api.guestService.serviceNotFound(serviceId),
+                    data: null,
+                });
+            }
+            yield deleteGuestService(serviceId);
+            log(LogEventTypes_1.LogEventTypes.GUEST_SERVICE_DELETE, req.userId, "Deleted guest service with id: " + serviceId);
+            return (0, sendResponse_1.default)(res, {
+                success: true,
+                statusCode: http_status_codes_1.StatusCodes.OK,
+                message: strings_1.default.api.generic.success,
+                data: null,
+            });
+        }
+        catch (e) {
+            next(e);
+        }
+    }));
+    return {
+        router,
+    };
+};
+exports.makeGuestServicesRoute = makeGuestServicesRoute;
+exports["default"] = exports.makeGuestServicesRoute;
+
+
+/***/ }),
+/* 77 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const tslib_1 = __webpack_require__(1);
+const express_1 = tslib_1.__importDefault(__webpack_require__(14));
+const sendResponse_1 = tslib_1.__importDefault(__webpack_require__(20));
+const http_status_codes_1 = __webpack_require__(21);
+const joi_1 = tslib_1.__importDefault(__webpack_require__(22));
+const strings_1 = tslib_1.__importDefault(__webpack_require__(16));
+const LogEventTypes_1 = __webpack_require__(23);
+const makeGuestServiceOrdersRoute = (guestServiceOrderDAO, reservationsDAO, guestServiceDAO, log, authentication, authorization) => {
+    const { getGuestServiceOrders, getGuestServiceOrderById, addGuestServiceOrder, updateGuestServiceOrder, deleteGuestServiceOrder, checkGuestServiceOrderExistsById, } = guestServiceOrderDAO;
+    const router = express_1.default.Router();
+    router.get("/", authentication, authorization("guestServiceOrders.read"), (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const guestServiceOrders = yield getGuestServiceOrders();
+            return (0, sendResponse_1.default)(res, {
+                success: true,
+                statusCode: http_status_codes_1.StatusCodes.OK,
+                message: strings_1.default.api.generic.success,
+                data: guestServiceOrders,
+            });
+        }
+        catch (e) {
+            next(e);
+        }
+    }));
+    router.get("/:orderId", authentication, authorization("guestServiceOrders.read"), (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const orderId = parseInt(req.params.orderId);
+            if (isNaN(orderId)) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+                    message: strings_1.default.api.guestServiceOrder.invalidOrderId(orderId),
+                    data: null,
+                });
+            }
+            const guestServiceOrder = yield getGuestServiceOrderById(orderId);
+            if (!guestServiceOrder) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.NOT_FOUND,
+                    message: strings_1.default.api.guestServiceOrder.orderNotFound(orderId),
+                    data: null,
+                });
+            }
+            return (0, sendResponse_1.default)(res, {
+                success: true,
+                statusCode: http_status_codes_1.StatusCodes.OK,
+                message: strings_1.default.api.generic.success,
+                data: guestServiceOrder,
+            });
+        }
+        catch (e) {
+            next(e);
+        }
+    }));
+    router.post("/add", authentication, authorization("guestServiceOrders.create"), (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const schema = joi_1.default.object({
+                reservationId: joi_1.default.number().required(),
+                orderTime: joi_1.default.date().required(),
+                orderStatus: joi_1.default.string().required(),
+                description: joi_1.default.string().optional().allow(null, ""),
+                serviceId: joi_1.default.number().required(),
+                orderPrice: joi_1.default.number().required(),
+                orderQuantity: joi_1.default.number().required()
+            });
+            const { error } = schema.validate(req.body);
+            if (error) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+                    message: error.message,
+                    data: error.message,
+                });
+            }
+            const reservationId = req.body.reservationId;
+            const serviceId = req.body.serviceId;
+            // Check if the reservation and service exist
+            const reservationExists = yield reservationsDAO.checkReservationExistsById(reservationId);
+            const service = yield guestServiceDAO.getGuestServiceById(serviceId);
+            if (service === null) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.NOT_FOUND,
+                    message: strings_1.default.api.guestService.serviceNotFound(serviceId),
+                    data: null,
+                });
+            }
+            if (!reservationExists) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.NOT_FOUND,
+                    message: strings_1.default.api.guestServiceOrder.reservationOrServiceNotFound,
+                    data: null,
+                });
+            }
+            // check the quantity of the service. -1 means unlimited
+            if (service.serviceQuantity !== -1) {
+                // check if the quantity is enough
+                if (service.serviceQuantity < parseInt(req.body.orderQuantity)) {
+                    return (0, sendResponse_1.default)(res, {
+                        success: false,
+                        statusCode: http_status_codes_1.StatusCodes.NOT_FOUND,
+                        message: strings_1.default.api.guestServiceOrder.serviceNotEnoughQuantity,
+                        data: null,
+                    });
+                }
+            }
+            const newGuestServiceOrder = {
+                orderPrice: req.body.orderPrice,
+                reservationId: reservationId,
+                orderTime: req.body.orderTime,
+                orderStatus: req.body.orderStatus,
+                description: req.body.description,
+                serviceId: serviceId,
+                orderQuantity: req.body.orderQuantity
+            };
+            const guestServiceOrder = yield addGuestServiceOrder(newGuestServiceOrder);
+            log(LogEventTypes_1.LogEventTypes.GUEST_SERVICE_ORDER_ADD, req.userId, "Added a new guest service order with id: " + guestServiceOrder.orderId);
+            // decrease the quantity of the service
+            if (service.serviceQuantity !== -1) {
+                const guestServiceItem = yield guestServiceDAO.getGuestServiceById(serviceId);
+                guestServiceItem.serviceQuantity -= parseInt(req.body.orderQuantity);
+                yield guestServiceDAO.updateGuestService(guestServiceItem);
+            }
+            return (0, sendResponse_1.default)(res, {
+                success: true,
+                statusCode: http_status_codes_1.StatusCodes.CREATED,
+                message: strings_1.default.api.generic.success,
+                data: guestServiceOrder,
+            });
+        }
+        catch (e) {
+            next(e);
+        }
+    }));
+    // router.patch("/:orderId", authentication, authorization("guestServiceOrders.update"), async (req, res, next) => {
+    //     try {
+    //         const orderId = parseInt(req.params.orderId);
+    //
+    //         if (isNaN(orderId)) {
+    //             return sendResponse(res, {
+    //                 success: false,
+    //                 statusCode: StatusCodes.BAD_REQUEST,
+    //                 message: strings.api.guestServiceOrder.invalidOrderId(orderId),
+    //                 data: null,
+    //             });
+    //         }
+    //
+    //         const exists = await checkGuestServiceOrderExistsById(orderId);
+    //
+    //         if (!exists) {
+    //             return sendResponse(res, {
+    //                 success: false,
+    //                 statusCode: StatusCodes.NOT_FOUND,
+    //                 message: strings.api.guestServiceOrder.orderNotFound(orderId),
+    //                 data: null,
+    //             });
+    //         }
+    //
+    //         const schema = Joi.object({
+    //             reservationId: Joi.number().required(),
+    //             orderTime: Joi.date().required(),
+    //             orderStatus: Joi.string().required(),
+    //             description: Joi.string().optional().allow(null, ""),
+    //             serviceId: Joi.number().required(),
+    //             orderPrice: Joi.number().required(),
+    //             orderQuantity: Joi.number().required()
+    //         });
+    //
+    //         const {error} = schema.validate(req.body);
+    //
+    //         if (error) {
+    //             return sendResponse(res, {
+    //                 success: false,
+    //                 statusCode: StatusCodes.BAD_REQUEST,
+    //                 message: error.message,
+    //                 data: error.message,
+    //             });
+    //         }
+    //
+    //         const updatedGuestServiceOrder = {
+    //             order_id: orderId,
+    //             orderPrice: req.body.orderPrice,
+    //             reservationId: req.body.reservation_id,
+    //             orderTime: req.body.orderTime,
+    //             orderStatus: req.body.orderStatus,
+    //             description: req.body.description,
+    //             serviceId: req.body.service_id,
+    //             orderQuantity: req.body.orderQuantity
+    //         };
+    //
+    //         const guestServiceOrder = await updateGuestServiceOrder(updatedGuestServiceOrder);
+    //
+    //         log(
+    //             LogEventTypes.GUEST_SERVICE_ORDER_UPDATE,
+    //             req.userId,
+    //             "Updated guest service order with id: " + orderId,
+    //         );
+    //
+    //         return sendResponse(res, {
+    //             success: true,
+    //             statusCode: StatusCodes.OK,
+    //             message: strings.api.generic.success,
+    //             data: guestServiceOrder,
+    //         });
+    //     } catch (e) {
+    //         next(e);
+    //     }
+    // });
+    router.delete("/:orderId", authentication, authorization("guestServiceOrders.delete"), (req, res, next) => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const orderId = parseInt(req.params.orderId);
+            if (isNaN(orderId)) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.BAD_REQUEST,
+                    message: strings_1.default.api.guestServiceOrder.invalidOrderId(orderId),
+                    data: null,
+                });
+            }
+            const exists = yield checkGuestServiceOrderExistsById(orderId);
+            if (!exists) {
+                return (0, sendResponse_1.default)(res, {
+                    success: false,
+                    statusCode: http_status_codes_1.StatusCodes.NOT_FOUND,
+                    message: strings_1.default.api.guestServiceOrder.orderNotFound(orderId),
+                    data: null,
+                });
+            }
+            yield deleteGuestServiceOrder(orderId);
+            log(LogEventTypes_1.LogEventTypes.GUEST_SERVICE_ORDER_DELETE, req.userId, "Deleted guest service order with id: " + orderId);
+            return (0, sendResponse_1.default)(res, {
+                success: true,
+                statusCode: http_status_codes_1.StatusCodes.OK,
+                message: strings_1.default.api.generic.success,
+                data: null,
+            });
+        }
+        catch (e) {
+            next(e);
+        }
+    }));
+    return {
+        router,
+    };
+};
+exports["default"] = makeGuestServiceOrdersRoute;
+
+
+/***/ }),
+/* 78 */
 /***/ ((module) => {
 
 module.exports = require("os");
@@ -5351,8 +6087,8 @@ const tslib_1 = __webpack_require__(1);
 const config_1 = tslib_1.__importDefault(__webpack_require__(2));
 const startServer_1 = tslib_1.__importDefault(__webpack_require__(5));
 const logger_1 = __webpack_require__(6);
-const os_1 = tslib_1.__importDefault(__webpack_require__(72));
-const path_1 = tslib_1.__importDefault(__webpack_require__(43));
+const os_1 = tslib_1.__importDefault(__webpack_require__(78));
+const path_1 = tslib_1.__importDefault(__webpack_require__(45));
 const config = (0, config_1.default)();
 exports.config = config;
 // check if command line arguments were passed
