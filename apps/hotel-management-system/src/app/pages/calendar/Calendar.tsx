@@ -117,7 +117,7 @@ export function Calendar() {
         <>
             <Grid container spacing={2}>
                 <Grid item xs={4}>
-                    <Paper>
+                    <Paper sx={{overflow: "scroll", overflowY: "hidden"}}>
                         <DateCalendar value={selectedDate} onChange={setSelectedDate} timezone={appState.timeZone}/>
                     </Paper>
                 </Grid>
