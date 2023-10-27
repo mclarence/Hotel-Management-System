@@ -36,7 +36,25 @@ const PageInstructions: any = {
     },
     "/rooms": () => {
         return (
-            "Rooms Page"
+            //"Rooms Page"
+            <>
+            <Stack direction={"column"} gap={2}>
+                <Typography variant={"h4"}>Plus Button</Typography>
+                <Typography variant={"body1"}>
+                - Location: bottom right
+                - To add new room for customer, require customer ID
+                </Typography>
+                <Typography variant={"h5"}>Detail Bar</Typography>
+                <Typography variant={"body1"}>
+                Show RoomID, code, price, description and status 
+                </Typography>
+                <Typography variant={"h5"}>Pencil & Bin button</Typography>
+                <Typography variant={"body1"}>
+                - To edit customer room, modify or change capacity and price 
+                - To delete or remove room.
+                </Typography>
+            </Stack>
+        </>
         )
     },
     "/tickets": () => {
@@ -79,7 +97,25 @@ const PageInstructions: any = {
     },
     "/guest-services": () => {
         return (
-            "Guest-Services Page"
+            //"Guest-Services Page"
+            <>
+            <Stack direction={"column"} gap={2}>
+                <Typography variant={"h4"}>Plus Button</Typography>
+                <Typography variant={"body1"}>
+                - Location: bottom rigt
+                - To add new guest service ex: inroom dinning, spa, massage, etc.
+                - Require ID, type of serivce and description
+                </Typography>
+                <Typography variant={"h5"}>Detail Bar</Typography>
+                <Typography variant={"body1"}>
+                Show OrderID, ReservationID, serviceID, Time, status, price, quantity and desription. 
+                </Typography>
+                <Typography variant={"h5"}>Pencil & Bin button</Typography>
+                <Typography variant={"body1"}> 
+                - To delete or remove service.
+                </Typography>
+            </Stack>
+        </>
         )
     },
     "/reservations": () => {
