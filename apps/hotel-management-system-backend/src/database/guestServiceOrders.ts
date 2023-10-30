@@ -53,8 +53,9 @@ export const makeGuestServiceOrderDAO = (db: IDatabase<any, any>): IGuestService
             guestServiceOrder.orderTime,
             guestServiceOrder.orderStatus,
             guestServiceOrder.orderPrice,
+            guestServiceOrder.description,
             guestServiceOrder.orderQuantity,
-            guestServiceOrder.description
+            guestServiceOrder.orderId
         ])
     }
 

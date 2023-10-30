@@ -137,6 +137,7 @@ export const EditGuestServiceDialog = (props: EditGuestServiceDialogProps) => {
                             min: -1
                         }}
                         onChange={(e) => setServiceQuantity(parseFloat(e.target.value))}
+                        helperText={"Enter -1 for unlimited quantity"}
                     />
                     <Button
                         variant={"contained"}

@@ -14,12 +14,15 @@ import AddGuestServiceOrderDialog from "./AddGuestServiceOrderDialog";
 import {RowDeleteButton} from "../../../../../util/components/RowDeleteButton";
 import {RowEditButton} from "../../../../../util/components/RowEditButton";
 import appStateSlice from "../../../../redux/slices/AppStateSlice";
+import EditGuestServiceOrderDialog from "./EditGuestServiceOrderDialog";
 
 export const GuestServiceOrdersPane = () => {
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [rows, setRows] = useState<GuestServiceOrder[]>([]);
     const [openAddOrderDialog, setOpenAddOrderDialog] = useState<boolean>(false);
+    const [selectedOrder, setSelectedOrder] = useState<GuestServiceOrder | null>(null);
+    const [openEditOrderDialog, setOpenEditOrderDialog] = useState<boolean>(false);
     const appState = useSelector((state: RootState) => state.appState);
     const dispatch = useAppDispatch();
 
@@ -48,10 +51,16 @@ export const GuestServiceOrdersPane = () => {
                         idField="orderId"
                         deleteFunction={handleDeleteOrder}
                     />
+                    <RowEditButton onClick={() => handleEditOrder(params.row as GuestServiceOrder)}/>
                 </>
             ),
         },
     ] as GridColDef[])
+
+    const handleEditOrder = (order: GuestServiceOrder) => {
+        setSelectedOrder(order);
+        setOpenEditOrderDialog(true);
+    }
 
     const handleDeleteOrder = (orderId: number) => {
         if (!window.confirm("Are you sure you want to delete this order?")) {
@@ -94,6 +103,8 @@ export const GuestServiceOrdersPane = () => {
         <>
             <AddGuestServiceOrderDialog open={openAddOrderDialog} setOpen={setOpenAddOrderDialog}
                                         refreshGuestServiceOrders={refreshGuestServiceOrders}/>
+            <EditGuestServiceOrderDialog guestServiceOrder={selectedOrder} open={openEditOrderDialog} setOpen={setOpenEditOrderDialog} refreshGuestServiceOrders={refreshGuestServiceOrders}/>
+
             <Paper sx={{padding: 2}}>
                 <DataGrid
                     density={'compact'}

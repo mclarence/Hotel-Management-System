@@ -40,19 +40,21 @@ const PageInstructions: any = {
         return (
             <>
                 <Stack direction={"column"} gap={2}>
-                    <Typography variant={"h4"}>Plus Button</Typography>
+                    <Typography variant={"h4"}>Rooms</Typography>
                     <Typography variant={"body1"}>
-                        - Location: bottom right
-                        - To add new room for customer, require customer ID
+                        This page allows you to manage the rooms of the hotel. You can add, edit, and delete rooms.
                     </Typography>
-                    <Typography variant={"h5"}>Detail Bar</Typography>
+                    <Typography variant={"h5"}>Adding a Room</Typography>
                     <Typography variant={"body1"}>
-                        Show RoomID, code, price, description and status
+                        Click the <AddIcon fontSize={"inherit"}/> button at the bottom right to add a new room. You will be presented with a dialog where you can enter the room's details.
                     </Typography>
-                    <Typography variant={"h5"}>Pencil & Bin button</Typography>
+                    <Typography variant={"h5"}>Editing a Room</Typography>
                     <Typography variant={"body1"}>
-                        - To edit customer room, modify or change capacity and price
-                        - To delete or remove room.
+                        Click the <EditIcon fontSize={"inherit"}/> button on the same row as the room in the table. You will be presented with a dialog similar to the add room dialog where you can edit the room's details.
+                    </Typography>
+                    <Typography variant={"h5"}>Deleting a Room</Typography>
+                    <Typography variant={"body1"}>
+                        Click the <DeleteIcon color={"error"} fontSize={"inherit"}/> button on the same row as the room in the table. You will be presented with a confirmation dialog to confirm the deletion. You cannot delete rooms that are currently occupied.
                     </Typography>
                 </Stack>
             </>
@@ -105,19 +107,33 @@ const PageInstructions: any = {
             //"Guest-Services Page"
             <>
                 <Stack direction={"column"} gap={2}>
-                    <Typography variant={"h4"}>Plus Button</Typography>
+                    <Typography variant={"h4"}>Guest Services</Typography>
+                    <Typography variant={"h5"}>Orders</Typography>
+                    <Typography variant={"h6"}>Creating an Order</Typography>
                     <Typography variant={"body1"}>
-                        - Location: bottom right
-                        - To add new guest service ex: in-room dinning, spa, massage, etc.
-                        - Require ID, type of service and description
+                        To create a new guest service order, click the <AddIcon fontSize={"inherit"}/> button located at the bottom right of the page. A dialog will appear where you can enter the details of the order.
+                        An existing guest with a reservation must be selected. Additionally, an existing service must be already created in the services tab.
                     </Typography>
-                    <Typography variant={"h5"}>Detail Bar</Typography>
+                    <Typography variant={"h6"}>Editing an Order</Typography>
                     <Typography variant={"body1"}>
-                        Show OrderID, ReservationID, serviceID, Time, status, price, quantity and description.
+                        To edit an order, click the <EditIcon fontSize={"inherit"}/> button located on the same row as the order in the table. A dialog will appear where you can edit the order status. To edit the order details, you must delete the order and create a new one.
                     </Typography>
-                    <Typography variant={"h5"}>Pencil & Bin button</Typography>
+                    <Typography variant={"h6"}>Deleting an Order</Typography>
                     <Typography variant={"body1"}>
-                        - To delete or remove service.
+                        To delete an order, click the <DeleteIcon fontSize={"inherit"} color={"error"}/> button located on the same row as the order in the table. A confirmation dialog will appear to confirm the deletion.
+                    </Typography>
+                    <Typography variant={"h5"}>Services</Typography>
+                    <Typography variant={"h6"}>Creating a Service Item</Typography>
+                    <Typography variant={"body1"}>
+                        To create a new guest service item, click the <AddIcon fontSize={"inherit"}/> button located at the bottom right of the page. A dialog will appear where you can enter the details of the guest service item.
+                    </Typography>
+                    <Typography variant={"h6"}>Editing a Service Item</Typography>
+                    <Typography variant={"body1"}>
+                        To edit a service item, click the <EditIcon fontSize={"inherit"}/> button located on the same row as the order in the table. A dialog will appear where you can edit the details of the guest service item.
+                    </Typography>
+                    <Typography variant={"h6"}>Deleting a Service Item</Typography>
+                    <Typography variant={"body1"}>
+                        To delete a service item, click the <DeleteIcon fontSize={"inherit"} color={"error"}/> button located on the same row as the order in the table. A confirmation dialog will appear to confirm the deletion.
                     </Typography>
                 </Stack>
             </>

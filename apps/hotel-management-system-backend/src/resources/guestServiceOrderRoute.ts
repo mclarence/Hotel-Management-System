@@ -11,6 +11,7 @@ import {LogEventTypes} from "../../../../libs/models/src/lib/enums/LogEventTypes
 import {IGuestServiceDAO} from "../database/guestService";
 import {GuestServiceOrder} from "@hotel-management-system/models";
 import {IReservationDAO} from "../database/reservations";
+import dayjs from "dayjs";
 
 export interface IGuestServiceOrderRoute {
     router: express.Router;
@@ -181,80 +182,80 @@ const makeGuestServiceOrdersRoute = (
         }
     });
 
-    // router.patch("/:orderId", authentication, authorization("guestServiceOrders.update"), async (req, res, next) => {
-    //     try {
-    //         const orderId = parseInt(req.params.orderId);
-    //
-    //         if (isNaN(orderId)) {
-    //             return sendResponse(res, {
-    //                 success: false,
-    //                 statusCode: StatusCodes.BAD_REQUEST,
-    //                 message: strings.api.guestServiceOrder.invalidOrderId(orderId),
-    //                 data: null,
-    //             });
-    //         }
-    //
-    //         const exists = await checkGuestServiceOrderExistsById(orderId);
-    //
-    //         if (!exists) {
-    //             return sendResponse(res, {
-    //                 success: false,
-    //                 statusCode: StatusCodes.NOT_FOUND,
-    //                 message: strings.api.guestServiceOrder.orderNotFound(orderId),
-    //                 data: null,
-    //             });
-    //         }
-    //
-    //         const schema = Joi.object({
-    //             reservationId: Joi.number().required(),
-    //             orderTime: Joi.date().required(),
-    //             orderStatus: Joi.string().required(),
-    //             description: Joi.string().optional().allow(null, ""),
-    //             serviceId: Joi.number().required(),
-    //             orderPrice: Joi.number().required(),
-    //             orderQuantity: Joi.number().required()
-    //         });
-    //
-    //         const {error} = schema.validate(req.body);
-    //
-    //         if (error) {
-    //             return sendResponse(res, {
-    //                 success: false,
-    //                 statusCode: StatusCodes.BAD_REQUEST,
-    //                 message: error.message,
-    //                 data: error.message,
-    //             });
-    //         }
-    //
-    //         const updatedGuestServiceOrder = {
-    //             order_id: orderId,
-    //             orderPrice: req.body.orderPrice,
-    //             reservationId: req.body.reservation_id,
-    //             orderTime: req.body.orderTime,
-    //             orderStatus: req.body.orderStatus,
-    //             description: req.body.description,
-    //             serviceId: req.body.service_id,
-    //             orderQuantity: req.body.orderQuantity
-    //         };
-    //
-    //         const guestServiceOrder = await updateGuestServiceOrder(updatedGuestServiceOrder);
-    //
-    //         log(
-    //             LogEventTypes.GUEST_SERVICE_ORDER_UPDATE,
-    //             req.userId,
-    //             "Updated guest service order with id: " + orderId,
-    //         );
-    //
-    //         return sendResponse(res, {
-    //             success: true,
-    //             statusCode: StatusCodes.OK,
-    //             message: strings.api.generic.success,
-    //             data: guestServiceOrder,
-    //         });
-    //     } catch (e) {
-    //         next(e);
-    //     }
-    // });
+    router.patch("/:orderId", authentication, authorization("guestServiceOrders.update"), async (req, res, next) => {
+        try {
+            const orderId = parseInt(req.params.orderId);
+
+            if (isNaN(orderId)) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: strings.api.guestServiceOrder.invalidOrderId(orderId),
+                    data: null,
+                });
+            }
+
+            const exists = await checkGuestServiceOrderExistsById(orderId);
+
+            if (!exists) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.NOT_FOUND,
+                    message: strings.api.guestServiceOrder.orderNotFound(orderId),
+                    data: null,
+                });
+            }
+
+            const schema = Joi.object({
+                reservationId: Joi.number().required(),
+                orderTime: Joi.date().required(),
+                orderStatus: Joi.string().required(),
+                description: Joi.string().optional().allow(null, ""),
+                serviceId: Joi.number().required(),
+                orderPrice: Joi.number().required(),
+                orderQuantity: Joi.number().required()
+            });
+
+            const {error} = schema.validate(req.body);
+
+            if (error) {
+                return sendResponse(res, {
+                    success: false,
+                    statusCode: StatusCodes.BAD_REQUEST,
+                    message: error.message,
+                    data: error.message,
+                });
+            }
+
+            const updatedGuestServiceOrder = {
+                orderId: orderId,
+                orderPrice: req.body.orderPrice,
+                reservationId: req.body.reservationId,
+                orderTime: dayjs.utc(req.body.orderTime).toDate(),
+                orderStatus: req.body.orderStatus,
+                description: req.body.description,
+                serviceId: req.body.serviceId,
+                orderQuantity: req.body.orderQuantity
+            };
+
+            const guestServiceOrder = await updateGuestServiceOrder(updatedGuestServiceOrder);
+
+            log(
+                LogEventTypes.GUEST_SERVICE_ORDER_UPDATE,
+                req.userId,
+                "Updated guest service order with id: " + orderId,
+            );
+
+            return sendResponse(res, {
+                success: true,
+                statusCode: StatusCodes.OK,
+                message: strings.api.generic.success,
+                data: guestServiceOrder,
+            });
+        } catch (e) {
+            next(e);
+        }
+    });
 
     router.delete("/:orderId", authentication, authorization("guestServiceOrders.delete"), async (req, res, next) => {
         try {

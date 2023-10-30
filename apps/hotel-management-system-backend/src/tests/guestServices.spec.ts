@@ -13,6 +13,7 @@ import {
 } from "./common";
 import request from "supertest";
 import {GuestService} from "@hotel-management-system/models";
+import {GuestServiceOrderStatuses} from "../../../../libs/models/src/lib/enums/GuestServiceOrderStatuses";
 
 let app: Express;
 beforeAll(async () => {
@@ -120,6 +121,47 @@ describe("guest services", () => {
             .delete(`/api/guest-service-orders/${guestServiceOrderResponse.orderId}`)
             .set("Authorization", `Bearer ${token}`)
             .expect(200)
+    })
+
+    it("should update a guest service order", async () => {
+        const token = await login(app);
+        const room = await addRoom(app, token, makeNewRoom())
+        const guest = await addGuest(app, token, makeNewGuest())
+        const reservation = await addReservation(app, token, makeNewReservation(room.roomId, guest.guestId))
+
+        const guestServiceItem = await addGuestService(app, token, makeGuestService(5))
+        const guestServiceOrder = makeGuestServiceOrder(reservation.reservationId, guestServiceItem.serviceId, 1)
+
+        const guestServiceOrderResponse = await addGuestServiceOrder(app, token, guestServiceOrder)
+
+        const updatedGuestServiceOrder = {
+            orderId: guestServiceOrderResponse.orderId,
+            reservationId: guestServiceOrderResponse.reservationId,
+            serviceId: guestServiceOrderResponse.serviceId,
+            orderTime: guestServiceOrderResponse.orderTime,
+            orderStatus: GuestServiceOrderStatuses.COMPLETED,
+            orderPrice: guestServiceOrderResponse.orderPrice,
+            description: guestServiceOrderResponse.description,
+            orderQuantity: guestServiceOrderResponse.orderQuantity,
+        }
+
+        const {orderId, ...expectedGuestServiceOrder} = updatedGuestServiceOrder;
+
+        await request(app)
+            .patch(`/api/guest-service-orders/${orderId}`)
+            .set("Authorization", `Bearer ${token}`)
+            .send(expectedGuestServiceOrder)
+            .expect((res) => (res.status != 200 ? console.log(res.body) : 0))
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.data).toHaveProperty("reservationId", updatedGuestServiceOrder.reservationId)
+                expect(res.body.data).toHaveProperty("serviceId", updatedGuestServiceOrder.serviceId)
+                expect(res.body.data).toHaveProperty("orderTime", updatedGuestServiceOrder.orderTime)
+                expect(res.body.data).toHaveProperty("orderStatus", updatedGuestServiceOrder.orderStatus)
+                expect(res.body.data).toHaveProperty("orderPrice", updatedGuestServiceOrder.orderPrice)
+                expect(res.body.data).toHaveProperty("description", updatedGuestServiceOrder.description)
+                expect(res.body.data).toHaveProperty("orderQuantity", updatedGuestServiceOrder.orderQuantity)
+            })
     })
 
     it("should get all guest service orders", async () => {
