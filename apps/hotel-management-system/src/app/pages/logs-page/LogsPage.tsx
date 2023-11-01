@@ -9,11 +9,15 @@ import {CustomNoRowsOverlay} from "../../../util/components/CustomNoRowsOverlay"
 import {makeApiRequest} from "../../api/makeApiRequest";
 
 const LogsComponent = () => {
+    // State to store logs data
     const [logs, setLogs] = useState<Logs[]>([]);
+    // Redux dispatch hook
     const dispatch = useAppDispatch();
+    // State to track loading status
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
+        // Fetch logs data on component mount
         makeApiRequest<Logs[]>(
             getLogs(),
             dispatch,
@@ -22,9 +26,9 @@ const LogsComponent = () => {
             }
         )
 
-    }, [])
+    }, []) // Empty dependency array ensures this effect runs only once when the component mounts
 
-
+// Define column structure for DataGrid
     const columns = useRef([
         {field: 'logId', headerName: 'Log ID', flex: 1},
         {field: 'eventType', headerName: 'Event Type', flex: 1},

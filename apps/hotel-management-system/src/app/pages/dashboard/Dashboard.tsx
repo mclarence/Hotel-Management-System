@@ -15,9 +15,13 @@ import {makeApiRequest} from "../../api/makeApiRequest";
 import dayjs from "dayjs";
 
 export function Dashboard() {
+    // Dispatch hook for redux
     const dispatch = useAppDispatch();
+    // Get app state from Redux store
     const appState = useSelector((state: RootState) => state.appState);
     const navigate = useNavigate();
+
+    // State variables
     const [checkInsToday, setCheckInsToday] = useState(0);
     const [checkOutsToday, setCheckOutsToday] = useState(0);
     const [rooms, setRooms] = useState<Room[]>([]);
@@ -26,6 +30,7 @@ export function Dashboard() {
     useEffect(() => {
         const currentDate = dayjs.utc()
 
+        // Fetch room status counts
         makeApiRequest<{ status: string, count: string }[]>(
             getRoomStatusCount(),
             dispatch,
@@ -39,6 +44,7 @@ export function Dashboard() {
             }
         )
 
+        // Fetch today's check-ins
         makeApiRequest<Reservation[]>(
             searchReservations({
                 checkInDate: currentDate,
@@ -48,6 +54,7 @@ export function Dashboard() {
                 setCheckInsToday(data.length);
             })
 
+        // Fetch today's check-outs
         makeApiRequest<Reservation[]>(
             searchReservations({
                 checkOutDate: currentDate,
@@ -58,6 +65,7 @@ export function Dashboard() {
             }
         )
 
+        // Fetch all rooms
         makeApiRequest<Room[]>(
             getRooms(),
             dispatch,
@@ -68,7 +76,7 @@ export function Dashboard() {
 
     }, []);
 
-
+// Define room status colors
     const colours: {
         [key: string]: string
     } = {
@@ -79,11 +87,11 @@ export function Dashboard() {
         [RoomStatuses.RESERVED]: '#FF8042'
     }
 
-// 筛选和搜索的状态
+// Filtering and searching status
     const [filterStatus, setFilterStatus] = useState('');
     const [searchRoomNumber, setSearchRoomNumber] = useState('');
 
-// 根据状态筛选rooms
+// Filter rooms based on status and room number
     const filteredRooms = rooms.filter(room => {
         return (
             (filterStatus === '' || room.status === filterStatus) &&
