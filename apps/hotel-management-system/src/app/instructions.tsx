@@ -99,7 +99,31 @@ const PageInstructions: any = {
     },
     "/guests": () => {
         return (
-            "Guests Page"
+            <>
+                <Stack direction={"column"} gap={2}>
+                    <Typography variant={"h4"}>Guests Page</Typography>
+                    <Typography variant={"body1"}>
+		    	The guests page displays a list of all guests and relevant details, including guest id, name, email and phone number. It also allows all CRUD operations and payment details for users to be managed.
+                    </Typography>
+                    <Typography variant={"h5"}>Adding a Guest</Typography>
+                    <Typography variant={"body1"}>
+		    	Add a new guest into the system by clicking the round blue button with the + symbol that is located in the bottom right hand corner of the page. The system will check if a valid email has been provided.
+                    </Typography>
+                    <Typography variant={"h5"}>Deleting a Guest</Typography>
+                    <Typography variant={"body1"}>
+		    	A guest can be deleted from the system by clicking the red rubbish bin icon located on the same row as the guest. The system will make you confirm your action.
+                    </Typography>
+                    <Typography variant={"h5"}>Modifying a Guest</Typography>
+                    <Typography variant={"body1"}>
+		    	A guest can be modified by clicking the white pen icon located on the same row as the guest.
+                    </Typography>
+                    <Typography variant={"h5"}>Adding a Payment Method</Typography>
+                    <Typography variant={"body1"}>
+		    	To add a payment method for a guest, click the white credit card icon located on the same row as the guest you want to update. This will open a new window. On this window, click the credit card icon in the bottom right. There will then be a window that allows the user to enter the details for a credit/debit card or bank account. Click the "ADD CARD" button to enter payment method into the system.
+			To exit the payment methods window, click the "x" in the top right of the page.
+                    </Typography>
+                </Stack>
+            </>
         )
     },
     "/guest-services": () => {
@@ -141,17 +165,50 @@ const PageInstructions: any = {
     },
     "/reservations": () => {
         return (
-            "Reservation Page"
+            <>
+                <Stack direction={"column"} gap={2}>
+                    <Typography variant={"h4"}>Reservations</Typography>
+                    <Typography variant={"body1"}>
+		    	This page displays a list of all reservations in the hotel management system. It also allows users to add a remove reservations from the system.
+                    </Typography>
+                    <Typography variant={"h5"}>Usage</Typography>
+                    <Typography variant={"body1"}>
+		    	Click the "+" button in the bottom right corner to add a new reservation. Begin typing the guests name, and if the guest exists in the system their name will appear in a drop-down menu. Begin entering a valid room code and a drop-down menu will appear with valid rooms. Then, enter a start date and end date for the reservation. The system will check to ensure that the room is available and free on those dates. Finally, add the reservation to the system by clicking "CREATE RESERVATION" button.
+                    </Typography>
+                    <Typography variant={"h5"}>Deleting a Reservation</Typography>
+                    <Typography variant={"body1"}>
+		    	Click the red rubbish bin icon on the row of reservation that you would like to delete.
+                    </Typography>
+                </Stack>
+            </>
         )
     },
     "/transactions": () => {
         return (
-            "Transaction Page"
+            <>
+                <Stack direction={"column"} gap={2}>
+                    <Typography variant={"h4"}>Transcations</Typography>
+                    <Typography variant={"body1"}>
+		    	This page allows users to make transcations on behalf of patrons. It requires the patron to have a guest entry in the system and also a valid payment method.
+                    </Typography>
+                    <Typography variant={"h5"}>Usage</Typography>
+                    <Typography variant={"body1"}>
+		    	Click the "+" button in the bottom right corner to add a new transcation. Begin typing the guests name, and if the guest exists in the system their name will appear in a drop-down menu. Once a guest has been selected, clicking on the Payment Method box will open a drop-down menu of all that users payment methods. Enter a dollar amount, description and date. Click "ADD TRANSACTION" to finalise the transcation.
+                    </Typography>
+                </Stack>
+            </>
         )
     },
     "/check-in-out": () => {
         return (
-            "Check-in-out Page"
+            <>
+                <Stack direction={"column"} gap={2}>
+                    <Typography variant={"h5"}>Usage</Typography>
+                    <Typography variant={"body1"}>
+		    	To Check In/Out a guest, begin typing their name in the text box at the top of the page. Select the guest from the drop-down menu that appears. Once this is done, the reservations of that guests appear in the Reservations section in the middle of the page. Here there is a green button that will allow the user to check the guest in. Once the guest has been checked in, a button will appear to then check the guest out.
+                    </Typography>
+                </Stack>
+            </>
         )
     },
     "/users": () => {
