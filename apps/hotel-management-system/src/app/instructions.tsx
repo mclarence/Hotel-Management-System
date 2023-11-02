@@ -14,7 +14,7 @@ const PageInstructions: any = {
         return (
             <>
                 <Stack direction={"column"} gap={2}>
-                    <Typography variant={"h4"}>Dashboard2</Typography>
+                    <Typography variant={"h4"}>Dashboard</Typography>
                     <Typography variant={"body1"}>
                         This page provides an overview of the status of the hotel room and customer occupancy.
                     </Typography>
