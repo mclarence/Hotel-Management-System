@@ -38,9 +38,9 @@ export const LoginPage = () => {
                 console.log("jwt exists");
                 dispatch(fetchUserDetails());
                 dispatch(appStateSlice.actions.setSnackBarAlert({
-                        show: true,
-                        message: 'Welcome back!',
-                        severity: 'success'
+                    show: true,
+                    message: 'Welcome back!',
+                    severity: 'success'
                 }))
             }
         }
@@ -93,7 +93,7 @@ export const LoginPage = () => {
             padding={20}
         >
             <Grid item xs={16} sx={{textAlign: 'center'}}>
-                 <Typography variant="h1">Hotel Management System</Typography>
+                <Typography variant="h1">Hotel Management System</Typography>
             </Grid>
             <Grid item xs={8}>
                 <Typography variant="h2">Login</Typography>
@@ -105,8 +105,17 @@ export const LoginPage = () => {
                 <Card variant="outlined" sx={{padding: 5}}>
                     <form onSubmit={handleLoginSubmit}>
                         <Stack spacing={3}>
+                            <Alert severity={"warning"} variant={"filled"}>
+                                <Typography variant="h6">This is a demo application.</Typography>
+                                <Typography variant="body1">
+                                    This application was created as part of a university project. It is not intended for
+                                    commercial use. Please do not enter any sensitive information. There may be bugs and
+                                    security vulnerabilities. This instance is reset every 24 hours.
+                                    To login as admin, use the username <strong>admin</strong> and
+                                    password <strong>admin</strong>.
+                                </Typography>
+                            </Alert>
                             {showAlert.show && <Alert severity="error">{showAlert.message}</Alert>}
-
                             <TextField required label="Username" onChange={(e) => setUsername(e.target.value)}/>
                             <TextField required label="Password" type="password"
                                        onChange={(e) => setPassword(e.target.value)}/>
